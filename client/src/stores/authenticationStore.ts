@@ -3,10 +3,17 @@ import { defineStore } from 'pinia'
 import type { LoginResponseSuccess } from './network/connectionStore'
 import navigationProvider from '../router/navigationProvider'
 
+function getStoredUserRole(): string | null {
+  return sessionStorage.getItem('userRole')
+}
+
 export const useAuthenticationStore = defineStore('authenticationStore', () => {
+  const storedToken = sessionStorage.getItem('jwtToken')
+  const storedRole = getStoredUserRole()
+
   const states = {
-    isAuthenticated: ref<boolean>(false),
-    isAdmin: ref<boolean>(false)
+    isAuthenticated: ref<boolean>(!!storedToken),
+    isAdmin: ref<boolean>(storedRole === 'ADMIN')
   }
 
   const methods = {
@@ -17,7 +24,10 @@ export const useAuthenticationStore = defineStore('authenticationStore', () => {
 
         if (response.userRole === 'ADMIN') {
           states.isAdmin.value = true
+        } else {
+          states.isAdmin.value = false
         }
+        storeUserRole(response.userRole)
 
         navigationProvider.navigateOnCondition(
           states.isAuthenticated.value,
@@ -29,6 +39,7 @@ export const useAuthenticationStore = defineStore('authenticationStore', () => {
 
     handleRevokeAuthentication: () => {
       clearJwtToken()
+      clearUserRole()
       revokeAuthentication()
       navigationProvider.navigate('home')
     },
@@ -47,8 +58,16 @@ export const useAuthenticationStore = defineStore('authenticationStore', () => {
     sessionStorage.setItem('jwtToken', token)
   }
 
+  function storeUserRole(role: string) {
+    sessionStorage.setItem('userRole', role)
+  }
+
   function clearJwtToken() {
     sessionStorage.removeItem('jwtToken')
+  }
+
+  function clearUserRole() {
+    sessionStorage.removeItem('userRole')
   }
 
   return {

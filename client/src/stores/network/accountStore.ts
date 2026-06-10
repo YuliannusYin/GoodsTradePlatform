@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { callPost, callGet, callPut, callDelete } from './requests'
+import { callPost, callGet, callPut, callDelete, ApiError } from './requests'
 import { ref, watch } from 'vue'
 import { useAuthenticationStore } from '../authenticationStore'
 
@@ -25,7 +25,7 @@ export const useAccountStore = defineStore('accountStore', () => {
 
     deleteAccountResponse: ref<ResponseSuccess | ResponseError | null>(null),
 
-    isConfirmationErrorResponse: ref<boolean | null>(null),
+    isConfirmationErrorResponse: ref<boolean>(false),
 
     username: ref<string | null>(null),
     email: ref<string | null>(null),
@@ -43,89 +43,110 @@ export const useAccountStore = defineStore('accountStore', () => {
   )
 
   const API = {
-    submitSignup: async (username: string, email: string, password: string): Promise<any> => {
-      const response: ResponseSuccess | ResponseError = await callPost('/account/register', {
-        username: username,
-        email: email,
-        password: password
-      })
-
-      assignResponse(response, states.signupResponse)
-      return response
+    submitSignup: async (username: string, email: string, password: string): Promise<ResponseSuccess | ResponseError> => {
+      try {
+        const response: ResponseSuccess = await callPost('/account/register', {
+          username: username,
+          email: email,
+          password: password
+        })
+        states.signupResponse.value = { success: true, message: response.message }
+        return response
+      } catch (error) {
+        const errorResponse = toResponseError(error)
+        states.signupResponse.value = errorResponse
+        return errorResponse
+      }
     },
 
     confirmCredentials: async (password: string): Promise<boolean> => {
-      const isConfirmed: boolean = await callPost('/account/confirm', {
-        email: useAccountStore().states.email,
-        password: password
-      })
-
-      if (!isConfirmed) {
+      try {
+        const response: any = await callPost('/account/confirm', {
+          email: useAccountStore().states.email,
+          password: password
+        })
+        return !!response
+      } catch (error) {
         states.isConfirmationErrorResponse.value = true
+        return false
       }
-
-      return isConfirmed
     },
 
     getUserDetails: async () => {
-      const response = await callGet('/account/details')
-      if (response.success) {
-        states.username.value = response.username
-        states.email.value = response.email
+      try {
+        const response = await callGet('/account/details')
+        if (response.success) {
+          states.username.value = response.username
+          states.email.value = response.email
+        }
+      } catch (error) {
+        // silently fail - user details can be fetched again
       }
     },
 
-    changeUsername: async (newUsername: string) => {
-      const response: ResponseSuccess | ResponseError = await callPut('/account/username', {
-        newUsername: newUsername
-      })
-
-      assignResponse(response, states.changeUsernameResponse)
-
-      return response
+    changeUsername: async (newUsername: string): Promise<ResponseSuccess | ResponseError> => {
+      try {
+        const response: ResponseSuccess = await callPut('/account/username', {
+          newUsername: newUsername
+        })
+        states.changeUsernameResponse.value = { success: true, message: response.message }
+        return response
+      } catch (error) {
+        const errorResponse = toResponseError(error)
+        states.changeUsernameResponse.value = errorResponse
+        return errorResponse
+      }
     },
 
-    changeEmail: async (newEmail: string) => {
-      const response: ResponseSuccess | ResponseError = await callPut('/account/email', {
-        newEmail: newEmail
-      })
-
-      assignResponse(response, states.changeEmailResponse)
-
-      return response
+    changeEmail: async (newEmail: string): Promise<ResponseSuccess | ResponseError> => {
+      try {
+        const response: ResponseSuccess = await callPut('/account/email', {
+          newEmail: newEmail
+        })
+        states.changeEmailResponse.value = { success: true, message: response.message }
+        return response
+      } catch (error) {
+        const errorResponse = toResponseError(error)
+        states.changeEmailResponse.value = errorResponse
+        return errorResponse
+      }
     },
 
-    changePassword: async (currentPassword: string, newPassword: string) => {
-      const response: ResponseSuccess | ResponseError = await callPut('/account/password', {
-        currentPassword: currentPassword,
-        newPassword: newPassword
-      })
-
-      assignResponse(response, states.changePasswordResponse)
-
-      return response
+    changePassword: async (currentPassword: string, newPassword: string): Promise<ResponseSuccess | ResponseError> => {
+      try {
+        const response: ResponseSuccess = await callPut('/account/password', {
+          currentPassword: currentPassword,
+          newPassword: newPassword
+        })
+        states.changePasswordResponse.value = { success: true, message: response.message }
+        return response
+      } catch (error) {
+        const errorResponse = toResponseError(error)
+        states.changePasswordResponse.value = errorResponse
+        return errorResponse
+      }
     },
 
     getOrders: () => callGet('/account/orders/all'),
 
-    deleteAccount: async () => {
-      const response: ResponseSuccess | ResponseError = await callDelete('/account/delete')
-
-      assignResponse(response, states.deleteAccountResponse)
-
-      return response
+    deleteAccount: async (): Promise<ResponseSuccess | ResponseError> => {
+      try {
+        const response: ResponseSuccess = await callDelete('/account/delete')
+        states.deleteAccountResponse.value = { success: true, message: response.message }
+        return response
+      } catch (error) {
+        const errorResponse = toResponseError(error)
+        states.deleteAccountResponse.value = errorResponse
+        return errorResponse
+      }
     }
   }
 
-  function assignResponse(response: any, state: any) {
-    if (response.success) {
-      const { success, message } = response
-      state.value = { success, message }
+  function toResponseError(error: unknown): ResponseError {
+    if (error instanceof ApiError) {
+      return { error: true, message: error.data?.message || 'Request failed' }
     }
-    if (response.error) {
-      const { error, message } = response
-      state.value = { error, message }
-    }
+    return { error: true, message: 'Network error' }
   }
 
   return {

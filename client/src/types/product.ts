@@ -32,16 +32,7 @@ export interface CreateProductDto {
   source: string
 }
 
-export interface EditProductDto {
-  name: string
-  description: string
-  imageUrls: string[]
-  price: number
-  quantity: number
-  category: string
-  condition: string
-  source: string
-}
+export type EditProductDto = CreateProductDto
 
 export const PRODUCT_CATEGORIES: Record<string, string> = {
   ANIME_FIGURE: '手办',

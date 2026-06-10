@@ -11,7 +11,7 @@
           <div>
             <div v-for="item in order.items" :key="item.product.id">
               <div class="mb-1 py-2">
-                <img :src="item.product.imageUrl" alt="Product Image" class="w-8 h-8 inline-block mr-2" />
+                <img :src="item.product.imageUrls?.[0]" alt="Product Image" class="w-8 h-8 inline-block mr-2" />
                 <span class="font-bold">{{ item.product.name }}</span>
                 - {{ item.product.price }}
                 <span v-if="item.amount > 1" class="font-semibold text-blue-700"> x {{ item.amount }}</span>

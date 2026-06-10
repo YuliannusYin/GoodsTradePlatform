@@ -9,13 +9,13 @@
 
         <ConfirmDialogue :isPasswordRequired="false" header="Confirm change expected delivery"
             text="Are you sure you want to change this expected delivery?"
-            v-if="props.order?.status === 'SENT' && isConfirmationVisible" :onConfirm="changeExpectedDelivery"
+            v-if="props.order?.status === 'SHIPPED' && isConfirmationVisible" :onConfirm="changeExpectedDelivery"
             :onCancel="closeConfirmation" />
 
         <div class="flex justify-between items-center">
             <h2 class="text-lg font-bold">{{
                 props.order?.status === "PENDING" ? "Send Order"
-                : props.order?.status === "SENT" ? "Change Expected Delivery"
+                : props.order?.status === "SHIPPED" ? "Change Expected Delivery"
                     : '' }}</h2>
             <i class="fas fa-close text-center font-semibold px-3 rounded-md cursor-pointer" @click="props.onClose" />
         </div>
@@ -39,7 +39,7 @@
                     <SmallViewTitle class="mb-3" text="Items" additionalClass="text-base" />
                     <ul v-for="item in props.order.items" :key="item.product.id">
                         <li class="my-1">
-                            <img :src="item.product.imageUrl" class="w-8 h-8 mr-2 hidden sm:inline-block" />
+                            <img :src="item.product.imageUrls?.[0]" class="w-8 h-8 mr-2 hidden sm:inline-block" />
                             <span class="font-bold text-xs">{{ item.product.name }}</span>
                             <span v-if="item.amount > 1" class="font-semibold text-blue-700"> x {{ item.amount }}</span>
                             <div class="border border-t-1 w-full my-2"></div>
@@ -68,7 +68,7 @@
                 class="bg-blue-500 text-white px-4 py-2 rounded w-full">
                 Send
             </button>
-            <button v-if="props.order?.status === 'SENT'" @click="openConfirmation"
+            <button v-if="props.order?.status === 'SHIPPED'" @click="openConfirmation"
                 class="bg-blue-500 text-white px-4 py-2 rounded w-full">
                 Change
             </button>

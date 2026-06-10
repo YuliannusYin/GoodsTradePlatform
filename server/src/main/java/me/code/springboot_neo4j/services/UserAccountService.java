@@ -107,6 +107,12 @@ public class UserAccountService implements UserDetailsService {
     }
 
     public Success changePassword(User user, ChangePasswordDTO dto) {
+        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
+            throw new CustomRuntimeException(
+                    HttpStatus.BAD_REQUEST,
+                    "Current password is incorrect");
+        }
+
         credentialsValidator.findNullPassword(dto.newPassword());
         credentialsValidator.findPasswordFormattingError(dto.newPassword());
 

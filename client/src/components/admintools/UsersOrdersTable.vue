@@ -35,7 +35,7 @@
           <td class="border p-2 hidden md:table-cell">
             <div v-for="item in order.items" :key="item.product.id">
               <div class="py-2 flex items-center justify-start">
-                <img :src="item.product.imageUrl" class="w-8 h-8 mr-2 hidden sm:inline-block" />
+                <img :src="item.product.imageUrls?.[0]" class="w-8 h-8 mr-2 hidden sm:inline-block" />
                 <div class="font-bold text-xs hidden lg:table-cell mr-2">{{ item.product.name }}</div>
                 <div v-if="item.amount > 1" class="font-semibold text-blue-700 text-xs"> x {{ item.amount }}</div>
               </div>
@@ -97,7 +97,7 @@ export default defineComponent({
       }
 
       else if (route.name === "SentOrders") {
-        getAllOrdersByStatus(OrderStatus.SENT)
+        getAllOrdersByStatus(OrderStatus.SHIPPED)
       }
     }
 

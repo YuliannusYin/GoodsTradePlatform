@@ -26,7 +26,7 @@
         </div>
         <div class="mb-4">
           <label for="productImageUrl" class="block text-gray-700 font-bold mb-2">Image URL</label>
-          <input v-model="product.imageUrl" type="text" class="border w-full p-2 rounded" />
+          <input v-model="imageUrlInput" type="text" class="border w-full p-2 rounded" />
         </div>
         <div class="mb-4">
           <label for="productPrice" class="block text-gray-700 font-bold mb-2">Price</label>
@@ -72,10 +72,14 @@ export default defineComponent({
     const product = ref<EditProductDto>({
       name: '',
       description: '',
-      imageUrl: '',
+      imageUrls: [],
       price: 0,
       quantity: 0,
+      category: '',
+      condition: 'NEW',
+      source: 'PLATFORM'
     });
+    const imageUrlInput = ref<string>('');
 
     const isConfirmationVisible = ref<boolean>(false);
 
@@ -93,19 +97,19 @@ export default defineComponent({
       selectedProductId.value = productId;
       product.value.name = response.name;
       product.value.description = response.description;
-      product.value.imageUrl = response.imageUrl;
+      product.value.imageUrls = response.imageUrls || [];
+      imageUrlInput.value = response.imageUrls?.[0] || '';
       product.value.price = response.price;
       product.value.quantity = response.quantity;
     }
 
     async function editProduct() {
+      product.value.imageUrls = imageUrlInput.value ? [imageUrlInput.value] : [];
       const editedProduct = { ...product.value };
-      console.log(editedProduct);
-      const response = await adminToolsStore.API.editProduct(selectedProductId.value, editedProduct);
-      console.log(response);
+      await adminToolsStore.API.editProduct(selectedProductId.value, editedProduct);
     }
 
-    return { products, selectedProductId, product, isConfirmationVisible, openConfirmation, closeConfirmation, loadProduct, editProduct };
+    return { products, selectedProductId, product, imageUrlInput, isConfirmationVisible, openConfirmation, closeConfirmation, loadProduct, editProduct };
   },
   components: { ConfirmDialogue, ProductPreview, SmallViewTitle, SubmitButton }
 });

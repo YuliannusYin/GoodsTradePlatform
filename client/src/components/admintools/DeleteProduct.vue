@@ -34,7 +34,7 @@ import ProductPreview from '../ProductPreview.vue';
 
 
 export default defineComponent({
-  name: 'EditProduct',
+  name: 'DeleteProduct',
   setup() {
     const adminToolsStore = useAdminToolsStore();
     const productStore = useProductStore();
@@ -43,9 +43,12 @@ export default defineComponent({
       id: '',
       name: '',
       description: '',
-      imageUrl: '',
+      imageUrls: [],
       price: 0,
       quantity: 0,
+      category: '',
+      condition: 'NEW',
+      source: 'PLATFORM'
     });
     const selectedProductId = ref<string>('');
 

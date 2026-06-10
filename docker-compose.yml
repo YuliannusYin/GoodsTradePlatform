@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   neo4j:
     image: neo4j:5-community
     container_name: merchandise-neo4j
     environment:
-      - NEO4J_AUTH=neo4j/merchandise123
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-merchandise123}
       - NEO4J_PLUGINS=["apoc"]
     ports:
       - "7474:7474"
@@ -29,7 +27,9 @@ services:
     environment:
       - SPRING_NEO4J_URI=bolt://neo4j:7687
       - SPRING_NEO4J_AUTHENTICATION_USERNAME=neo4j
-      - SPRING_NEO4J_AUTHENTICATION_PASSWORD=merchandise123
+      - SPRING_NEO4J_AUTHENTICATION_PASSWORD=${NEO4J_PASSWORD:-merchandise123}
+      - JWT_SECRET=${JWT_SECRET:-dev-only-secret-key-change-in-production-min-32-chars}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-3600000}
     ports:
       - "8080:8080"
     depends_on:

@@ -4,3 +4,7 @@ spring:
     authentication:
       username: ${SPRING_NEO4J_AUTHENTICATION_USERNAME:neo4j}
       password: ${SPRING_NEO4J_AUTHENTICATION_PASSWORD:YOUR_NEO4J_PASSWORD}
+
+jwt:
+  secret: ${JWT_SECRET:dev-only-secret-key-change-in-production-min-32-chars}
+  expiration-ms: ${JWT_EXPIRATION_MS:3600000}

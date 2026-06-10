@@ -8,7 +8,7 @@
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'SentOrders' }" class="text-black hover:text-gray-500 font-semibold"
         :class="{ 'text-blue-600': isOnSentOrdersRoute, 'bg-white': !isOnSentOrdersRoute }">
-        Sent
+        Shipped
       </router-link>
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'AllOrders' }" class="text-black hover:text-gray-500 font-semibold"

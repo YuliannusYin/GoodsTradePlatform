@@ -62,7 +62,8 @@ public class AdminToolsService {
 
     public boolean isValidOrderStatus(String status) {
         return status.equalsIgnoreCase(Order.Status.PENDING.toString()) ||
-                status.equalsIgnoreCase(Order.Status.SENT.toString());
+                status.equalsIgnoreCase(Order.Status.SHIPPED.toString()) ||
+                status.equalsIgnoreCase(Order.Status.DELIVERED.toString());
     }
 
     public List<Order> findAllUsersOrders() {
@@ -86,7 +87,7 @@ public class AdminToolsService {
 
             LocalDateTime expectedDelivery = generateLocalDateTime(dateAndTime);
 
-            orderRepository.setOrderToSent(order.getId(), Order.Status.SENT, expectedDelivery);
+            orderRepository.setOrderToSent(order.getId(), Order.Status.SHIPPED, expectedDelivery);
 
             return new Success(HttpStatus.OK, "Order was successfully sent");
 

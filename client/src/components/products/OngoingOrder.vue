@@ -11,7 +11,7 @@
             <div v-for="item in ongoingOrder?.items" :key="item.product.id">
               <li class="mb-1 py-2 border-b w-full flex justify-between items-center">
                 <div class="flex items-center">
-                  <img :src="item.product.imageUrl" alt="Product Image"
+                  <img :src="item.product.imageUrls?.[0]" alt="Product Image"
                     class="max-w-[4rem] sm:max-w-[5rem] inline-block mr-5" />
                   <div>
                     <span class="font-bold">{{ item.product.name }}</span>

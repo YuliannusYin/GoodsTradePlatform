@@ -4,36 +4,41 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.NoArgsConstructor;
 import me.code.springboot_neo4j.models.nodes.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.InputStream;
 import java.security.Key;
-import java.util.Map;
+import java.util.Date;
 
 @Component
-@NoArgsConstructor
 public class JwtTokenUtil {
-
-    private static final String CONFIG_FILE = "secrets-config.yml";
-    private static final String JWT_SECRET = "jwt-secret";
 
     private static final String CLAIM_ID = "id";
     private static final String CLAIM_ROLE = "role";
 
-    private final String secret = getJwtSecret();
-    private final Key key = Keys.hmacShaKeyFor(secret.getBytes());
+    private final Key key;
+    private final long expirationMs;
+
+    public JwtTokenUtil(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration-ms:3600000}") long expirationMs) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        this.expirationMs = expirationMs;
+    }
 
     public String generateToken(User user) {
         String id = user.getId();
         String role = user.getRole().toString();
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .setSubject(id)
                 .claim(CLAIM_ID, id)
                 .claim(CLAIM_ROLE, role)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .signWith(key)
                 .compact();
     }
@@ -61,12 +66,5 @@ public class JwtTokenUtil {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.get(type, String.class);
-    }
-
-    private String getJwtSecret() {
-        InputStream inputStream = JwtTokenUtil.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
-        Map<String, String> config = new Yaml().load(inputStream);
-
-        return config.get(JWT_SECRET);
     }
 }

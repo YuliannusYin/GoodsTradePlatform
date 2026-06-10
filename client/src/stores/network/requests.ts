@@ -3,7 +3,18 @@ import type { Method } from 'axios'
 import { useAuthenticationStore } from '../authenticationStore'
 import { useLoadingStore } from './loadingStore'
 
-const baseUrl = 'http://localhost:8080/api'
+const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
+
+export class ApiError extends Error {
+  public status: number
+  public data: any
+
+  constructor(status: number, data: any) {
+    super(data?.message || 'Request failed')
+    this.status = status
+    this.data = data
+  }
+}
 
 export async function callGet(endpoint: string) {
   return await makeRequest('GET', endpoint)
@@ -43,7 +54,10 @@ async function makeRequest(method: Method, endpoint: string, data?: any) {
     return result.data
   } catch (error: any) {
     setIsLoading(false)
-    return error.response.data
+    if (error.response) {
+      throw new ApiError(error.response.status, error.response.data)
+    }
+    throw new ApiError(0, { error: true, message: error.message || 'Network error' })
   }
 }
 

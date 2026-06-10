@@ -7,6 +7,10 @@
         <h2 class="text-xl font-semibold mb-4">Change Password</h2>
         <form @submit.prevent="openConfirmation">
             <div class="mb-4">
+                <label for="currentPassword" class="block text-gray-700 font-bold mb-2">Current password:</label>
+                <input v-model="currentPassword" type="password" class="border w-full p-2 rounded" />
+            </div>
+            <div class="mb-4">
                 <label for="newPassword" class="block text-gray-700 font-bold mb-2">New password:</label>
                 <input v-model="newPassword" type="password" class="border w-full p-2 rounded" />
             </div>
@@ -20,7 +24,7 @@
             </div>
             <button type="submit"
                 class="bg-blue-500 text-white py-2 px-4 rounded disabled:bg-gray-500 disabled:hover:bg-gray-700 disabled:cursor-not-allowed"
-                :disabled="newPassword === '' || newPassword != confirmNewPassword">Change password</button>
+                :disabled="currentPassword === '' || newPassword === '' || newPassword != confirmNewPassword">Change password</button>
         </form>
     </div>
 </template>
@@ -37,6 +41,7 @@ export default defineComponent({
         const accountStore = useAccountStore();
         const connectionStore = useConnectionStore();
 
+        const currentPassword = ref('');
         const newPassword = ref('');
         const confirmNewPassword = ref('');
 
@@ -53,14 +58,15 @@ export default defineComponent({
             isConfirmationVisible.value = false;
         }
 
-        async function handleChangePassword(currentPassword: string) {
-            const response = await accountStore.API.changePassword(currentPassword, newPassword.value);
+        async function handleChangePassword() {
+            const response = await accountStore.API.changePassword(currentPassword.value, newPassword.value);
             handleResponseMessage()
 
             if ('success' in response) {
                 setTimeout(async () => {
                     await connectionStore.API.submitRelog(newPassword.value, 'EditAccountView');
                     clearResponseMessage()
+                    currentPassword.value = '';
                     newPassword.value = '';
                     confirmNewPassword.value = '';
                 }, 2000);
@@ -71,7 +77,7 @@ export default defineComponent({
         function handleResponseMessage() {
             changePasswordResponse.value = accountStore.states.changePasswordResponse
 
-            if (changePasswordResponse.value.error) {
+            if (changePasswordResponse.value?.error) {
                 responseMessageColor.value = "text-red-700"
             }
             else {
@@ -83,9 +89,8 @@ export default defineComponent({
             changePasswordResponse.value = null
         }
 
-        return { newPassword, confirmNewPassword, openConfirmation, closeConfirmation, handleChangePassword, changePasswordResponse, responseMessageColor, isConfirmationVisible }
+        return { currentPassword, newPassword, confirmNewPassword, openConfirmation, closeConfirmation, handleChangePassword, changePasswordResponse, responseMessageColor, isConfirmationVisible }
     },
     components: { ConfirmDialogue }
 });
 </script>
-  

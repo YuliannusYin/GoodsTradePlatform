@@ -3,18 +3,24 @@ package me.code.springboot_neo4j.services;
 import me.code.springboot_neo4j.dtos.requests.UserLoginDTO;
 import me.code.springboot_neo4j.dtos.responses.error.details.ValidationErrorDetail;
 import me.code.springboot_neo4j.exceptions.types.variants.ValidationException;
+import me.code.springboot_neo4j.models.nodes.User;
 import me.code.springboot_neo4j.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class LoginValidationService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public LoginValidationService(UserRepository userRepository) {
+    public LoginValidationService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void validateUserCredentials(UserLoginDTO dto) {
@@ -40,7 +46,8 @@ public class LoginValidationService {
     }
 
     private boolean isInvalidPassword(String email, String password) {
-        return userRepository.isInvalidPassword(email, password);
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.isEmpty() || !passwordEncoder.matches(password, user.get().getPassword());
     }
 
     private ValidationErrorDetail getValidationErrorDetail() {

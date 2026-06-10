@@ -18,7 +18,7 @@
         </div>
         <div class="mb-4">
           <label for="productImageUrl" class="block text-gray-700 font-bold mb-2">Image URL</label>
-          <input v-model="product.imageUrl" type="text" class="border w-full p-2 rounded" />
+          <input v-model="imageUrlInput" type="text" class="border w-full p-2 rounded" />
         </div>
         <div class="mb-4">
           <label for="productPrice" class="block text-gray-700 font-bold mb-2">Price</label>
@@ -50,10 +50,14 @@ export default defineComponent({
     const product = ref<CreateProductDto>({
       name: '',
       description: '',
-      imageUrl: '',
+      imageUrls: [],
       price: 0,
       quantity: 0,
+      category: '',
+      condition: 'NEW',
+      source: 'PLATFORM'
     });
+    const imageUrlInput = ref<string>('');
     const isConfirmationVisible = ref<boolean>(false);
 
     function openConfirmation() {
@@ -65,6 +69,7 @@ export default defineComponent({
     }
 
     async function addNewProduct() {
+      product.value.imageUrls = imageUrlInput.value ? [imageUrlInput.value] : [];
       const newProduct = { ...product.value };
       await adminToolsStore.API.addProduct(newProduct);
       resetProductValues();
@@ -74,12 +79,16 @@ export default defineComponent({
       product.value = {
         name: '',
         description: '',
-        imageUrl: '',
+        imageUrls: [],
         price: 0,
         quantity: 0,
+        category: '',
+        condition: 'NEW',
+        source: 'PLATFORM'
       };
+      imageUrlInput.value = '';
     }
-    return { product, addNewProduct, isConfirmationVisible, openConfirmation, closeConfirmation };
+    return { product, imageUrlInput, addNewProduct, isConfirmationVisible, openConfirmation, closeConfirmation };
   },
   components: { ConfirmDialogue, SmallViewTitle, ProductPreview, SubmitButton }
 });
