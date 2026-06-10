@@ -1,0 +1,32 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+secrets-config.yml
+
+# Docker volumes data
+neo4j_data/
+neo4j_logs/
+
+# Logs
+*.log
+logs/

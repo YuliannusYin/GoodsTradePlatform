@@ -1,6 +1,6 @@
 # 周边交易平台
 
-![Java](https://img.shields.io/badge/Java-17-orange?logo=java) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-green?logo=springboot) ![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vue.js) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
+![Java](https://img.shields.io/badge/Java-17-orange?logo=java) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green?logo=springboot) ![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vue.js) ![Neo4j](https://img.shields.io/badge/Neo4j-5-018BFF?logo=neo4j) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss)
 
 ## 项目简介
 
@@ -16,7 +16,7 @@
 - **购物车**：添加/移除商品，实时计算价格
 - **订单管理**：下单、查看订单状态、管理员发货
 
-### 新增功能
+### 扩展功能
 - **商品收藏**：用户可收藏感兴趣的商品，在收藏夹中统一管理
 - **商品评价/评分**：购买后可对商品进行 1-5 星评分和文字评价
 - **分类筛选**：商城页面左侧分类导航，快速筛选目标品类
@@ -31,66 +31,148 @@
 
 | 层级 | 技术 |
 |------|------|
-| 前端 | Vue 3 (Composition API) + TypeScript + Pinia + Tailwind CSS |
+| 前端 | Vue 3 (Composition API) + TypeScript 5 + Pinia + Vue Router 4 |
+| UI 框架 | Tailwind CSS 3 + Headless UI + Heroicons + Font Awesome |
+| 构建工具 | Vite 4 |
 | 后端 | Java 17 + Spring Boot 3.2 + Spring Security + Spring Data Neo4j |
-| 数据库 | Neo4j (图数据库) |
-| 认证 | JWT (jjwt) |
+| 数据库 | Neo4j 5 Community (图数据库) |
+| 认证 | JWT (jjwt 0.11.5) |
+| 工具库 | Lombok |
 | 部署 | Docker + Docker Compose + Nginx |
 
 ## 项目结构
 
 ```
-├── client/                  # 前端项目
+eCommerce-Project/
+├── client/                          # 前端项目 (Vue 3 + TypeScript)
+│   ├── public/
+│   │   └── favicon.ico
 │   ├── src/
-│   │   ├── components/      # Vue 组件
-│   │   │   ├── account/     # 账户相关组件
-│   │   │   ├── admintools/  # 管理员工具组件
-│   │   │   ├── footer/      # 页脚组件
-│   │   │   ├── header/      # 导航栏组件
-│   │   │   └── products/    # 商品相关组件
-│   │   ├── router/          # 路由配置
-│   │   ├── stores/          # Pinia 状态管理
-│   │   ├── types/           # TypeScript 类型定义
-│   │   └── views/           # 页面视图
-│   ├── Dockerfile
-│   └── nginx.conf
-├── server/                  # 后端项目
+│   │   ├── components/              # Vue 组件
+│   │   │   ├── account/             # 账户相关 (信息、修改、删除、订单)
+│   │   │   ├── admintools/          # 管理员工具 (增删改商品、订单管理)
+│   │   │   ├── footer/              # 页脚 (导航、信息、社交图标)
+│   │   │   ├── header/              # 导航栏 (搜索、购物车、账户、汉堡菜单)
+│   │   │   └── products/            # 商品相关 (卡片、搜索、收藏、下单)
+│   │   ├── resources/               # 静态图片资源
+│   │   ├── router/                  # Vue Router 路由配置
+│   │   │   ├── index.ts             # 路由定义与导航守卫
+│   │   │   └── navigationProvider.ts
+│   │   ├── stores/                  # Pinia 状态管理
+│   │   │   ├── network/             # 网络请求相关 Store
+│   │   │   │   ├── accountStore.ts  # 账户状态
+│   │   │   │   ├── adminToolsStore.ts
+│   │   │   │   ├── connectionStore.ts
+│   │   │   │   ├── favoriteStore.ts
+│   │   │   │   ├── loadingStore.ts
+│   │   │   │   ├── orderStore.ts
+│   │   │   │   ├── productStore.ts
+│   │   │   │   ├── requests.ts      # Axios 请求封装
+│   │   │   │   ├── reviewStore.ts
+│   │   │   │   └── userProductStore.ts
+│   │   │   ├── authenticationStore.ts # 认证状态
+│   │   │   └── shoppingCartStore.ts   # 购物车状态
+│   │   ├── types/                   # TypeScript 类型定义
+│   │   │   ├── favorite.ts
+│   │   │   ├── order.ts
+│   │   │   ├── product.ts
+│   │   │   └── review.ts
+│   │   ├── views/                   # 页面视图
+│   │   │   ├── admin/               # 管理员页面
+│   │   │   │   ├── AdminToolsView.vue
+│   │   │   │   ├── HandleOrdersView.vue
+│   │   │   │   └── HandleProductsView.vue
+│   │   │   ├── AccountView.vue
+│   │   │   ├── CheckoutView.vue
+│   │   │   ├── EditAccountView.vue
+│   │   │   ├── FavoritesView.vue
+│   │   │   ├── HomeView.vue
+│   │   │   ├── LoginView.vue
+│   │   │   ├── ProductView.vue
+│   │   │   ├── PublishProductView.vue
+│   │   │   ├── ShopView.vue
+│   │   │   ├── ShowAccountOrdersView.vue
+│   │   │   └── SignupView.vue
+│   │   ├── App.vue
+│   │   ├── index.css
+│   │   └── main.ts
+│   ├── Dockerfile                   # 前端 Docker 构建 (Node → Nginx)
+│   ├── nginx.conf                   # Nginx 反向代理配置
+│   ├── vite.config.ts
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   └── package.json
+├── server/                          # 后端项目 (Spring Boot + Neo4j)
 │   ├── src/main/java/me/code/springboot_neo4j/
-│   │   ├── config/          # 配置类
-│   │   ├── controllers/     # REST 控制器
-│   │   ├── dtos/            # 数据传输对象
-│   │   ├── exceptions/      # 异常处理
-│   │   ├── models/          # Neo4j 节点模型
-│   │   ├── repositories/    # 数据访问层
-│   │   ├── security/        # 安全配置
-│   │   └── services/        # 业务逻辑层
-│   └── Dockerfile
-├── docker-compose.yml       # Docker 编排文件
+│   │   ├── config/                  # 配置类
+│   │   │   └── neo4j/               # Neo4j 初始化 (Mock 数据、节点配置)
+│   │   ├── controllers/             # REST 控制器
+│   │   │   ├── AdminToolsController.java
+│   │   │   ├── FavoriteController.java
+│   │   │   ├── LoginController.java
+│   │   │   ├── OrderController.java
+│   │   │   ├── ProductController.java
+│   │   │   ├── ReviewController.java
+│   │   │   ├── UserAccountController.java
+│   │   │   └── UserProductController.java
+│   │   ├── dtos/                    # 数据传输对象
+│   │   │   ├── requests/            # 请求 DTO
+│   │   │   └── responses/           # 响应 DTO (success/ error/ entities/)
+│   │   ├── exceptions/              # 全局异常处理
+│   │   │   └── types/               # 自定义异常 (Validation/Order)
+│   │   ├── models/                  # Neo4j 节点模型
+│   │   │   └── nodes/               # User, Product, Order, OrderItem, Review, Favorite
+│   │   ├── repositories/            # Spring Data Neo4j Repository
+│   │   ├── security/                # 安全配置
+│   │   │   ├── CorsConfig.java
+│   │   │   ├── JwtTokenUtil.java
+│   │   │   ├── JwtValidationFilter.java
+│   │   │   └── SecurityConfig.java
+│   │   └── services/                # 业务逻辑层
+│   ├── src/main/resources/
+│   │   └── application.yml          # Spring Boot 配置
+│   ├── Dockerfile                   # 后端 Docker 构建 (Maven → JRE)
+│   └── pom.xml
+├── images/                          # 项目截图
+│   ├── home_page.png
+│   ├── product_search.png
+│   ├── ongoing_order.png
+│   ├── user_orders.png
+│   ├── admin_ui.png
+│   └── admin_orders.png
+├── docker-compose.yml               # Docker Compose 编排
+├── .gitignore
 └── README.md
 ```
 
 ## 快速开始
 
-### 方式一：Docker 一键部署（推荐，适用于 Ubuntu）
+### 方式一：Docker 一键部署（推荐）
 
 #### 前提条件
 - 已安装 Docker 和 Docker Compose
-- Ubuntu 20.04+ / 其他 Linux 发行版
+- Ubuntu 20.04+ / 其他 Linux 发行版 / Windows (WSL2)
 
 #### 部署步骤
 
 1. **克隆项目**
 ```bash
-git clone https://github.com/your-username/eCommerce-Project.git
-cd eCommerce-Project
+git clone https://github.com/YuliannusYin/GoodsTradePlatform
+cd GoodsTradePlatform
 ```
 
-2. **一键启动所有服务**
+2. **（可选）创建环境变量文件**
+```bash
+cp .env.example .env
+# 编辑 .env 设置生产环境密码和 JWT 密钥
+```
+
+3. **一键启动所有服务**
 ```bash
 docker compose up -d --build
 ```
 
-3. **等待服务启动完成**（首次启动需要下载镜像和编译，约 3-5 分钟）
+4. **等待服务启动完成**（首次启动需要下载镜像和编译，约 3-5 分钟）
 ```bash
 # 查看服务状态
 docker compose ps
@@ -99,23 +181,23 @@ docker compose ps
 docker compose logs -f server
 ```
 
-4. **访问应用**
+5. **访问应用**
 - 前端页面：http://localhost
 - 后端 API：http://localhost:8080/api
 - Neo4j 管理界面：http://localhost:7474
 
-5. **默认测试账号**
+6. **默认测试账号**
 ```
 管理员：admin@admin.com / Password
 普通用户：user@user.com / Password
 ```
 
-6. **停止服务**
+7. **停止服务**
 ```bash
 docker compose down
 ```
 
-7. **清除所有数据（包括数据库）**
+8. **清除所有数据（包括数据库卷）**
 ```bash
 docker compose down -v
 ```
@@ -126,11 +208,22 @@ docker compose down -v
 - Node.js 18+
 - Java 17+
 - Maven 3.9+
-- Neo4j 数据库实例（本地或 AuraDB）
+- Neo4j 5 数据库实例（本地或 AuraDB）
 
 #### 步骤
 
-1. **配置 Neo4j 连接**
+1. **启动 Neo4j 数据库**
+
+本地安装或使用 Docker：
+```bash
+docker run -d \
+  --name neo4j \
+  -p 7474:7474 -p 7687:7687 \
+  -e NEO4J_AUTH=neo4j/your_password \
+  neo4j:5-community
+```
+
+2. **配置后端数据库连接**
 
 编辑 `server/src/main/resources/application.yml`：
 ```yaml
@@ -140,53 +233,126 @@ spring:
     authentication:
       username: neo4j
       password: YOUR_NEO4J_PASSWORD
+
+jwt:
+  secret: YOUR_JWT_SECRET_KEY_AT_LEAST_32_CHARACTERS
+  expiration-ms: 3600000
 ```
 
-2. **启动后端**
+3. **启动后端**
 ```bash
 cd server
 mvn spring-boot:run
 ```
 
-3. **安装前端依赖并启动**
+4. **安装前端依赖并启动**
 ```bash
 cd client
 npm install
 npm run dev
 ```
 
-4. **访问应用**
+5. **访问应用**
 - 前端：http://localhost:5173
 - 后端：http://localhost:8080
 
 ## API 接口概览
 
+### 认证相关
+
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | POST | /api/account/register | 用户注册 | 否 |
 | POST | /api/account/login | 用户登录 | 否 |
+
+### 商品相关
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
 | GET | /api/products/all | 获取所有商品 | 否 |
 | GET | /api/products/featured | 获取热门商品 | 否 |
 | GET | /api/products/{id} | 获取商品详情 | 否 |
 | GET | /api/products/search | 搜索商品（支持分类） | 否 |
 | GET | /api/products/categories | 获取分类列表 | 否 |
+
+### 订单相关
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
 | POST | /api/orders/place | 下单 | 是 |
 | GET | /api/orders/all | 获取用户订单 | 是 |
+
+### 评价相关
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
 | POST | /api/reviews/add | 添加评价 | 是 |
 | GET | /api/reviews/product/{id} | 获取商品评价 | 否 |
+
+### 收藏相关
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
 | POST | /api/favorites/add | 添加收藏 | 是 |
 | DELETE | /api/favorites/remove/{id} | 取消收藏 | 是 |
 | GET | /api/favorites/list | 获取收藏列表 | 是 |
+
+### 用户商品（C2C）
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
 | POST | /api/user_products/add | 用户发布商品 | 是 |
 | GET | /api/user_products/my | 获取我的商品 | 是 |
+
+## 页面路由
+
+| 路径 | 页面 | 认证 |
+|------|------|------|
+| `/` | 首页 | 否 |
+| `/shop` | 商城（支持 query/filter/category 参数） | 否 |
+| `/product/:productId` | 商品详情 | 否 |
+| `/login` | 登录 | 否 |
+| `/signup` | 注册 | 否 |
+| `/account` | 账户中心 | 是 |
+| `/account/edit` | 编辑账户 | 是 |
+| `/account/orders` | 我的订单 | 是 |
+| `/checkout` | 结算页 | 否（需购物车有商品） |
+| `/publish` | 发布商品 | 是 |
+| `/favorites` | 我的收藏 | 是 |
+| `/admin_tools/products` | 管理商品 | 管理员 |
+| `/admin_tools/orders` | 管理订单 | 管理员 |
 
 ## 环境变量
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| SPRING_NEO4J_URI | Neo4j 连接地址 | bolt://localhost:7687 |
-| SPRING_NEO4J_AUTHENTICATION_USERNAME | Neo4j 用户名 | neo4j |
-| SPRING_NEO4J_AUTHENTICATION_PASSWORD | Neo4j 密码 | - |
+| `NEO4J_PASSWORD` | Neo4j 数据库密码 | `merchandise123` |
+| `SPRING_NEO4J_URI` | Neo4j 连接地址 | `bolt://localhost:7687` |
+| `SPRING_NEO4J_AUTHENTICATION_USERNAME` | Neo4j 用户名 | `neo4j` |
+| `SPRING_NEO4J_AUTHENTICATION_PASSWORD` | Neo4j 密码 | 同 `NEO4J_PASSWORD` |
+| `JWT_SECRET` | JWT 签名密钥 | `dev-only-secret-key-change-in-production-min-32-chars` |
+| `JWT_EXPIRATION_MS` | JWT 过期时间（毫秒） | `3600000`（1 小时） |
+
+## Docker 架构
+
+```
+                    ┌─────────────────┐
+                    │   Browser :80   │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Nginx (client) │  ← 静态资源 + 反向代理 /api/
+                    └────────┬────────┘
+                             │ /api/
+                    ┌────────▼────────┐
+                    │  Spring Boot    │  ← REST API :8080
+                    │  (server)       │
+                    └────────┬────────┘
+                             │ bolt://
+                    ┌────────▼────────┐
+                    │  Neo4j 5        │  ← 图数据库 :7687/:7474
+                    └─────────────────┘
+```
 
 ## 许可证
 
