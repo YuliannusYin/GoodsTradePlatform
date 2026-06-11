@@ -10,13 +10,17 @@ Desktop.ini
 *.iml
 *.iws
 *.ipr
+
 .vscode/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.docs/
+
+.trae/
+
+docs/
 
 # Environment & Secrets
 .env
