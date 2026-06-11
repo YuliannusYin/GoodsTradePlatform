@@ -59,7 +59,8 @@ public class UserAccountService implements UserDetailsService {
         try {
             return new UserDetailsSuccess(HttpStatus.OK,
                     "User details were successfully retrieved",
-                    user.getEmail(), user.getUsername());
+                    user.getEmail(), user.getUsername(),
+                    user.getBalance(), user.isProtected());
 
         } catch (Exception exception) {
             throw new CustomRuntimeException(
@@ -69,6 +70,7 @@ public class UserAccountService implements UserDetailsService {
     }
 
     public Success changeUsername(User user, ChangeUsernameDTO dto) {
+        checkNotProtected(user, "change username");
         credentialsValidator.findNullUsername(dto.newUsername());
         credentialsValidator.findUsernameFormattingError(dto.newUsername());
 
@@ -88,6 +90,7 @@ public class UserAccountService implements UserDetailsService {
     }
 
     public Success changeEmail(User user, ChangeEmailDTO dto) {
+        checkNotProtected(user, "change email");
         credentialsValidator.findNullEmail(dto.newEmail());
         credentialsValidator.findEmailFormattingError(dto.newEmail());
 
@@ -107,6 +110,7 @@ public class UserAccountService implements UserDetailsService {
     }
 
     public Success changePassword(User user, ChangePasswordDTO dto) {
+        checkNotProtected(user, "change password");
         if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
             throw new CustomRuntimeException(
                     HttpStatus.BAD_REQUEST,
@@ -133,6 +137,7 @@ public class UserAccountService implements UserDetailsService {
     }
 
     public Success deleteAccount(User user) {
+        checkNotProtected(user, "delete account");
         try {
             userRepository.deleteById(user.getId());
 
@@ -172,5 +177,13 @@ public class UserAccountService implements UserDetailsService {
                 () -> new CustomRuntimeException(
                         HttpStatus.NOT_FOUND,
                         "Could not find user with username: " + username));
+    }
+
+    private void checkNotProtected(User user, String action) {
+        if (user.isProtected()) {
+            throw new CustomRuntimeException(
+                    HttpStatus.FORBIDDEN,
+                    "This is a system account. You cannot " + action + ".");
+        }
     }
 }

@@ -191,8 +191,9 @@ docker compose logs -f server
 
 6. **默认测试账号**
 ```
-管理员：admin@admin.com / Password
-普通用户：user@user.com / Password
+超级管理员：admin@merchandise.com / Admin@2024（不可改名/改密码/删除）
+测试商户：merchant@merchandise.com / Merchant@2024（所有内置商品的卖家）
+测试用户：testuser@merchandise.com / Test@2024（余额 $10,000,000）
 ```
 
 7. **停止服务**

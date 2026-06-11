@@ -29,6 +29,8 @@ export const useAccountStore = defineStore('accountStore', () => {
 
     username: ref<string | null>(null),
     email: ref<string | null>(null),
+    balance: ref<number>(0),
+    isProtected: ref<boolean>(false),
     orders: ref<any | null>(null)
   }
 
@@ -78,6 +80,8 @@ export const useAccountStore = defineStore('accountStore', () => {
         if (response.success) {
           states.username.value = response.username
           states.email.value = response.email
+          states.balance.value = response.balance ?? 0
+          states.isProtected.value = response.isProtected ?? false
         }
       } catch (error) {
         // silently fail - user details can be fetched again

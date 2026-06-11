@@ -1,3 +1,7 @@
+-- ============================================================
+-- V1: Create initial database schema
+-- ============================================================
+
 CREATE TABLE users (
     id              VARCHAR(36)    PRIMARY KEY,
     email           VARCHAR(255)   NOT NULL UNIQUE,
@@ -5,7 +9,9 @@ CREATE TABLE users (
     password        VARCHAR(255)   NOT NULL,
     role            VARCHAR(10)    NOT NULL DEFAULT 'USER',
     avatar_url      VARCHAR(500),
-    bio             VARCHAR(500)
+    bio             VARCHAR(500),
+    balance         DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    is_protected    BOOLEAN        NOT NULL DEFAULT false
 );
 
 CREATE TABLE products (
@@ -59,6 +65,7 @@ CREATE TABLE reviews (
     UNIQUE (user_id, product_id)
 );
 
+-- Indexes
 CREATE INDEX idx_products_category ON products(category);
 CREATE INDEX idx_products_seller_id ON products(seller_id);
 CREATE INDEX idx_products_name_lower ON products(LOWER(name));

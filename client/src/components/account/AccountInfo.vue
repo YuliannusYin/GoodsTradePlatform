@@ -4,13 +4,17 @@
         <div>
             <p><strong>Username:</strong> {{ username }}</p>
             <p><strong>Email:</strong> {{ email }}</p>
+            <p><strong>Balance:</strong> ${{ formattedBalance }}</p>
+            <p v-if="isProtected" class="mt-2 text-sm text-amber-600 font-medium">
+                This is a system account. Username, email, password, and deletion are restricted.
+            </p>
         </div>
     </div>
 </template>
-  
+
 <script lang="ts">
 import { useAccountStore } from '@/stores/network/accountStore';
-import { defineComponent, ref, onMounted, watch } from 'vue';
+import { defineComponent, ref, onMounted, watch, computed } from 'vue';
 
 export default defineComponent({
     name: 'AccountInfo',
@@ -18,34 +22,28 @@ export default defineComponent({
         const accountStore = useAccountStore();
 
         const username = ref<string | null>(null);
-        const email = ref<string | null>(null)
+        const email = ref<string | null>(null);
+        const balance = ref<number>(0);
+        const isProtected = ref<boolean>(false);
 
-        onMounted(async () => {
-            username.value = accountStore.states.username
-            email.value = accountStore.states.email
+        const formattedBalance = computed(() => {
+            return balance.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         });
 
-        watch(
-            () => accountStore.states.username,
-            (newUsernameState: any) => {
-                if (newUsernameState) {
-                    username.value = accountStore.states.username;
-                }
-            }
-        );
+        onMounted(async () => {
+            username.value = accountStore.states.username;
+            email.value = accountStore.states.email;
+            balance.value = accountStore.states.balance;
+            isProtected.value = accountStore.states.isProtected;
+        });
 
-        watch(
-            () => accountStore.states.email,
-            (newEmailState: any) => {
-                if (newEmailState) {
-                    email.value = accountStore.states.email;
-                }
-            }
-        );
+        watch(() => accountStore.states.username, (val: any) => { if (val) username.value = val; });
+        watch(() => accountStore.states.email, (val: any) => { if (val) email.value = val; });
+        watch(() => accountStore.states.balance, (val: any) => { if (val !== undefined) balance.value = val; });
+        watch(() => accountStore.states.isProtected, (val: any) => { if (val !== undefined) isProtected.value = val; });
 
-        return { username, email }
+        return { username, email, balance, isProtected, formattedBalance }
     },
-
 });
 </script>
   

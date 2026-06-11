@@ -42,6 +42,12 @@ public class User implements UserDetails {
     @Column(length = 500)
     private String bio;
 
+    @Column(nullable = false)
+    private double balance = 0.0;
+
+    @Column(name = "is_protected", nullable = false)
+    private boolean isProtected = false;
+
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Product> sellingProducts;
 
@@ -50,6 +56,15 @@ public class User implements UserDetails {
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public User(String email, String username, String password, Role role, double balance, boolean isProtected) {
+        this.email = email;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.balance = balance;
+        this.isProtected = isProtected;
     }
 
     @Override
