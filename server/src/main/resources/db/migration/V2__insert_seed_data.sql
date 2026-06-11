@@ -1,3 +1,6 @@
+INSERT INTO users (id, email, username, password, role) VALUES
+    ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'seller@example.com', 'secondhand_seller', '$2a$10$placeholder_hash', 'USER');
+
 INSERT INTO products (id, name, description, image_urls, price, quantity, category, condition, source, seller_id) VALUES
     ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b01', '初音未来 手办 Ver.', '初音未来经典造型手办，高精度涂装，约23cm高，附带底座。',
      '["https://m.media-amazon.com/images/I/71K3JnFqJWL._AC_SL1500_.jpg"]'::jsonb,
