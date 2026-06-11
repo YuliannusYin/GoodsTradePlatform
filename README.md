@@ -1,10 +1,10 @@
 # 周边交易平台
 
-![Java](https://img.shields.io/badge/Java-17-orange?logo=java) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green?logo=springboot) ![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vue.js) ![Neo4j](https://img.shields.io/badge/Neo4j-5-018BFF?logo=neo4j) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss)
+![Java](https://img.shields.io/badge/Java-17-orange?logo=java) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green?logo=springboot) ![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vue.js) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss)
 
 ## 项目简介
 
-本项目是一个基于 Vue 3 + Spring Boot + Neo4j 的**周边交易平台**，支持 B2C 平台自营和 C2C 用户闲置交易两种模式。用户可以浏览、搜索、购买各类动漫、游戏、偶像周边商品，也可以发布自己的闲置周边进行售卖。
+本项目是一个基于 Vue 3 + Spring Boot + PostgreSQL 的**周边交易平台**，支持 B2C 平台自营和 C2C 用户闲置交易两种模式。用户可以浏览、搜索、购买各类动漫、游戏、偶像周边商品，也可以发布自己的闲置周边进行售卖。
 
 ## 功能特性
 
@@ -34,8 +34,9 @@
 | 前端 | Vue 3 (Composition API) + TypeScript 5 + Pinia + Vue Router 4 |
 | UI 框架 | Tailwind CSS 3 + Headless UI + Heroicons + Font Awesome |
 | 构建工具 | Vite 4 |
-| 后端 | Java 17 + Spring Boot 3.2 + Spring Security + Spring Data Neo4j |
-| 数据库 | Neo4j 5 Community (图数据库) |
+| 后端 | Java 17 + Spring Boot 3.2 + Spring Security + Spring Data JPA |
+| 数据库 | PostgreSQL 16 (关系型数据库) |
+| 数据库迁移 | Flyway |
 | 认证 | JWT (jjwt 0.11.5) |
 | 工具库 | Lombok |
 | 部署 | Docker + Docker Compose + Nginx |
@@ -102,10 +103,10 @@ eCommerce-Project/
 │   ├── tailwind.config.js
 │   ├── tsconfig.json
 │   └── package.json
-├── server/                          # 后端项目 (Spring Boot + Neo4j)
-│   ├── src/main/java/me/code/springboot_neo4j/
+├── server/                          # 后端项目 (Spring Boot + PostgreSQL)
+│   ├── src/main/java/me/code/springboot_postgres/
 │   │   ├── config/                  # 配置类
-│   │   │   └── neo4j/               # Neo4j 初始化 (Mock 数据、节点配置)
+│   │   │   └── DataInitializer.java # 数据初始化 (种子用户)
 │   │   ├── controllers/             # REST 控制器
 │   │   │   ├── AdminToolsController.java
 │   │   │   ├── FavoriteController.java
@@ -120,9 +121,9 @@ eCommerce-Project/
 │   │   │   └── responses/           # 响应 DTO (success/ error/ entities/)
 │   │   ├── exceptions/              # 全局异常处理
 │   │   │   └── types/               # 自定义异常 (Validation/Order)
-│   │   ├── models/                  # Neo4j 节点模型
-│   │   │   └── nodes/               # User, Product, Order, OrderItem, Review, Favorite
-│   │   ├── repositories/            # Spring Data Neo4j Repository
+│   │   ├── models/                  # JPA 实体模型
+│   │   │   └── entities/            # User, Product, Order, OrderItem, Review, Favorite
+│   │   ├── repositories/            # Spring Data JPA Repository
 │   │   ├── security/                # 安全配置
 │   │   │   ├── CorsConfig.java
 │   │   │   ├── JwtTokenUtil.java
@@ -130,7 +131,10 @@ eCommerce-Project/
 │   │   │   └── SecurityConfig.java
 │   │   └── services/                # 业务逻辑层
 │   ├── src/main/resources/
-│   │   └── application.yml          # Spring Boot 配置
+│   │   ├── application.yml          # Spring Boot 配置
+│   │   └── db/migration/            # Flyway 数据库迁移脚本
+│   │       ├── V1__create_initial_schema.sql
+│   │       └── V2__insert_seed_data.sql
 │   ├── Dockerfile                   # 后端 Docker 构建 (Maven → JRE)
 │   └── pom.xml
 ├── images/                          # 项目截图
@@ -184,7 +188,6 @@ docker compose logs -f server
 5. **访问应用**
 - 前端页面：http://localhost
 - 后端 API：http://localhost:8080/api
-- Neo4j 管理界面：http://localhost:7474
 
 6. **默认测试账号**
 ```
@@ -208,19 +211,21 @@ docker compose down -v
 - Node.js 18+
 - Java 17+
 - Maven 3.9+
-- Neo4j 5 数据库实例（本地或 AuraDB）
+- PostgreSQL 16 数据库实例（本地或 Docker）
 
 #### 步骤
 
-1. **启动 Neo4j 数据库**
+1. **启动 PostgreSQL 数据库**
 
-本地安装或使用 Docker：
+使用 Docker：
 ```bash
 docker run -d \
-  --name neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/your_password \
-  neo4j:5-community
+  --name merchandise-postgres \
+  -p 5432:5432 \
+  -e POSTGRES_DB=merchandise \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  postgres:16-alpine
 ```
 
 2. **配置后端数据库连接**
@@ -228,11 +233,10 @@ docker run -d \
 编辑 `server/src/main/resources/application.yml`：
 ```yaml
 spring:
-  neo4j:
-    uri: bolt://localhost:7687
-    authentication:
-      username: neo4j
-      password: YOUR_NEO4J_PASSWORD
+  datasource:
+    url: jdbc:postgresql://localhost:5432/merchandise
+    username: postgres
+    password: YOUR_POSTGRES_PASSWORD
 
 jwt:
   secret: YOUR_JWT_SECRET_KEY_AT_LEAST_32_CHARACTERS
@@ -326,10 +330,12 @@ npm run dev
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `NEO4J_PASSWORD` | Neo4j 数据库密码 | `merchandise123` |
-| `SPRING_NEO4J_URI` | Neo4j 连接地址 | `bolt://localhost:7687` |
-| `SPRING_NEO4J_AUTHENTICATION_USERNAME` | Neo4j 用户名 | `neo4j` |
-| `SPRING_NEO4J_AUTHENTICATION_PASSWORD` | Neo4j 密码 | 同 `NEO4J_PASSWORD` |
+| `POSTGRES_DB` | PostgreSQL 数据库名 | `merchandise` |
+| `POSTGRES_USER` | PostgreSQL 用户名 | `postgres` |
+| `POSTGRES_PASSWORD` | PostgreSQL 密码 | `merchandise123` |
+| `SPRING_DATASOURCE_URL` | 数据库连接地址 | `jdbc:postgresql://localhost:5432/merchandise` |
+| `SPRING_DATASOURCE_USERNAME` | 数据库用户名 | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | 数据库密码 | 同 `POSTGRES_PASSWORD` |
 | `JWT_SECRET` | JWT 签名密钥 | `dev-only-secret-key-change-in-production-min-32-chars` |
 | `JWT_EXPIRATION_MS` | JWT 过期时间（毫秒） | `3600000`（1 小时） |
 
@@ -348,9 +354,9 @@ npm run dev
                     │  Spring Boot    │  ← REST API :8080
                     │  (server)       │
                     └────────┬────────┘
-                             │ bolt://
+                             │ jdbc:postgresql://
                     ┌────────▼────────┐
-                    │  Neo4j 5        │  ← 图数据库 :7687/:7474
+                    │  PostgreSQL 16  │  ← 关系型数据库 :5432
                     └─────────────────┘
 ```
 
