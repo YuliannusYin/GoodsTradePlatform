@@ -6,7 +6,6 @@ import me.code.springboot_postgres.dtos.responses.success.variants.Authenticatio
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.security.JwtTokenUtil;
-import me.code.springboot_postgres.services.LoginValidationService;
 import me.code.springboot_postgres.services.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,47 +21,43 @@ public class LoginController {
 
     private final AuthenticationProvider authenticationProvider;
     private final UserAccountService userAccountService;
-    private final LoginValidationService loginValidationService;
     private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     public LoginController(
             AuthenticationProvider authenticationProvider,
             UserAccountService userAccountService,
-            LoginValidationService loginValidationService,
             JwtTokenUtil jwtTokenUtil) {
         this.authenticationProvider = authenticationProvider;
         this.userAccountService = userAccountService;
-        this.loginValidationService = loginValidationService;
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Success> login(@RequestBody UserLoginDTO dto) throws Exception {
-        try {
-            User user = authenticateUser(dto);
-            String token = generateTokenForUser(user);
+    public ResponseEntity<Success> login(@RequestBody UserLoginDTO dto) {
+        User user = authenticateUser(dto);
+        String token = generateTokenForUser(user);
 
-            return new AuthenticationSuccess(
-                    HttpStatus.OK,
-                    "Login successful",
-                    user.getRole().toString(),
-                    token)
-                    .toResponseEntity();
-
-        } catch (Exception exception) {
-            validateCredentials(dto);
-            throw new Exception(exception.getMessage());
-        }
+        return new AuthenticationSuccess(
+                HttpStatus.OK,
+                "Login successful",
+                user.getRole().toString(),
+                token)
+                .toResponseEntity();
     }
 
     private User authenticateUser(UserLoginDTO dto) {
         User user = userAccountService.loadUserByEmail(dto.email());
         var token = new UsernamePasswordAuthenticationToken(user.getUsername(), dto.password());
-        Authentication result = authenticationProvider.authenticate(token);
+        Authentication result;
+        try {
+            result = authenticationProvider.authenticate(token);
+        } catch (Exception e) {
+            throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
 
         if (isNotAuthenticated(result)) {
-            throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Could not authenticate login requests");
+            throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
         return user;
     }
@@ -73,10 +68,6 @@ public class LoginController {
 
     private String generateTokenForUser(User user) {
         return jwtTokenUtil.generateToken(user);
-    }
-
-    private void validateCredentials(UserLoginDTO dto) {
-        loginValidationService.validateUserCredentials(dto);
     }
 
 }
