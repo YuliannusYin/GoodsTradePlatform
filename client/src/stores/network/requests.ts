@@ -12,7 +12,7 @@ export class ApiError extends Error {
   public method: string
 
   constructor(status: number, data: any, url: string = '', method: string = '') {
-    super(data?.message || 'Request failed')
+    super(data?.message || '请求失败')
     this.status = status
     this.data = data
     this.url = url
@@ -62,7 +62,7 @@ async function makeRequest(method: Method, endpoint: string, data?: any) {
     if (error.response) {
       throw new ApiError(error.response.status, error.response.data, requestUrl, method)
     }
-    throw new ApiError(0, { error: true, message: error.message || 'Network error' }, requestUrl, method)
+    throw new ApiError(0, { error: true, message: error.message || '网络错误' }, requestUrl, method)
   }
 }
 

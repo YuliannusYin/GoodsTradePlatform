@@ -1,6 +1,6 @@
 <template>
     <div class="cursor-pointer transition duration-300" @mouseover="showPopup" @mouseleave="hidePopup">
-        <StyledRouterLink text="LOGIN" path="/login" />
+        <StyledRouterLink text="登录" path="/login" />
         <LoginOrSignupPopup v-if="isShowingPopup" />
     </div>
 </template>

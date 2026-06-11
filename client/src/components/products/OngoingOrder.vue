@@ -1,8 +1,7 @@
 <template>
   <div class="flex flex-col justify-center items-center w-full">
     <div v-if="!isConfirmedOrder" class="w-full flex flex-col items-center justify-center">
-      <h2 class="text-l font-bold text-center sm:text-left uppercase w-full sm:min-w-max sm:w-[70%] py-4">Inspect your
-        cart
+      <h2 class="text-l font-bold text-center sm:text-left uppercase w-full sm:min-w-max sm:w-[70%] py-4">查看购物车
       </h2>
       <div class="p-4 bg-white rounded shadow w-full sm:min-w-max sm:w-[70%] mb-4">
         <LoadingScreen />
@@ -11,7 +10,7 @@
             <div v-for="item in ongoingOrder?.items" :key="item.product.id">
               <li class="mb-1 py-2 border-b w-full flex justify-between items-center">
                 <div class="flex items-center">
-                  <img :src="item.product.imageUrls?.[0]" alt="Product Image"
+                  <img :src="item.product.imageUrls?.[0]" alt="商品图片"
                     class="max-w-[4rem] sm:max-w-[5rem] inline-block mr-5" />
                   <div>
                     <span class="font-bold">{{ item.product.name }}</span>
@@ -51,81 +50,75 @@
 
         <div v-if="ongoingOrder !== null && !isConfirmedOrder"
           class="w-full font-bold flex justify-between items-center mt-4 mb-1 px-2">
-          <p class="ml-[0.47rem]">Total price:</p>
+          <p class="ml-[0.47rem]">总价：</p>
           <p>{{ ongoingOrder?.totalPrice }}:-</p>
         </div>
       </div>
 
       <div v-if="isAuthenticated" class="sm:min-w-max w-full space-y-4 text-l font-bold sm:w-[70%] pb-4">
-        <h2 class="text-l font-bold uppercase text-center sm:text-left">2. Fill in your delivery details</h2>
+        <h2 class="text-l font-bold uppercase text-center sm:text-left">2. 填写配送信息</h2>
         <div class="p-4 bg-white rounded shadow pb-4 w-full flex flex-col justify-center items-center">
           <iframe id="googleMap" class="w-full h-[20rem] rounded-md mb-4"
             :src="`https://maps.google.com/maps?q=${deliveryCoordinates.latitude},${deliveryCoordinates.longitude}&hl=en&z=14&amp;output=embed`">
           </iframe>
-          <button @click="getGeoLocation" class="bg-sky-500 hover:bg-sky-600 px-6 py-2 text-l text-white rounded">Get my
-            location</button>
+          <button @click="getGeoLocation" class="bg-sky-500 hover:bg-sky-600 px-6 py-2 text-l text-white rounded">获取我的位置</button>
         </div>
 
         <div class="flex justify-between">
           <div class="p-4 bg-white rounded shadow w-full mr-4">
-            <h2 class="text-l font-bold mb-6 text-center sm:text-left uppercase whitespace-nowrap">3. Select delivery
-              method</h2>
+            <h2 class="text-l font-bold mb-6 text-center sm:text-left uppercase whitespace-nowrap">3. 选择配送方式</h2>
             <div class="mb-4">
-              <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Delivery Method</label>
+              <label for="email" class="block text-gray-700 text-sm font-bold mb-2">配送方式</label>
               <select v-model="selectedDeliveryMethod" id="selectedDeliveryMethod"
                 class="px-3 py-2 border rounded border-gray-300 focus:outline-none">
                 <option v-for="deliveryMethod in deliveryMethods" :key="deliveryMethod" :value="deliveryMethod">
-                  {{ deliveryMethod === 'DRONE_DELIVERY' ? 'Drone delivery' : deliveryMethod }}</option>
+                  {{ deliveryMethod === 'DRONE_DELIVERY' ? '无人机配送' : deliveryMethod }}</option>
               </select>
             </div>
           </div>
 
           <div class="p-4 bg-white rounded shadow w-full">
-            <h2 class="text-l font-bold mb-6 text-center sm:text-left uppercase whitespace-nowrap">4. Select payment
-              method</h2>
+            <h2 class="text-l font-bold mb-6 text-center sm:text-left uppercase whitespace-nowrap">4. 选择支付方式</h2>
             <div class="mb-4">
-              <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Payment Method</label>
+              <label for="email" class="block text-gray-700 text-sm font-bold mb-2">支付方式</label>
               <select v-model="selectedPaymentMethod" id="selectedDeliveryMethod"
                 class="px-3 py-2 border rounded border-gray-300 focus:outline-none">
                 <option v-for="paymentMethod in paymentMethods" :key="paymentMethod" :value="paymentMethod">
-                  {{ paymentMethod === "PAY_ON_DELIVERY" ? "Pay on delivery" : paymentMethod }} </option>
+                  {{ paymentMethod === "PAY_ON_DELIVERY" ? "货到付款" : paymentMethod }} </option>
               </select>
             </div>
           </div>
         </div>
 
         <div class="p-4 bg-white rounded shadow">
-          <h2 class="text-l font-bold mb-3 text-center sm:text-left uppercase">{{ isAuthenticated ? '5' : '2' }}. Confirm
-            your order</h2>
+          <h2 class="text-l font-bold mb-3 text-center sm:text-left uppercase">{{ isAuthenticated ? '5' : '2' }}. 确认订单</h2>
           <div class="w-full flex justify-center items-center">
             <button @click="placeOrder"
               :disabled="deliveryCoordinates.latitude == '' || deliveryCoordinates.longitude == ''"
-              class="bg-green-500 hover:bg-green-600 px-6 py-2 text-l text-white rounded disabled:bg-gray-500 disabled:cursor-not-allowed">Confirm
-              order</button>
+              class="bg-green-500 hover:bg-green-600 px-6 py-2 text-l text-white rounded disabled:bg-gray-500 disabled:cursor-not-allowed">确认下单</button>
           </div>
         </div>
       </div>
       <div v-if="!isAuthenticated && !isConfirmedOrder">
-        <h2 class="text-l font-bold my-6 text-center sm:text-left uppercase">2. Login to complete your order</h2>
+        <h2 class="text-l font-bold my-6 text-center sm:text-left uppercase">2. 登录以完成下单</h2>
         <div class="flex flex-col justify-center">
           <button
             class="w-max-min bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none transition duration-300">
-            <StyledRouterLink text="Login" path="/login" additional-class="text-md" />
+            <StyledRouterLink text="登录" path="/login" additional-class="text-md" />
           </button>
           <div class="flex justify-center items-center mt-4">
-            <p class="mr-1 text-sm">New customer? </p>
-            <StyledRouterLink text="Start here" path="/signup" textClass="text-blue-700 hover:text-blue-600"
+            <p class="mr-1 text-sm">新用户？</p>
+            <StyledRouterLink text="点击注册" path="/signup" textClass="text-blue-700 hover:text-blue-600"
               additional-class="text-blue-700 hover:text-blue-400 text-sm" />
           </div>
         </div>
       </div>
     </div>
     <div v-if="isConfirmedOrder" class="flex flex-col items-center justify-center">
-      <h2 class="text-l font-bold my-6 text-center sm:text-left uppercase">Thank you for your purchase!</h2>
+      <h2 class="text-l font-bold my-6 text-center sm:text-left uppercase">感谢您的购买！</h2>
       <RouterLink to="/shop">
         <button @click="clearConfirmedOrder"
-          class="bg-blue-500 hover:bg-blue-600 px-6 py-2 text-l text-white font-semibold rounded">Keep
-          shopping</button>
+          class="bg-blue-500 hover:bg-blue-600 px-6 py-2 text-l text-white font-semibold rounded">继续购物</button>
       </RouterLink>
     </div>
   </div>

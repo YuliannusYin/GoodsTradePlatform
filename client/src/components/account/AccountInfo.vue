@@ -1,12 +1,12 @@
 <template>
     <div class="p-4 bg-white rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Account Information</h2>
+        <h2 class="text-xl font-semibold mb-4">账户信息</h2>
         <div>
-            <p><strong>Username:</strong> {{ username }}</p>
-            <p><strong>Email:</strong> {{ email }}</p>
-            <p><strong>Balance:</strong> ${{ formattedBalance }}</p>
+            <p><strong>用户名：</strong> {{ username }}</p>
+            <p><strong>邮箱：</strong> {{ email }}</p>
+            <p><strong>余额：</strong> ${{ formattedBalance }}</p>
             <p v-if="isProtected" class="mt-2 text-sm text-amber-600 font-medium">
-                This is a system account. Username, email, password, and deletion are restricted.
+                这是系统账户，用户名、邮箱、密码和删除操作受到限制。
             </p>
         </div>
     </div>

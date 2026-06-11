@@ -1,20 +1,20 @@
 <template>
-    <ConfirmDialogue :isPasswordRequired="true" header="Confirm username change"
-        text="Are you sure you want to change your username?" v-if="isConfirmationVisible" :onConfirm="handleChangeUsername"
+    <ConfirmDialogue :isPasswordRequired="true" header="确认修改用户名"
+        text="确定要修改用户名吗？" v-if="isConfirmationVisible" :onConfirm="handleChangeUsername"
         :onCancel="closeConfirmation" />
 
     <div class="p-4 bg-white rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Change Username</h2>
+        <h2 class="text-xl font-semibold mb-4">修改用户名</h2>
         <form @submit.prevent="openConfirmation">
             <div class="mb-4">
-                <label for="newUsername" class="block text-gray-700 font-bold mb-2">New Username:</label>
+                <label for="newUsername" class="block text-gray-700 font-bold mb-2">新用户名：</label>
                 <input v-model="newUsername" type="text" id="newUsername" class="border w-full p-2 rounded" />
             </div>
             <div v-if="changeUsernameResponse"
                 :class="['flex', 'justify-center', 'font-semibold', 'my-2', responseMessageColor]">
                 <p>{{ changeUsernameResponse.message }}</p>
             </div>
-            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">Change username</button>
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">修改用户名</button>
         </form>
     </div>
 </template>

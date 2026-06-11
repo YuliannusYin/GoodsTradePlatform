@@ -4,12 +4,12 @@
     <table class="border max-w-full w-full">
       <thead class="text-left text-xs whitespace-nowrap">
         <tr class="bg-gray-200">
-          <th class="border p-2 hidden md:table-cell">User email</th>
-          <th class="border p-2 hidden md:table-cell">Price</th>
-          <th class="border p-2">Status</th>
-          <th class="border p-2">Received</th>
-          <th class="border p-2">Expected delivery</th>
-          <th class="border p-2 hidden md:table-cell">Items</th>
+          <th class="border p-2 hidden md:table-cell">用户邮箱</th>
+          <th class="border p-2 hidden md:table-cell">价格</th>
+          <th class="border p-2">状态</th>
+          <th class="border p-2">下单时间</th>
+          <th class="border p-2">预计送达</th>
+          <th class="border p-2 hidden md:table-cell">商品列表</th>
         </tr>
       </thead>
       <tbody class="bg-gray-50 whitespace-normal text-s md:text-base">
@@ -30,7 +30,7 @@
           </td>
           <td v-else class="border p-2 text-left">
             <span class="bg-yellow-300 py-1 px-1 mr-2 rounded-full"></span>
-            <span>N / A</span>
+            <span>暂无</span>
           </td>
           <td class="border p-2 hidden md:table-cell">
             <div v-for="item in order.items" :key="item.product.id">
@@ -77,14 +77,14 @@ export default defineComponent({
 
     function generateHeader(): string {
       if (route.name === "PendingOrders") {
-        return 'Pending Orders'
+        return '待发货订单'
       }
 
       else if (route.name === "SentOrders") {
-        return "Sent Orders"
+        return "已发货订单"
       }
 
-      else return 'All Orders';
+      else return '全部订单';
     }
 
     async function loadOrders() {

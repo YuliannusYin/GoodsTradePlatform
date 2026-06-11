@@ -1,5 +1,5 @@
 <template>
-  <StyledButton :text="isButtonDisabled ? 'OUT OF STOCK' : 'ADD TO CART'" :disabled="isButtonDisabled" :class="[buttonStyles, 'font-extrabold text-sm']"
+  <StyledButton :text="isButtonDisabled ? '已售罄' : '加入购物车'" :disabled="isButtonDisabled" :class="[buttonStyles, 'font-extrabold text-sm']"
     :handleClick="handleBuyButtonClick" />
 </template>
   

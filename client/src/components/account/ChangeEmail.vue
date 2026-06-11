@@ -1,20 +1,20 @@
 <template>
-    <ConfirmDialogue :isPasswordRequired="true" header="Confirm Email change"
-        text="Are you sure you want to change your Email?" v-if="isConfirmationVisible" :onConfirm="handleChangeEmail"
+    <ConfirmDialogue :isPasswordRequired="true" header="确认修改邮箱"
+        text="确定要修改邮箱吗？" v-if="isConfirmationVisible" :onConfirm="handleChangeEmail"
         :onCancel="closeConfirmation" />
 
     <div class="p-4 bg-white rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Change Email</h2>
+        <h2 class="text-xl font-semibold mb-4">修改邮箱</h2>
         <form @submit.prevent="openConfirmation">
             <div class="mb-4">
-                <label for="newEmail" class="block text-gray-700 font-bold mb-2">New Email:</label>
+                <label for="newEmail" class="block text-gray-700 font-bold mb-2">新邮箱：</label>
                 <input v-model="newEmail" type="text" class="border w-full p-2 rounded" />
             </div>
             <div v-if="changeEmailResponse"
                 :class="['flex', 'justify-center', 'font-semibold', 'my-2', responseMessageColor]">
                 <p>{{ changeEmailResponse.message }}</p>
             </div>
-            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">Change Email</button>
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">修改邮箱</button>
         </form>
     </div>
 </template>

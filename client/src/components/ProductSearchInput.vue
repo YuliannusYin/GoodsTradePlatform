@@ -10,8 +10,8 @@
     </div>
     <div v-if="isOpenDropdown"
       class=" bg-white w-full lg:w-[28rem] transition duration-400 rounded-sm min-h-max shadow-md border border-gray-300 absolute top-[3.73rem] md:top-[2.6rem] lg:top-[2.63rem] flex flex-col p-4 space-y-2">
-      <h3 class="text-base font-semibold">SORT BY</h3>
-      <div class="w-full border bordet-t-gray-300"></div>
+      <h3 class="text-base font-semibold">排序方式</h3>
+      <div class="w-full border border-t-gray-300"></div>
       <div class="flex flex-col text-base items-start justify-center space-y-1">
         <label>
           <input type="checkbox" :checked="filters.lowestPrice" @change="() => handleFilterChange('lowest_price')"
@@ -21,7 +21,7 @@
         <label>
           <input type="checkbox" :checked="filters.highestPrice" @change="() => handleFilterChange('highest_price')"
             class="form-checkbox h-4 w-4" />
-          Highest price
+          价格从高到低
         </label>
       </div>
     </div>
@@ -44,7 +44,7 @@ export default defineComponent({
 
     placeholder: {
       type: String,
-      default: 'Search our products',
+      default: '搜索商品',
     },
 
     hasCloseSearchEnabled: {

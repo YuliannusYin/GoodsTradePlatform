@@ -13,7 +13,7 @@
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'AllOrders' }" class="text-black hover:text-gray-500 font-semibold"
         :class="{ 'text-blue-600': isOnAllOrdersRoute, 'bg-white': !isOnAllOrdersRoute }">
-        All
+        全部
       </router-link>
     </div>
 

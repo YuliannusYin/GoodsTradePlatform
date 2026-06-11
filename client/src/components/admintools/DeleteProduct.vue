@@ -1,14 +1,14 @@
 <template>
   <div class="flex w-full">
-    <ConfirmDialogue :isPasswordRequired="false" header="Confirm delete product"
-      text="Are you sure you want to delete this product?" v-if="isConfirmationVisible" :onConfirm="deleteProduct"
+    <ConfirmDialogue :isPasswordRequired="false" header="确认删除商品"
+      text="确定要删除此商品吗？" v-if="isConfirmationVisible" :onConfirm="deleteProduct"
       :onCancel="closeConfirmation" />
 
     <ProductPreview v-if="product" :product="product" />
     <div class="p-4 bg-white rounded shadow w-full sm:max-w-[50%] sm:min-w-[50%] sm:ml-5">
-      <SmallViewTitle text="Delete product" class="mb-2" />
+      <SmallViewTitle text="删除商品" class="mb-2" />
       <div class="mb-4">
-        <label for="products" class="block text-gray-700 font-bold mb-2">Product</label>
+        <label for="products" class="block text-gray-700 font-bold mb-2">商品</label>
         <select v-model="selectedProductId" class="border w-full p-2 rounded" @change="loadProduct(selectedProductId)">
           <option v-for="product in products" :key="product.id" :value="product.id">
             {{ product.name }}
@@ -16,7 +16,7 @@
         </select>
       </div>
       <form @submit.prevent="openConfirmation">
-        <SubmitButton text="Delete product" additionalClass="bg-red-500 hover:bg-red-600" />
+        <SubmitButton text="删除商品" additionalClass="bg-red-500 hover:bg-red-600" />
       </form>
     </div>
   </div>

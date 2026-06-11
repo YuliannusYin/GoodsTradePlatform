@@ -6,14 +6,14 @@
           :class="{ 'bg-blue-50 text-blue-600': isOnProductsRoute, 'bg-white': !isOnProductsRoute }">
           <i class="fas fa-cube"></i>
           <router-link :to="{ name: 'HandleProductsView' }" class="text-black font-semibold">
-            Products
+            商品管理
           </router-link>
         </button>
         <button class="border p-2 w-full min-w-max sm:p-4 hover:bg-blue-50 hover:text-blue-600"
           :class="{ 'bg-blue-50 text-blue-600': isOnOrdersRoute, 'bg-white': !isOnOrdersRoute }">
           <i class="fas fa-truck sm:ml-[-0.6rem]"></i>
           <router-link :to="{ name: 'HandleOrdersView' }" class="text-black ml-1 font-semibold">
-            Orders
+            订单管理
           </router-link>
         </button>
       </div>

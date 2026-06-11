@@ -2,20 +2,20 @@
     <div v-if="props.order"
         class="w-screen sm:w-max sm:min-w-[30rem] bg-white border-l fixed h-screen top-[6.45rem] sm:top-[5.78rem] right-0 p-5 shadow-md">
 
-        <ConfirmDialogue :isPasswordRequired="false" header="Confirm send order"
-            text="Are you sure you want to send this order?"
+        <ConfirmDialogue :isPasswordRequired="false" header="确认发货"
+            text="确定要发送此订单吗？"
             v-if="props.order?.status === 'PENDING' && isConfirmationVisible" :onConfirm="sendOrder"
             :onCancel="closeConfirmation" />
 
-        <ConfirmDialogue :isPasswordRequired="false" header="Confirm change expected delivery"
-            text="Are you sure you want to change this expected delivery?"
+        <ConfirmDialogue :isPasswordRequired="false" header="确认修改预计送达时间"
+            text="确定要修改预计送达时间吗？"
             v-if="props.order?.status === 'SHIPPED' && isConfirmationVisible" :onConfirm="changeExpectedDelivery"
             :onCancel="closeConfirmation" />
 
         <div class="flex justify-between items-center">
             <h2 class="text-lg font-bold">{{
-                props.order?.status === "PENDING" ? "Send Order"
-                : props.order?.status === "SHIPPED" ? "Change Expected Delivery"
+                props.order?.status === "PENDING" ? "发货"
+                : props.order?.status === "SHIPPED" ? "修改预计送达"
                     : '' }}</h2>
             <i class="fas fa-close text-center font-semibold px-3 rounded-md cursor-pointer" @click="props.onClose" />
         </div>
@@ -24,19 +24,19 @@
         <div>
             <div class="my-4 space-y-4">
                 <div>
-                    <SmallViewTitle class="mb-1" text="User email" :hasUnderline='false' additionalClass="text-base" />
+                    <SmallViewTitle class="mb-1" text="用户邮箱" :hasUnderline='false' additionalClass="text-base" />
                     <p> {{ props.order.userEmail }}</p>
                 </div>
                 <div>
-                    <SmallViewTitle class="mb-1" text="Price" :hasUnderline='false' additionalClass="text-base" />
+                    <SmallViewTitle class="mb-1" text="价格" :hasUnderline='false' additionalClass="text-base" />
                     <p> {{ props.order.price }}</p>
                 </div>
                 <div>
-                    <SmallViewTitle class="mb-1" text="Status" :hasUnderline='false' additionalClass="text-base" />
+                    <SmallViewTitle class="mb-1" text="状态" :hasUnderline='false' additionalClass="text-base" />
                     <p> {{ props.order.status }}</p>
                 </div>
                 <div>
-                    <SmallViewTitle class="mb-3" text="Items" additionalClass="text-base" />
+                    <SmallViewTitle class="mb-3" text="商品列表" additionalClass="text-base" />
                     <ul v-for="item in props.order.items" :key="item.product.id">
                         <li class="my-1">
                             <img :src="item.product.imageUrls?.[0]" class="w-8 h-8 mr-2 hidden sm:inline-block" />
@@ -47,7 +47,7 @@
                     </ul>
                 </div>
                 <div>
-                    <SmallViewTitle class="mb-1" text="Received" :hasUnderline='false' additionalClass="text-base" />
+                    <SmallViewTitle class="mb-1" text="下单时间" :hasUnderline='false' additionalClass="text-base" />
 
                     <div class="flex items-center justify-center mt-2">
                         <input type="date" disabled v-model="receivedDate" class="border p-2 w-full focus:outline-none" />
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div>
-                    <SmallViewTitle class="mb-1" text="Expected delivery" :hasUnderline='false'
+                    <SmallViewTitle class="mb-1" text="预计送达" :hasUnderline='false'
                         additionalClass="text-base" />
 
                     <div class="flex items-center justify-center mt-2">
@@ -66,11 +66,11 @@
             </div>
             <button v-if="props.order?.status === 'PENDING'" @click="openConfirmation"
                 class="bg-blue-500 text-white px-4 py-2 rounded w-full">
-                Send
+                发货
             </button>
             <button v-if="props.order?.status === 'SHIPPED'" @click="openConfirmation"
                 class="bg-blue-500 text-white px-4 py-2 rounded w-full">
-                Change
+                修改
             </button>
         </div>
 

@@ -1,13 +1,13 @@
 <template>
-    <ConfirmDialogue :isPasswordRequired="true" header="Confirm password change"
-        text="Are you sure you want to change your password?" v-if="isConfirmationVisible" :onConfirm="handleChangePassword"
+    <ConfirmDialogue :isPasswordRequired="true" header="确认修改密码"
+        text="确定要修改密码吗？" v-if="isConfirmationVisible" :onConfirm="handleChangePassword"
         :onCancel="closeConfirmation" />
 
     <div class="p-4 bg-white rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Change Password</h2>
+        <h2 class="text-xl font-semibold mb-4">修改密码</h2>
         <form @submit.prevent="openConfirmation">
             <div class="mb-4">
-                <label for="currentPassword" class="block text-gray-700 font-bold mb-2">Current password:</label>
+                <label for="currentPassword" class="block text-gray-700 font-bold mb-2">当前密码：</label>
                 <input v-model="currentPassword" type="password" class="border w-full p-2 rounded" />
             </div>
             <div class="mb-4">
@@ -15,7 +15,7 @@
                 <input v-model="newPassword" type="password" class="border w-full p-2 rounded" />
             </div>
             <div class="mb-4">
-                <label for="confirmNewPassword" class="block text-gray-700 font-bold mb-2">Confirm New password:</label>
+                <label for="confirmNewPassword" class="block text-gray-700 font-bold mb-2">确认新密码：</label>
                 <input v-model="confirmNewPassword" type="password" class="border w-full p-2 rounded" />
             </div>
             <div v-if="changePasswordResponse"
@@ -24,7 +24,7 @@
             </div>
             <button type="submit"
                 class="bg-blue-500 text-white py-2 px-4 rounded disabled:bg-gray-500 disabled:hover:bg-gray-700 disabled:cursor-not-allowed"
-                :disabled="currentPassword === '' || newPassword === '' || newPassword != confirmNewPassword">Change password</button>
+                :disabled="currentPassword === '' || newPassword === '' || newPassword != confirmNewPassword">修改密码</button>
         </form>
     </div>
 </template>

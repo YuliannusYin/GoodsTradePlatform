@@ -1,16 +1,16 @@
 <template>
-  <ConfirmDialogue :isPasswordRequired="true" header="Confirm Delete Account"
-    text="Are you sure you want to change your account? this action is irreversible" v-if="isConfirmationVisible"
+  <ConfirmDialogue :isPasswordRequired="true" header="确认删除账户"
+    text="确定要删除账户吗？此操作不可撤销" v-if="isConfirmationVisible"
     :onConfirm="handleDeleteAccount" :onCancel="closeConfirmation" />
 
   <div class="p-4 bg-white rounded shadow">
-    <h2 class="text-xl font-semibold mb-4">Delete Account</h2>
+    <h2 class="text-xl font-semibold mb-4">删除账户</h2>
     <div v-if="deleteAccountResponse" :class="['flex', 'justify-center', 'font-semibold', 'my-2', responseMessageColor]">
       <p>{{ deleteAccountResponse.message }}</p>
     </div>
     <form @submit.prevent="openConfirmation">
 
-      <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded">Delete Account</button>
+      <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded">删除账户</button>
     </form>
   </div>
 </template>

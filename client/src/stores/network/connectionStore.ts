@@ -57,13 +57,13 @@ export const useConnectionStore = defineStore('connectionStore', () => {
         if (error instanceof ApiError) {
           const errorResponse: ResponseError = {
             error: true,
-            message: error.data?.message || 'Login failed'
+            message: error.data?.message || '登录失败'
           }
           states.loginErrorResponse.value = errorResponse
           states.loginDiagnostics.value = {
             timestamp: new Date().toISOString(),
             httpStatus: error.status,
-            backendMessage: error.data?.message || 'No message',
+            backendMessage: error.data?.message || '无消息',
             fullResponseData: error.data,
             requestUrl: error.url,
             requestMethod: error.method,
@@ -72,12 +72,12 @@ export const useConnectionStore = defineStore('connectionStore', () => {
           }
           return errorResponse
         }
-        const errorResponse: ResponseError = { error: true, message: 'Network error' }
+        const errorResponse: ResponseError = { error: true, message: '网络错误' }
         states.loginErrorResponse.value = errorResponse
         states.loginDiagnostics.value = {
           timestamp: new Date().toISOString(),
           httpStatus: 0,
-          backendMessage: 'Network error - cannot reach server',
+          backendMessage: '网络错误 - 无法连接服务器',
           fullResponseData: null,
           requestUrl: '/api/account/login',
           requestMethod: 'POST',
@@ -103,15 +103,15 @@ export const useConnectionStore = defineStore('connectionStore', () => {
     testBackendConnection: async (): Promise<{ reachable: boolean; status?: number; message: string }> => {
       try {
         const response = await callPost('/account/login', {})
-        return { reachable: true, status: 200, message: 'Backend is reachable (returned unexpected success)' }
+        return { reachable: true, status: 200, message: '后端可访问（返回了意外的成功响应）' }
       } catch (error) {
         if (error instanceof ApiError) {
           if (error.status === 0) {
-            return { reachable: false, message: 'Cannot connect to backend server' }
+            return { reachable: false, message: '无法连接后端服务器' }
           }
-          return { reachable: true, status: error.status, message: `Backend reachable, returned HTTP ${error.status}` }
+          return { reachable: true, status: error.status, message: `后端可访问，返回 HTTP ${error.status}` }
         }
-        return { reachable: false, message: 'Unknown error testing backend connection' }
+        return { reachable: false, message: '测试后端连接时出现未知错误' }
       }
     }
   }

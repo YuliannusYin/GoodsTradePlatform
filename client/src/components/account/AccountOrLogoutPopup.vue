@@ -3,14 +3,14 @@
         <div class="flex flex-col justify-center items-center bg-white p-4 shadow-md rounded-md">
             <div class="text-left space-y-2 flex flex-col">
                 <router-link :to="{ name: 'EditAccountView' }" class="text-blue-700 hover:text-blue-500">
-                    Edit my information
+                    编辑我的信息
                 </router-link>
                 <router-link :to="{ name: 'ShowAccountOrdersView' }" class="text-blue-700 hover:text-blue-500">
-                    Show my orders
+                    查看我的订单
                 </router-link>
                 <button @click="handleLogout"
                     class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none transition duration-300">
-                    <p class="text-md">Logout</p>
+                    <p class="text-md">退出登录</p>
                 </button>
             </div>
 

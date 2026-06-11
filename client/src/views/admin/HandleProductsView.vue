@@ -3,7 +3,7 @@
     <div class="flex justify-center sm:justify-start space-x-8 border-b p-2 sm:p-4">
       <router-link :to="{ name: 'AddProduct' }" class="text-black hover:text-gray-500 font-semibold"
         :class="{ 'text-blue-600': isOnAddProductRoute, 'bg-white': !isOnAddProductRoute }">
-        Add
+        添加
       </router-link>
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'EditProduct' }" class="text-black hover:text-gray-500 font-semibold"
@@ -13,7 +13,7 @@
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'DeleteProduct' }" class="text-black hover:text-gray-500 font-semibold"
         :class="{ 'text-blue-600': isOnDeleteProductRoute, 'bg-white': !isOnDeleteProductRoute }">
-        Delete
+        删除
       </router-link>
     </div>
 

@@ -148,9 +148,9 @@ export const useAccountStore = defineStore('accountStore', () => {
 
   function toResponseError(error: unknown): ResponseError {
     if (error instanceof ApiError) {
-      return { error: true, message: error.data?.message || 'Request failed' }
+      return { error: true, message: error.data?.message || '请求失败' }
     }
-    return { error: true, message: 'Network error' }
+    return { error: true, message: '网络错误' }
   }
 
   return {
