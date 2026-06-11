@@ -35,3 +35,6 @@ neo4j_logs/
 # Logs
 *.log
 logs/
+
+# old src
+images/old/
