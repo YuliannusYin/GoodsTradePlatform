@@ -1,5 +1,6 @@
 package me.code.springboot_postgres.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,9 +47,11 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"sellingProducts"})
     User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"order"})
     private List<OrderItem> items;
 
     public Order(User user, List<OrderItem> items, String address, DeliveryMethod deliveryMethod, PaymentMethod paymentMethod) {

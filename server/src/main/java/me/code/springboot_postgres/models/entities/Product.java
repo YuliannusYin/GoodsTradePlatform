@@ -1,5 +1,7 @@
 package me.code.springboot_postgres.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -53,6 +55,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
+    @JsonIgnoreProperties({"sellingProducts"})
     private User seller;
 
     public Product(String name, String description, List<String> imageUrls, double price, int quantity, Category category, Condition condition, String source) {

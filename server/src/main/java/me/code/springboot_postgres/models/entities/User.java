@@ -1,5 +1,6 @@
 package me.code.springboot_postgres.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,6 +50,7 @@ public class User implements UserDetails {
     private boolean isProtected = false;
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"seller"})
     private List<Product> sellingProducts;
 
     public User(String email, String username, String password, Role role) {
