@@ -8,11 +8,15 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
 export class ApiError extends Error {
   public status: number
   public data: any
+  public url: string
+  public method: string
 
-  constructor(status: number, data: any) {
+  constructor(status: number, data: any, url: string = '', method: string = '') {
     super(data?.message || 'Request failed')
     this.status = status
     this.data = data
+    this.url = url
+    this.method = method
   }
 }
 
@@ -54,10 +58,11 @@ async function makeRequest(method: Method, endpoint: string, data?: any) {
     return result.data
   } catch (error: any) {
     setIsLoading(false)
+    const requestUrl = `${baseUrl}${endpoint}`
     if (error.response) {
-      throw new ApiError(error.response.status, error.response.data)
+      throw new ApiError(error.response.status, error.response.data, requestUrl, method)
     }
-    throw new ApiError(0, { error: true, message: error.message || 'Network error' })
+    throw new ApiError(0, { error: true, message: error.message || 'Network error' }, requestUrl, method)
   }
 }
 

@@ -20,13 +20,26 @@ export interface ResponseSuccess {
   message: string
 }
 
+export interface LoginDiagnostics {
+  timestamp: string
+  httpStatus: number
+  backendMessage: string
+  fullResponseData: any
+  requestUrl: string
+  requestMethod: string
+  requestPayload: { email: string }
+  errorType: 'backend' | 'network' | 'unknown'
+}
+
 export const useConnectionStore = defineStore('connectionStore', () => {
   const states = {
-    loginErrorResponse: ref<ResponseError | null>(null)
+    loginErrorResponse: ref<ResponseError | null>(null),
+    loginDiagnostics: ref<LoginDiagnostics | null>(null)
   }
 
   const API = {
     submitLogin: async (email: string, password: string): Promise<LoginResponseSuccess | ResponseError> => {
+      states.loginDiagnostics.value = null
       try {
         const response: LoginResponseSuccess = await callPost('/account/login', {
           email: email,
@@ -47,10 +60,30 @@ export const useConnectionStore = defineStore('connectionStore', () => {
             message: error.data?.message || 'Login failed'
           }
           states.loginErrorResponse.value = errorResponse
+          states.loginDiagnostics.value = {
+            timestamp: new Date().toISOString(),
+            httpStatus: error.status,
+            backendMessage: error.data?.message || 'No message',
+            fullResponseData: error.data,
+            requestUrl: error.url,
+            requestMethod: error.method,
+            requestPayload: { email },
+            errorType: error.status === 0 ? 'network' : 'backend'
+          }
           return errorResponse
         }
         const errorResponse: ResponseError = { error: true, message: 'Network error' }
         states.loginErrorResponse.value = errorResponse
+        states.loginDiagnostics.value = {
+          timestamp: new Date().toISOString(),
+          httpStatus: 0,
+          backendMessage: 'Network error - cannot reach server',
+          fullResponseData: null,
+          requestUrl: '/api/account/login',
+          requestMethod: 'POST',
+          requestPayload: { email },
+          errorType: 'network'
+        }
         return errorResponse
       }
     },
@@ -65,7 +98,22 @@ export const useConnectionStore = defineStore('connectionStore', () => {
       return response
     },
 
-    submitLogout: async () => useAuthenticationStore().methods.handleRevokeAuthentication()
+    submitLogout: async () => useAuthenticationStore().methods.handleRevokeAuthentication(),
+
+    testBackendConnection: async (): Promise<{ reachable: boolean; status?: number; message: string }> => {
+      try {
+        const response = await callPost('/account/login', {})
+        return { reachable: true, status: 200, message: 'Backend is reachable (returned unexpected success)' }
+      } catch (error) {
+        if (error instanceof ApiError) {
+          if (error.status === 0) {
+            return { reachable: false, message: 'Cannot connect to backend server' }
+          }
+          return { reachable: true, status: error.status, message: `Backend reachable, returned HTTP ${error.status}` }
+        }
+        return { reachable: false, message: 'Unknown error testing backend connection' }
+      }
+    }
   }
 
   return {
