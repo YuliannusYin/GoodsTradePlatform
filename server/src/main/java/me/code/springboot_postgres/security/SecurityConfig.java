@@ -81,8 +81,9 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            RegistrationValidationService registrationValidationService) {
-        return new UserAccountService(userRepository, passwordEncoder, registrationValidationService);
+            RegistrationValidationService registrationValidationService,
+            me.code.springboot_postgres.repositories.RoleRepository roleRepository) {
+        return new UserAccountService(userRepository, passwordEncoder, registrationValidationService, roleRepository);
     }
 
     @Bean
