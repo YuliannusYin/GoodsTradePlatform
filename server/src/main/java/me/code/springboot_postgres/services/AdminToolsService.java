@@ -67,24 +67,12 @@ public class AdminToolsService {
     }
 
     public List<Order> findAllUsersOrders() {
-        List<Order> orders = orderRepository.findAllUsersOrders();
-        if (orders.isEmpty()) {
-            throw new CustomRuntimeException(
-                    HttpStatus.NOT_FOUND,
-                    "Could not find all users orders");
-        }
-        return orders;
+        return orderRepository.findAllUsersOrders();
     }
 
     public List<Order> findAllUsersOrders(String status) {
         Order.Status statusEnum = Order.Status.valueOf(status.toUpperCase());
-        List<Order> orders = orderRepository.findAllUsersOrdersByStatus(statusEnum);
-        if (orders.isEmpty()) {
-            throw new CustomRuntimeException(
-                    HttpStatus.NOT_FOUND,
-                    "Could not find all users orders");
-        }
-        return orders;
+        return orderRepository.findAllUsersOrdersByStatus(statusEnum);
     }
 
     @Transactional

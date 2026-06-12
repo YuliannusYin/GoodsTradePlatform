@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -95,7 +96,7 @@ public class OrderService {
             List<OrderItem> items =
                     orderItemService.generateOrderItems(products);
 
-            double totalPrice =
+            BigDecimal totalPrice =
                     orderItemService.getTotalPrice(items);
 
             return new OngoingOrderDTO(items, totalPrice);
@@ -114,13 +115,7 @@ public class OrderService {
     }
 
     public List<Order> findOrdersByUserId(String userId) {
-        List<Order> orders = orderRepository.findOrdersByUserId(userId);
-        if (orders.isEmpty()) {
-            throw new CustomRuntimeException(
-                    HttpStatus.NOT_FOUND,
-                    "Could not find orders placed by user with id: " + userId);
-        }
-        return orders;
+        return orderRepository.findOrdersByUserId(userId);
     }
 
     public List<Order.DeliveryMethod> getAvailableDeliveryMethods() {

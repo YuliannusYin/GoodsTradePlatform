@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 
@@ -40,13 +41,13 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        ensureUser(SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, User.LegacyRole.ADMIN, 0.0, true, "SUPER_ADMIN");
-        ensureUser(MERCHANT_EMAIL, MERCHANT_PASSWORD, User.LegacyRole.USER, 0.0, true, "USER");
-        ensureUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, User.LegacyRole.USER, 10_000_000.0, true, "USER");
+        ensureUser(SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, User.LegacyRole.ADMIN, BigDecimal.ZERO, true, "SUPER_ADMIN");
+        ensureUser(MERCHANT_EMAIL, MERCHANT_PASSWORD, User.LegacyRole.USER, BigDecimal.ZERO, true, "USER");
+        ensureUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, User.LegacyRole.USER, new BigDecimal("10000000.00"), true, "USER");
     }
 
     private void ensureUser(String email, String rawPassword, User.LegacyRole legacyRole,
-                             double balance, boolean isProtected, String rbacRoleName) {
+                             BigDecimal balance, boolean isProtected, String rbacRoleName) {
         Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isEmpty()) {
             // User not in DB (shouldn't happen if V2 ran), create it
@@ -94,7 +95,7 @@ public class DataInitializer implements CommandLineRunner {
             user.setProtected(isProtected);
             needsUpdate = true;
         }
-        if (Double.compare(user.getBalance(), balance) != 0 && balance > 0) {
+        if (user.getBalance().compareTo(balance) != 0 && balance.compareTo(BigDecimal.ZERO) > 0) {
             user.setBalance(balance);
             needsUpdate = true;
         }

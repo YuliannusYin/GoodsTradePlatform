@@ -1,5 +1,6 @@
 package me.code.springboot_postgres.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String username;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -47,8 +50,8 @@ public class User implements UserDetails {
     @Column(length = 500)
     private String bio;
 
-    @Column(nullable = false)
-    private double balance = 0.0;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "is_protected", nullable = false)
     private boolean isProtected = false;
@@ -76,7 +79,7 @@ public class User implements UserDetails {
         this.legacyRole = legacyRole;
     }
 
-    public User(String email, String username, String password, LegacyRole legacyRole, double balance, boolean isProtected) {
+    public User(String email, String username, String password, LegacyRole legacyRole, BigDecimal balance, boolean isProtected) {
         this.email = email;
         this.username = username;
         this.password = password;

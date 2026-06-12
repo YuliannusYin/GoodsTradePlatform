@@ -10,7 +10,7 @@ CREATE TABLE users (
     role            VARCHAR(10)    NOT NULL DEFAULT 'USER',
     avatar_url      VARCHAR(500),
     bio             VARCHAR(500),
-    balance         DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    balance         DECIMAL(12,2)  NOT NULL DEFAULT 0.0,
     is_protected    BOOLEAN        NOT NULL DEFAULT false,
     is_enabled      BOOLEAN        NOT NULL DEFAULT true
 );
@@ -20,7 +20,7 @@ CREATE TABLE products (
     name            VARCHAR(255)   NOT NULL,
     description     TEXT,
     image_urls      JSONB,
-    price           DOUBLE PRECISION NOT NULL,
+    price           DECIMAL(10,2)  NOT NULL,
     quantity        INTEGER        NOT NULL DEFAULT 0,
     category        VARCHAR(30)    NOT NULL,
     condition       VARCHAR(15),
@@ -45,7 +45,7 @@ CREATE TABLE orders (
 CREATE TABLE order_items (
     id              VARCHAR(36)    PRIMARY KEY,
     amount          INTEGER        NOT NULL,
-    price           DOUBLE PRECISION NOT NULL,
+    price           DECIMAL(10,2) NOT NULL,
     product_id      VARCHAR(36)    NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
     order_id        VARCHAR(36)    NOT NULL REFERENCES orders(id) ON DELETE CASCADE
 );

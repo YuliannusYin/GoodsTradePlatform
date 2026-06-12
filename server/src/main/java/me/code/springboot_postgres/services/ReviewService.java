@@ -81,7 +81,17 @@ public class ReviewService {
                 .toList();
     }
 
-    public void deleteReview(String reviewId) {
-        reviewRepository.deleteById(reviewId);
+    public void deleteReview(User user, String reviewId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Review not found with id: " + reviewId));
+
+        boolean isOwner = review.getUser().getId().equals(user.getId());
+        boolean isAdmin = user.isAdmin();
+
+        if (!isOwner && !isAdmin) {
+            throw new CustomRuntimeException(HttpStatus.FORBIDDEN, "You can only delete your own reviews");
+        }
+
+        reviewRepository.delete(review);
     }
 }

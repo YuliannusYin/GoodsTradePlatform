@@ -11,6 +11,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -36,8 +37,8 @@ public class Product {
     @Column(columnDefinition = "jsonb")
     private List<String> imageUrls;
 
-    @Column(nullable = false)
-    private double price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(nullable = false)
     private int quantity;
@@ -65,7 +66,7 @@ public class Product {
     @JsonIgnoreProperties({"sellingProducts"})
     private User seller;
 
-    public Product(String name, String description, List<String> imageUrls, double price, int quantity, Category category, Condition condition, String source) {
+    public Product(String name, String description, List<String> imageUrls, BigDecimal price, int quantity, Category category, Condition condition, String source) {
         this.name = name;
         this.description = description;
         this.imageUrls = imageUrls;

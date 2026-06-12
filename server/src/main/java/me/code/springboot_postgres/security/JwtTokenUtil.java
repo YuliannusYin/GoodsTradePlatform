@@ -8,6 +8,7 @@ import me.code.springboot_postgres.models.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +26,12 @@ public class JwtTokenUtil {
     public JwtTokenUtil(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms:3600000}") long expirationMs) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret must be configured via JWT_SECRET environment variable");
+        }
+        if (secret.length() < 32) {
+            throw new IllegalStateException("JWT secret must be at least 32 characters long");
+        }
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.expirationMs = expirationMs;
     }

@@ -107,7 +107,6 @@ public class RegistrationValidationService {
     }
 
     public boolean isNonEmailFormat(String string) {
-        System.out.println(string.matches(EMAIL_FORMAT_REGEX));
         return !string.matches(EMAIL_FORMAT_REGEX);
     }
 

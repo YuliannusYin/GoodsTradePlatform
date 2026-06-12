@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,8 +28,8 @@ public class Order {
     @Column(nullable = false, length = 15)
     private Status status;
 
-    @Column(nullable = false)
-    private double price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 25)
@@ -66,14 +68,11 @@ public class Order {
         this.expectedDelivery = null;
     }
 
-    public double getTotalPrice() {
-        return formatPrice(items.stream()
-                .mapToDouble(OrderItem::getPrice)
-                .sum());
-    }
-
-    private double formatPrice(double price) {
-        return Math.round(price * 100.0) / 100.0;
+    public BigDecimal getTotalPrice() {
+        return items.stream()
+                .map(OrderItem::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     public enum Status {

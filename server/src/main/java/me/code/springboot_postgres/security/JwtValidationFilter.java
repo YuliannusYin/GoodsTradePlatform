@@ -13,11 +13,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 public class JwtValidationFilter extends OncePerRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtValidationFilter.class);
+
     private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenUtil jwtTokenUtil;
     private final UserAccountService userAccountService;
@@ -35,7 +41,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             @NonNull FilterChain securityFilterChain)
             throws ServletException, IOException {
 
-        String token = request.getHeader(AUTHORIZATION_HEADER);
+        String token = extractToken(request);
 
         if (isTokenMissing(token)) {
             continueFilterChain(securityFilterChain, request, response);
@@ -46,6 +52,17 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         } else {
             throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "The provided token is not valid.");
         }
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String header = request.getHeader(AUTHORIZATION_HEADER);
+        if (header == null || header.isBlank()) {
+            return null;
+        }
+        if (header.startsWith(BEARER_PREFIX)) {
+            return header.substring(BEARER_PREFIX.length());
+        }
+        return header;
     }
 
     private boolean isTokenMissing(String token) {
@@ -99,6 +116,9 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             throw new ServletException("Servlet exception: " + exception.getMessage());
         } else if (exception instanceof IOException) {
             throw new IOException("IO exception: " + exception.getMessage());
+        } else {
+            log.error("Unexpected exception in filter chain", exception);
+            throw new ServletException("Unexpected error during request processing", exception);
         }
     }
 }

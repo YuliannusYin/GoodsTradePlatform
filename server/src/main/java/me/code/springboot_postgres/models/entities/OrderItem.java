@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,8 +26,8 @@ public class OrderItem {
     @Column(nullable = false)
     private int amount;
 
-    @Column(nullable = false)
-    private double price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
@@ -40,6 +42,6 @@ public class OrderItem {
     public OrderItem(Product product, int amount) {
         this.product = product;
         this.amount = amount;
-        this.price = product.getPrice() * amount;
+        this.price = product.getPrice().multiply(BigDecimal.valueOf(amount));
     }
 }

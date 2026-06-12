@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Setter;
 import me.code.springboot_postgres.models.entities.OrderItem;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Setter
@@ -13,9 +14,9 @@ public class OngoingOrderDTO {
     private List<OrderItem> items;
 
     @JsonProperty("totalPrice")
-    private double totalPrice;
+    private BigDecimal totalPrice;
 
-    public OngoingOrderDTO(List<OrderItem> items, double totalPrice) {
+    public OngoingOrderDTO(List<OrderItem> items, BigDecimal totalPrice) {
         this.items = items;
         this.totalPrice = totalPrice;
     }

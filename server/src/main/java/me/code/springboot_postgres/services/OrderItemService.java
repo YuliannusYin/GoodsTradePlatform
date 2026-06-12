@@ -5,6 +5,7 @@ import me.code.springboot_postgres.models.entities.OrderItem;
 import me.code.springboot_postgres.models.entities.Product;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class OrderItemService {
 
     private void updateExistingOrderItem(OrderItem item) {
         item.setAmount(item.getAmount() + 1);
-        item.setPrice(item.getProduct().getPrice() * item.getAmount());
+        item.setPrice(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getAmount())));
     }
 
     private void addNewOrderItem(Product product, List<OrderItem> items) {
@@ -47,12 +48,10 @@ public class OrderItemService {
         items.add(newDetail);
     }
 
-    public double getTotalPrice(List<OrderItem> items) {
-        double sum = items.stream()
-                .mapToDouble(OrderItem::getPrice)
-                .sum();
-
-        return Math.round(sum * 100.0) / 100.0;
+    public BigDecimal getTotalPrice(List<OrderItem> items) {
+        return items.stream()
+                .map(OrderItem::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 }

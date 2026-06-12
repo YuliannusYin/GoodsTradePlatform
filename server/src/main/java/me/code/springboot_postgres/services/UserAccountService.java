@@ -90,6 +90,7 @@ public class UserAccountService implements UserDetailsService {
         checkNotProtected(user, "change username");
         credentialsValidator.findNullUsername(dto.newUsername());
         credentialsValidator.findUsernameFormattingError(dto.newUsername());
+        credentialsValidator.findNonUniqueUsername(dto.newUsername());
 
         try {
             user.setUsername(dto.newUsername());
@@ -110,6 +111,7 @@ public class UserAccountService implements UserDetailsService {
         checkNotProtected(user, "change email");
         credentialsValidator.findNullEmail(dto.newEmail());
         credentialsValidator.findEmailFormattingError(dto.newEmail());
+        credentialsValidator.findNonUniqueEmail(dto.newEmail());
 
         try {
             user.setEmail(dto.newEmail());

@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.code.springboot_postgres.models.entities.OrderItem;
 import me.code.springboot_postgres.models.entities.Order;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class PlacedOrderDTO {
     String id;
 
     @JsonProperty("price")
-    private double price;
+    private BigDecimal price;
 
     @JsonProperty("status")
     private Order.Status status;
