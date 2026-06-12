@@ -17,6 +17,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     clean-disabled: false
+    repair-after-error: true
 
 jwt:
   secret: ${JWT_SECRET:please-change-this-to-a-secure-random-secret-key-in-production}

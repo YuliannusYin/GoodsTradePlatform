@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -43,14 +45,25 @@ public class LoginController {
     }
 
     private User authenticateUser(UserLoginDTO dto) {
-        User user = userAccountService.loadUserByEmail(dto.email());
-        var token = new UsernamePasswordAuthenticationToken(user.getUsername(), dto.password());
-        Authentication result;
+        User user;
         try {
-            result = authenticationProvider.authenticate(token);
-        } catch (Exception e) {
+            user = userAccountService.loadUserByEmail(dto.email());
+        } catch (CustomRuntimeException e) {
             throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
+
+        var authToken = new UsernamePasswordAuthenticationToken(user.getUsername(), dto.password());
+        Authentication result;
+        try {
+            result = authenticationProvider.authenticate(authToken);
+        } catch (BadCredentialsException e) {
+            throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        } catch (InternalAuthenticationServiceException e) {
+            throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        } catch (Exception e) {
+            throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Authentication failed");
+        }
+
         if (!result.isAuthenticated()) {
             throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
