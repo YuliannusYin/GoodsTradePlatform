@@ -24,6 +24,8 @@ CREATE TABLE products (
     category        VARCHAR(30)    NOT NULL,
     condition       VARCHAR(15),
     source          VARCHAR(20),
+    status          VARCHAR(20)    NOT NULL DEFAULT 'APPROVED',
+    reject_reason   TEXT,
     seller_id       VARCHAR(36)    REFERENCES users(id) ON DELETE SET NULL
 );
 
@@ -65,10 +67,38 @@ CREATE TABLE reviews (
     UNIQUE (user_id, product_id)
 );
 
+-- RBAC tables
+CREATE TABLE roles (
+    id          VARCHAR(36)    PRIMARY KEY,
+    name        VARCHAR(50)    NOT NULL UNIQUE,
+    description VARCHAR(255),
+    created_at  TIMESTAMP      NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE permissions (
+    id          VARCHAR(36)    PRIMARY KEY,
+    name        VARCHAR(80)    NOT NULL UNIQUE,
+    description VARCHAR(255),
+    module      VARCHAR(50)    NOT NULL
+);
+
+CREATE TABLE role_permissions (
+    role_id       VARCHAR(36) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id VARCHAR(36) NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE user_roles (
+    user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role_id VARCHAR(36) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
 -- Indexes
 CREATE INDEX idx_products_category ON products(category);
 CREATE INDEX idx_products_seller_id ON products(seller_id);
 CREATE INDEX idx_products_name_lower ON products(LOWER(name));
+CREATE INDEX idx_products_status ON products(status);
 
 CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_orders_status ON orders(status);
