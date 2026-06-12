@@ -2,9 +2,8 @@ package me.code.springboot_postgres.controllers;
 
 import me.code.springboot_postgres.dtos.requests.OrderDeliveryDTO;
 import me.code.springboot_postgres.dtos.requests.ProductDTO;
-import me.code.springboot_postgres.dtos.responses.entities.UserOrderDTO;
-import me.code.springboot_postgres.dtos.responses.success.Success;
-import me.code.springboot_postgres.models.entities.Product;
+import me.code.springboot_postgres.dtos.responses.ApiResponse;
+import me.code.springboot_postgres.dtos.responses.UserOrderDTO;
 import me.code.springboot_postgres.services.AdminToolsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,81 +21,68 @@ public class AdminToolsController {
         this.adminToolsService = adminToolsService;
     }
 
-    // ==================== Product Management ====================
-
     @PostMapping("/product/add")
-    public ResponseEntity<Product> addProduct(@RequestBody ProductDTO dto) {
-        var result = adminToolsService.addProduct(dto);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<me.code.springboot_postgres.dtos.responses.ProductDTO>> addProduct(@RequestBody ProductDTO dto) {
+        return ApiResponse.ok("Product added", adminToolsService.addProduct(dto)).toResponseEntity();
     }
 
     @PutMapping("/product/edit/{productId}")
-    public ResponseEntity<Success> editProduct(@PathVariable String productId, @RequestBody ProductDTO dto) {
-        var result = adminToolsService.editProduct(productId, dto);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> editProduct(@PathVariable String productId, @RequestBody ProductDTO dto) {
+        return adminToolsService.editProduct(productId, dto).toResponseEntity();
     }
 
     @DeleteMapping("/product/delete/{productId}")
-    public ResponseEntity<Success> deleteProduct(@PathVariable String productId) {
-        var result = adminToolsService.deleteProduct(productId);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable String productId) {
+        return adminToolsService.deleteProduct(productId).toResponseEntity();
     }
 
-    // ==================== Product Review ====================
-
     @GetMapping("/product/pending")
-    public ResponseEntity<List<Product>> getPendingProducts() {
-        return ResponseEntity.ok(adminToolsService.getPendingProducts());
+    public ResponseEntity<ApiResponse<List<me.code.springboot_postgres.dtos.responses.ProductDTO>>> getPendingProducts() {
+        return ApiResponse.ok("Pending products retrieved", adminToolsService.getPendingProducts()).toResponseEntity();
     }
 
     @GetMapping("/product/status/{status}")
-    public ResponseEntity<List<Product>> getProductsByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(adminToolsService.getProductsByStatus(status));
+    public ResponseEntity<ApiResponse<List<me.code.springboot_postgres.dtos.responses.ProductDTO>>> getProductsByStatus(@PathVariable String status) {
+        return ApiResponse.ok("Products by status retrieved", adminToolsService.getProductsByStatus(status)).toResponseEntity();
     }
 
     @PatchMapping("/product/approve/{productId}")
-    public ResponseEntity<Success> approveProduct(@PathVariable String productId) {
+    public ResponseEntity<ApiResponse<Void>> approveProduct(@PathVariable String productId) {
         return adminToolsService.approveProduct(productId).toResponseEntity();
     }
 
     @PatchMapping("/product/reject/{productId}")
-    public ResponseEntity<Success> rejectProduct(@PathVariable String productId, @RequestParam String rejectReason) {
+    public ResponseEntity<ApiResponse<Void>> rejectProduct(@PathVariable String productId, @RequestParam String rejectReason) {
         return adminToolsService.rejectProduct(productId, rejectReason).toResponseEntity();
     }
 
     @PatchMapping("/product/disable/{productId}")
-    public ResponseEntity<Success> disableProduct(@PathVariable String productId) {
+    public ResponseEntity<ApiResponse<Void>> disableProduct(@PathVariable String productId) {
         return adminToolsService.disableProduct(productId).toResponseEntity();
     }
 
     @PatchMapping("/product/enable/{productId}")
-    public ResponseEntity<Success> enableProduct(@PathVariable String productId) {
+    public ResponseEntity<ApiResponse<Void>> enableProduct(@PathVariable String productId) {
         return adminToolsService.enableProduct(productId).toResponseEntity();
     }
 
-    // ==================== Order Management ====================
-
     @GetMapping("/order/all")
-    public ResponseEntity<List<UserOrderDTO>> getAllUsersOrders() {
-        var result = adminToolsService.getAllUsersOrders();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<UserOrderDTO>>> getAllUsersOrders() {
+        return ApiResponse.ok("All orders retrieved", adminToolsService.getAllUsersOrders()).toResponseEntity();
     }
 
     @GetMapping("/order/all/{status}")
-    public ResponseEntity<List<UserOrderDTO>> getAllUsersOrders(@PathVariable String status) {
-        var result = adminToolsService.getAllUsersOrders(status);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<UserOrderDTO>>> getAllUsersOrders(@PathVariable String status) {
+        return ApiResponse.ok("Orders by status retrieved", adminToolsService.getAllUsersOrders(status)).toResponseEntity();
     }
 
     @PatchMapping("/order/send")
-    public ResponseEntity<Success> sendOrder(@RequestBody OrderDeliveryDTO dto) {
-        var result = adminToolsService.sendOrder(dto.orderId(), dto.expectedDelivery());
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> sendOrder(@RequestBody OrderDeliveryDTO dto) {
+        return adminToolsService.sendOrder(dto.orderId(), dto.expectedDelivery()).toResponseEntity();
     }
 
     @PatchMapping("/order/expected_delivery")
-    public ResponseEntity<Success> changeExpectedDelivery(@RequestBody OrderDeliveryDTO dto) {
-        var result = adminToolsService.changeExpectedDelivery(dto.orderId(), dto.expectedDelivery());
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> changeExpectedDelivery(@RequestBody OrderDeliveryDTO dto) {
+        return adminToolsService.changeExpectedDelivery(dto.orderId(), dto.expectedDelivery()).toResponseEntity();
     }
 }

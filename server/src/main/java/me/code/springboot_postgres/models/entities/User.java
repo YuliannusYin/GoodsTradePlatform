@@ -1,7 +1,5 @@
 package me.code.springboot_postgres.models.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +31,6 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -56,9 +53,8 @@ public class User implements UserDetails {
     @Column(name = "is_enabled", nullable = false)
     private boolean isEnabled = true;
 
-    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"seller"})
-    private List<Product> sellingProducts;
+    @Version
+    private int version;
 
     public User(String email, String username, String password, Role role) {
         this.email = email;
@@ -85,7 +81,7 @@ public class User implements UserDetails {
     public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() { return isEnabled; }
 
     @Override
     public boolean isCredentialsNonExpired() { return true; }

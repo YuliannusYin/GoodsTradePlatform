@@ -12,17 +12,17 @@ export interface Product {
   source: string
   status: ProductStatus
   rejectReason: string | null
-  seller?: {
+  seller: {
     id: string
     username: string
-  }
+  } | null
 }
 
 export interface UnavailableProduct {
-  message: string;
-  productId: string;
-  requestedAmount: number;
-  availableAmount: number;
+  message: string
+  productId: string
+  requestedAmount: number
+  availableAmount: number
 }
 
 export interface CreateProductDto {

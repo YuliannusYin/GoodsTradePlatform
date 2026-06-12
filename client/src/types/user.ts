@@ -3,9 +3,9 @@ export interface User {
   email: string
   username: string
   role: string
+  avatarUrl: string | null
+  bio: string | null
   balance: number
   isProtected: boolean
   isEnabled: boolean
-  avatarUrl?: string
-  bio?: string
 }

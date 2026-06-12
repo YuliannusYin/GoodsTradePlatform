@@ -2,10 +2,9 @@ import axios from 'axios'
 import router from '@/router'
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+  baseURL: import.meta.env.VITE_API_BASE_URL || ''
 })
 
-// 请求拦截器 - 自动注入 JWT
 apiClient.interceptors.request.use(config => {
   const token = sessionStorage.getItem('jwtToken')
   if (token) {
@@ -14,9 +13,19 @@ apiClient.interceptors.request.use(config => {
   return config
 })
 
-// 响应拦截器 - 统一错误处理
 apiClient.interceptors.response.use(
-  response => response.data,
+  response => {
+    const apiResponse = response.data
+    // If the response follows ApiResponse format, extract the data field
+    if (apiResponse && typeof apiResponse === 'object' && 'success' in apiResponse && 'data' in apiResponse) {
+      if (!apiResponse.success) {
+        throw new Error(apiResponse.message || 'Request failed')
+      }
+      return apiResponse.data
+    }
+    // Fallback for non-standard responses
+    return apiResponse
+  },
   error => {
     if (error.response?.status === 401) {
       sessionStorage.removeItem('jwtToken')

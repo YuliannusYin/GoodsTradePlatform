@@ -5,13 +5,13 @@ import { useShoppingCartStore } from '../shoppingCartStore'
 export const useOrderStore = defineStore('orderStore', () => {
   async function placeOrder(address: string, deliveryMethod: string, paymentMethod: string) {
     const shoppingCartStore = useShoppingCartStore()
-    const response = await callPost('/orders/place', {
+    const response = await callPost('/api/orders/place', {
       productIds: shoppingCartStore.getAllProductIds(),
       address,
       deliveryMethod,
       paymentMethod
     })
-    if (response.success) {
+    if (response) {
       shoppingCartStore.clearProductIds()
     }
     return response
@@ -19,21 +19,21 @@ export const useOrderStore = defineStore('orderStore', () => {
 
   async function getOngoingOrder() {
     const shoppingCartStore = useShoppingCartStore()
-    return callPost('/orders/ongoing', {
+    return callPost('/api/orders/ongoing', {
       productIds: shoppingCartStore.getAllProductIds()
     })
   }
 
   async function getPlacedOrders() {
-    return callGet('/orders/all')
+    return callGet('/api/orders/all')
   }
 
   async function getAvailableDeliveryMethods() {
-    return callGet('/orders/delivery/methods')
+    return callGet('/api/orders/delivery/methods')
   }
 
   async function getAvailablePaymentMethods() {
-    return callGet('/orders/payment/methods')
+    return callGet('/api/orders/payment/methods')
   }
 
   return {

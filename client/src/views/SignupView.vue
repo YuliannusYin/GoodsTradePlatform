@@ -47,11 +47,11 @@ const responseMessageColor = ref('')
 
 async function handleSignup() {
   try {
-    const response = await accountStore.register(email.value, username.value, password.value)
-    responseMessage.value = response.message || '注册成功'
+    await accountStore.register(email.value, username.value, password.value)
+    responseMessage.value = '注册成功'
     responseMessageColor.value = 'text-green-700'
   } catch (error: any) {
-    responseMessage.value = error?.response?.data?.message || '注册失败'
+    responseMessage.value = error?.message || error?.response?.data?.message || '注册失败'
     responseMessageColor.value = 'text-red-700'
   }
 }

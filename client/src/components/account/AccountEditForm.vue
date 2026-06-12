@@ -125,19 +125,19 @@ async function handleConfirm(password?: string) {
         break
       case 'delete':
         response = await accountStore.deleteAccount()
-        if (response.success) {
+        if (response) {
           setTimeout(() => {
             router.push('/')
           }, 2000)
         }
         break
     }
-    if (response) {
-      responseMessage.value = response.message || '操作成功'
-      responseMessageColor.value = response.success ? 'text-green-700' : 'text-red-700'
+    if (response !== undefined && response !== null) {
+      responseMessage.value = '操作成功'
+      responseMessageColor.value = 'text-green-700'
     }
   } catch (error: any) {
-    responseMessage.value = error?.response?.data?.message || '操作失败'
+    responseMessage.value = error?.message || error?.response?.data?.message || '操作失败'
     responseMessageColor.value = 'text-red-700'
   }
   closeConfirmation()

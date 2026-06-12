@@ -4,19 +4,19 @@ import { callGet, callPost, callDelete } from './requests'
 
 export const useReviewStore = defineStore('reviewStore', () => {
   async function getProductReviews(productId: string): Promise<Review[]> {
-    return callGet(`/reviews/product/${productId}`)
+    return callGet(`/api/reviews/product/${productId}`)
   }
 
   async function getProductRating(productId: string): Promise<ProductRating> {
-    return callGet(`/reviews/product/${productId}/rating`)
+    return callGet(`/api/reviews/product/${productId}/rating`)
   }
 
   async function addReview(dto: CreateReviewDto): Promise<Review> {
-    return callPost('/reviews/add', dto)
+    return callPost('/api/reviews/add', dto)
   }
 
   async function deleteReview(reviewId: string): Promise<void> {
-    return callDelete(`/reviews/${reviewId}`)
+    return callDelete(`/api/reviews/${reviewId}`)
   }
 
   return {

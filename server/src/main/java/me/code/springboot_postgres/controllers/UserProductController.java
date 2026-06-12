@@ -1,8 +1,7 @@
 package me.code.springboot_postgres.controllers;
 
 import me.code.springboot_postgres.dtos.requests.ProductDTO;
-import me.code.springboot_postgres.dtos.responses.success.Success;
-import me.code.springboot_postgres.models.entities.Product;
+import me.code.springboot_postgres.dtos.responses.ApiResponse;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.ProductService;
 import me.code.springboot_postgres.services.UserProductService;
@@ -27,26 +26,22 @@ public class UserProductController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Product> addProduct(@AuthenticationPrincipal User user, @RequestBody ProductDTO dto) {
-        var result = userProductService.addProductByUser(user, dto);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<me.code.springboot_postgres.dtos.responses.ProductDTO>> addProduct(@AuthenticationPrincipal User user, @RequestBody ProductDTO dto) {
+        return ApiResponse.ok("Product submitted for review", userProductService.addProductByUser(user, dto)).toResponseEntity();
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<Product>> getMyProducts(@AuthenticationPrincipal User user) {
-        var result = productService.getProductsBySellerId(user.getId());
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<me.code.springboot_postgres.dtos.responses.ProductDTO>>> getMyProducts(@AuthenticationPrincipal User user) {
+        return ApiResponse.ok("My products retrieved", productService.getProductsBySellerId(user.getId())).toResponseEntity();
     }
 
     @PutMapping("/edit/{productId}")
-    public ResponseEntity<Success> editMyProduct(@AuthenticationPrincipal User user, @PathVariable String productId, @RequestBody ProductDTO dto) {
-        var result = userProductService.editOwnProduct(user, productId, dto);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> editMyProduct(@AuthenticationPrincipal User user, @PathVariable String productId, @RequestBody ProductDTO dto) {
+        return userProductService.editOwnProduct(user, productId, dto).toResponseEntity();
     }
 
     @DeleteMapping("/delete/{productId}")
-    public ResponseEntity<Success> deleteMyProduct(@AuthenticationPrincipal User user, @PathVariable String productId) {
-        var result = userProductService.deleteOwnProduct(user, productId);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> deleteMyProduct(@AuthenticationPrincipal User user, @PathVariable String productId) {
+        return userProductService.deleteOwnProduct(user, productId).toResponseEntity();
     }
 }

@@ -1,7 +1,7 @@
 package me.code.springboot_postgres.controllers;
 
-import me.code.springboot_postgres.dtos.responses.entities.FavoriteDTO;
-import me.code.springboot_postgres.dtos.responses.success.Success;
+import me.code.springboot_postgres.dtos.responses.ApiResponse;
+import me.code.springboot_postgres.dtos.responses.FavoriteDTO;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.FavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,26 +23,22 @@ public class FavoriteController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Success> addFavorite(@AuthenticationPrincipal User user, @RequestParam String productId) {
-        var result = favoriteService.addFavorite(user, productId);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> addFavorite(@AuthenticationPrincipal User user, @RequestParam String productId) {
+        return favoriteService.addFavorite(user, productId).toResponseEntity();
     }
 
     @DeleteMapping("/remove/{productId}")
-    public ResponseEntity<Success> removeFavorite(@AuthenticationPrincipal User user, @PathVariable String productId) {
-        var result = favoriteService.removeFavorite(user, productId);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> removeFavorite(@AuthenticationPrincipal User user, @PathVariable String productId) {
+        return favoriteService.removeFavorite(user, productId).toResponseEntity();
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<FavoriteDTO>> getUserFavorites(@AuthenticationPrincipal User user) {
-        var result = favoriteService.getUserFavorites(user.getId());
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<FavoriteDTO>>> getUserFavorites(@AuthenticationPrincipal User user) {
+        return ApiResponse.ok("Favorites retrieved", favoriteService.getUserFavorites(user.getId())).toResponseEntity();
     }
 
     @GetMapping("/check/{productId}")
-    public ResponseEntity<Boolean> isFavorite(@AuthenticationPrincipal User user, @PathVariable String productId) {
-        var result = favoriteService.isFavorite(user.getId(), productId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<Boolean>> isFavorite(@AuthenticationPrincipal User user, @PathVariable String productId) {
+        return ApiResponse.ok("Favorite status checked", favoriteService.isFavorite(user.getId(), productId)).toResponseEntity();
     }
 }

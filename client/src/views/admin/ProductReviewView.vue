@@ -226,7 +226,7 @@ async function handleApprove(product: Product) {
     await loadProducts()
     await loadTabCounts()
   } catch (e: any) {
-    error.value = e?.data?.message || '操作失败'
+    error.value = e?.message || '操作失败'
   }
 }
 
@@ -253,7 +253,7 @@ async function handleReject() {
     await loadProducts()
     await loadTabCounts()
   } catch (e: any) {
-    dialogError.value = e?.data?.message || '操作失败'
+    dialogError.value = e?.message || '操作失败'
   } finally {
     submitting.value = false
   }
@@ -266,7 +266,7 @@ async function handleDisable(product: Product) {
     await loadProducts()
     await loadTabCounts()
   } catch (e: any) {
-    error.value = e?.data?.message || '操作失败'
+    error.value = e?.message || '操作失败'
   }
 }
 
@@ -277,7 +277,7 @@ async function handleEnable(product: Product) {
     await loadProducts()
     await loadTabCounts()
   } catch (e: any) {
-    error.value = e?.data?.message || '操作失败'
+    error.value = e?.message || '操作失败'
   }
 }
 

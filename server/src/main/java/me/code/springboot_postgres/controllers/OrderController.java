@@ -1,9 +1,7 @@
 package me.code.springboot_postgres.controllers;
 
 import me.code.springboot_postgres.dtos.requests.PlaceOrderDTO;
-import me.code.springboot_postgres.dtos.responses.entities.OngoingOrderDTO;
-import me.code.springboot_postgres.dtos.responses.entities.PlacedOrderDTO;
-import me.code.springboot_postgres.dtos.responses.success.Success;
+import me.code.springboot_postgres.dtos.responses.*;
 import me.code.springboot_postgres.models.entities.Order;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.OrderService;
@@ -25,34 +23,27 @@ public class OrderController {
     }
 
     @PostMapping("/ongoing")
-    public ResponseEntity<OngoingOrderDTO> getOngoingOrder(@RequestBody String[] productIds) {
-        var result = orderService.getOngoingOrder(productIds);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<OngoingOrderDTO>> getOngoingOrder(@RequestBody String[] productIds) {
+        return ApiResponse.ok("Ongoing order retrieved", orderService.getOngoingOrder(productIds)).toResponseEntity();
     }
 
     @PostMapping("/place")
-    public ResponseEntity<Success> placeOrder(@AuthenticationPrincipal User user, @RequestBody PlaceOrderDTO dto) {
-        var result = orderService.placeOrder(
-                user, dto.productIds(), dto.address(), dto.deliveryMethod(), dto.paymentMethod());
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> placeOrder(@AuthenticationPrincipal User user, @RequestBody PlaceOrderDTO dto) {
+        return orderService.placeOrder(user, dto.productIds(), dto.address(), dto.deliveryMethod(), dto.paymentMethod()).toResponseEntity();
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<PlacedOrderDTO>> getUserOrders(@AuthenticationPrincipal User user) {
-        var result = orderService.getUserOrders(user.getId());
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getUserOrders(@AuthenticationPrincipal User user) {
+        return ApiResponse.ok("Orders retrieved", orderService.getUserOrders(user.getId())).toResponseEntity();
     }
 
     @GetMapping("/delivery/methods")
-    public ResponseEntity<List<Order.DeliveryMethod>> getAvailableDeliveryMethods() {
-        var result = orderService.getAvailableDeliveryMethods();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<Order.DeliveryMethod>>> getAvailableDeliveryMethods() {
+        return ApiResponse.ok("Delivery methods retrieved", orderService.getAvailableDeliveryMethods()).toResponseEntity();
     }
 
     @GetMapping("/payment/methods")
-    public ResponseEntity<List<Order.PaymentMethod>> getAvailablePaymentMethods() {
-        var result = orderService.getAvailablePaymentMethods();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<Order.PaymentMethod>>> getAvailablePaymentMethods() {
+        return ApiResponse.ok("Payment methods retrieved", orderService.getAvailablePaymentMethods()).toResponseEntity();
     }
-
 }

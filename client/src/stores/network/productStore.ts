@@ -4,15 +4,15 @@ import { callGet, callPost, callPut, callDelete } from './requests'
 
 export const useProductStore = defineStore('productStore', () => {
   async function getAllProducts(): Promise<Product[]> {
-    return callGet('/products/all')
+    return callGet('/api/products/all')
   }
 
   async function getProduct(productId: string | null): Promise<Product> {
-    return callGet(`/products/${productId}`)
+    return callGet(`/api/products/${productId}`)
   }
 
   async function getSearchedProducts(searchInput: string, filter: string, category?: string): Promise<Product[]> {
-    let endpoint = `/products/search?query=${searchInput}&filter=${filter}`
+    let endpoint = `/api/products/search?query=${searchInput}&filter=${filter}`
     if (category) {
       endpoint += `&category=${category}`
     }
@@ -20,36 +20,35 @@ export const useProductStore = defineStore('productStore', () => {
   }
 
   async function getFeaturedProducts(): Promise<Product[]> {
-    return callGet('/products/featured')
+    return callGet('/api/products/featured')
   }
 
   async function getProductsByCategory(category: string): Promise<Product[]> {
-    return callGet(`/products/category/${category}`)
+    return callGet(`/api/products/category/${category}`)
   }
 
   async function getCategories(): Promise<string[]> {
-    return callGet('/products/categories')
+    return callGet('/api/products/categories')
   }
 
   async function getConditions(): Promise<string[]> {
-    return callGet('/products/conditions')
+    return callGet('/api/products/conditions')
   }
 
-  // User product methods (merged from userProductStore)
   async function addMyProduct(dto: CreateProductDto): Promise<Product> {
-    return callPost('/user_products/add', dto)
+    return callPost('/api/user_products/add', dto)
   }
 
   async function getMyProducts(): Promise<Product[]> {
-    return callGet('/user_products/my')
+    return callGet('/api/user_products/my')
   }
 
   async function editMyProduct(productId: string, dto: CreateProductDto): Promise<Product> {
-    return callPut(`/user_products/edit/${productId}`, dto)
+    return callPut(`/api/user_products/edit/${productId}`, dto)
   }
 
   async function deleteMyProduct(productId: string): Promise<Product> {
-    return callDelete(`/user_products/delete/${productId}`)
+    return callDelete(`/api/user_products/delete/${productId}`)
   }
 
   return {

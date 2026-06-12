@@ -1,5 +1,5 @@
 -- ============================================================
--- V1: Create initial database schema
+-- V1: Initial schema (consolidated from V1-V4)
 -- ============================================================
 
 CREATE TABLE users (
@@ -7,12 +7,13 @@ CREATE TABLE users (
     email           VARCHAR(255)   NOT NULL UNIQUE,
     username        VARCHAR(255)   NOT NULL UNIQUE,
     password        VARCHAR(255)   NOT NULL,
-    role            VARCHAR(10)    NOT NULL DEFAULT 'USER',
+    role            VARCHAR(20)    NOT NULL DEFAULT 'USER',
     avatar_url      VARCHAR(500),
     bio             VARCHAR(500),
     balance         DECIMAL(12,2)  NOT NULL DEFAULT 0.0,
     is_protected    BOOLEAN        NOT NULL DEFAULT false,
-    is_enabled      BOOLEAN        NOT NULL DEFAULT true
+    is_enabled      BOOLEAN        NOT NULL DEFAULT true,
+    version         INTEGER        NOT NULL DEFAULT 0
 );
 
 CREATE TABLE products (
@@ -27,7 +28,8 @@ CREATE TABLE products (
     source          VARCHAR(20),
     status          VARCHAR(20)    NOT NULL DEFAULT 'APPROVED',
     reject_reason   TEXT,
-    seller_id       VARCHAR(36)    REFERENCES users(id) ON DELETE SET NULL
+    seller_id       VARCHAR(36)    REFERENCES users(id) ON DELETE SET NULL,
+    version         INTEGER        NOT NULL DEFAULT 0
 );
 
 CREATE TABLE orders (
@@ -66,33 +68,6 @@ CREATE TABLE reviews (
     user_id         VARCHAR(36)    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     product_id      VARCHAR(36)    NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     UNIQUE (user_id, product_id)
-);
-
--- RBAC tables
-CREATE TABLE roles (
-    id          VARCHAR(50)    PRIMARY KEY,
-    name        VARCHAR(50)    NOT NULL UNIQUE,
-    description VARCHAR(255),
-    created_at  TIMESTAMP      NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE permissions (
-    id          VARCHAR(50)    PRIMARY KEY,
-    name        VARCHAR(80)    NOT NULL UNIQUE,
-    description VARCHAR(255),
-    module      VARCHAR(50)    NOT NULL
-);
-
-CREATE TABLE role_permissions (
-    role_id       VARCHAR(50) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    permission_id VARCHAR(50) NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
-    PRIMARY KEY (role_id, permission_id)
-);
-
-CREATE TABLE user_roles (
-    user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    role_id VARCHAR(50) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    PRIMARY KEY (user_id, role_id)
 );
 
 -- Indexes

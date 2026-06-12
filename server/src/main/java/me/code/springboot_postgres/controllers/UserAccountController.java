@@ -1,7 +1,8 @@
 package me.code.springboot_postgres.controllers;
 
 import me.code.springboot_postgres.dtos.requests.*;
-import me.code.springboot_postgres.dtos.responses.success.Success;
+import me.code.springboot_postgres.dtos.responses.ApiResponse;
+import me.code.springboot_postgres.dtos.responses.UserDetailsDTO;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.UserAccountService;
 import jakarta.validation.Valid;
@@ -22,44 +23,38 @@ public class UserAccountController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Success> register(@Valid @RequestBody CreateUserDTO dto) {
-        var result = userAccountService.submitRegistration(dto);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody CreateUserDTO dto) {
+        return userAccountService.submitRegistration(dto).toResponseEntity();
     }
 
     @GetMapping("/details")
-    public ResponseEntity<Success> getAccountDetails(@AuthenticationPrincipal User user) {
-        var result = userAccountService.getUserDetails(user);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<UserDetailsDTO>> getAccountDetails(@AuthenticationPrincipal User user) {
+        return userAccountService.getUserDetails(user).toResponseEntity();
     }
 
     @PutMapping("/username")
-    public ResponseEntity<Success> changeUsername(@AuthenticationPrincipal User user, @RequestBody ChangeUsernameDTO dto) {
-        var result = userAccountService.changeUsername(user, dto);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> changeUsername(@AuthenticationPrincipal User user, @RequestBody ChangeUsernameDTO dto) {
+        return userAccountService.changeUsername(user, dto).toResponseEntity();
     }
 
     @PutMapping("/email")
-    public ResponseEntity<Success> changeEmail(@AuthenticationPrincipal User user, @RequestBody ChangeEmailDTO dto) {
-        var result = userAccountService.changeEmail(user, dto);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> changeEmail(@AuthenticationPrincipal User user, @RequestBody ChangeEmailDTO dto) {
+        return userAccountService.changeEmail(user, dto).toResponseEntity();
     }
 
     @PutMapping("/password")
-    public ResponseEntity<Success> changePassword(@AuthenticationPrincipal User user, @RequestBody ChangePasswordDTO dto) {
-        var result = userAccountService.changePassword(user, dto);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> changePassword(@AuthenticationPrincipal User user, @RequestBody ChangePasswordDTO dto) {
+        return userAccountService.changePassword(user, dto).toResponseEntity();
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Success> deleteAccount(@AuthenticationPrincipal User user) {
-        var result = userAccountService.deleteAccount(user);
-        return result.toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> deleteAccount(@AuthenticationPrincipal User user) {
+        return userAccountService.deleteAccount(user).toResponseEntity();
     }
 
     @PostMapping("/confirm")
-    public boolean isValidCredentials(@RequestBody UserLoginDTO dto) {
-        return userAccountService.isValidUserCredentials(dto.email(), dto.password());
+    public ResponseEntity<ApiResponse<Boolean>> isValidCredentials(@RequestBody UserLoginDTO dto) {
+        boolean valid = userAccountService.isValidUserCredentials(dto.email(), dto.password());
+        return ApiResponse.ok("Credentials validated", valid).toResponseEntity();
     }
-
 }

@@ -44,7 +44,7 @@ async function handleLogin() {
     await accountStore.login(email.value, password.value)
     router.push('/')
   } catch (error: any) {
-    errorMessage.value = error?.response?.data?.message || '登录失败'
+    errorMessage.value = error?.message || error?.response?.data?.message || '登录失败'
   }
 }
 </script>

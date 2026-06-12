@@ -2,7 +2,7 @@ export interface Favorite {
   id: string
   productId: string
   productName: string
-  productImageUrl: string
-  productPrice: number
+  imageUrl: string
+  price: number
   createdAt: string
 }

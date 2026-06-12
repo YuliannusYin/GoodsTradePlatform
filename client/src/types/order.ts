@@ -1,27 +1,34 @@
-import type { Product, UnavailableProduct } from './product'
+import type { UnavailableProduct } from './product'
+
+interface OrderItemProduct {
+  id: string
+  name: string
+  price: number
+  imageUrls: string[]
+}
 
 interface OrderItem {
   id: string
-  product: Product
   amount: number
   price: number
+  product: OrderItemProduct
 }
 
 export interface Order {
   id: string
   price: number
-  received: string
   status: string
-  address: string
-  deliveryMethod: string
   paymentMethod: string
+  deliveryMethod: string
+  address: string
+  received: string
   expectedDelivery: string | null
   items: OrderItem[]
 }
 
 export interface OngoingOrder {
-  totalPrice: number
   items: OrderItem[]
+  totalPrice: number
   unavailableProducts?: UnavailableProduct[]
 }
 
@@ -40,6 +47,7 @@ export interface PlacedOrder {
 export interface UserOrder {
   id: string
   userEmail: string
+  username: string
   price: number
   status: string
   received: string

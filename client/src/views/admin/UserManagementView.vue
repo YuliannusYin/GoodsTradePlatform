@@ -167,11 +167,11 @@ async function handleAssignRole() {
   submitting.value = true
   dialogError.value = ''
   try {
-    await callPatch(`/admin_tools/users/${selectedUser.value.id}/role?role=${selectedRole.value}`, {})
+    await callPatch(`/api/admin_tools/users/${selectedUser.value.id}/role?role=${selectedRole.value}`, {})
     closeRoleDialog()
     await loadData()
   } catch (e: any) {
-    dialogError.value = e?.data?.message || '分配角色失败'
+    dialogError.value = e?.message || '分配角色失败'
   } finally {
     submitting.value = false
   }
@@ -181,20 +181,20 @@ async function handleToggleEnabled(user: AdminUser) {
   const action = user.enabled ? '禁用' : '启用'
   if (!confirm(`确定${action}用户「${user.username}」吗？`)) return
   try {
-    await callPatch(`/admin_tools/users/${user.id}/toggle-enabled`, {})
+    await callPatch(`/api/admin_tools/users/${user.id}/toggle-enabled`, {})
     await loadData()
   } catch (e: any) {
-    error.value = e?.data?.message || '操作失败'
+    error.value = e?.message || '操作失败'
   }
 }
 
 async function handleDeleteUser(user: AdminUser) {
   if (!confirm(`确定删除用户「${user.username}」吗？此操作不可撤销。`)) return
   try {
-    await callDelete(`/admin_tools/users/${user.id}`)
+    await callDelete(`/api/admin_tools/users/${user.id}`)
     await loadData()
   } catch (e: any) {
-    error.value = e?.data?.message || '删除失败'
+    error.value = e?.message || '删除失败'
   }
 }
 

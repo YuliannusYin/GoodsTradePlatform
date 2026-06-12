@@ -1,20 +1,7 @@
-export interface ApiResponse {
+export interface ApiResponse<T> {
+  timestamp: string
   success: boolean
+  status: number
   message: string
-  status?: number
-}
-
-export interface LoginResponse {
-  success: boolean
-  message: string
-  userRoles: string[]
-  token: string
-}
-
-export interface UserDetails {
-  email: string
-  username: string
-  balance: number
-  isProtected: boolean
-  role: string
+  data: T
 }

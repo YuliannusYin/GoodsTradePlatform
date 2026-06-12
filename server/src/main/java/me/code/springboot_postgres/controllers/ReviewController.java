@@ -1,8 +1,9 @@
 package me.code.springboot_postgres.controllers;
 
 import me.code.springboot_postgres.dtos.requests.CreateReviewDTO;
-import me.code.springboot_postgres.dtos.responses.entities.ProductRatingDTO;
-import me.code.springboot_postgres.dtos.responses.entities.ReviewDTO;
+import me.code.springboot_postgres.dtos.responses.ApiResponse;
+import me.code.springboot_postgres.dtos.responses.ProductRatingDTO;
+import me.code.springboot_postgres.dtos.responses.ReviewDTO;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,39 +25,27 @@ public class ReviewController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ReviewDTO> addReview(@AuthenticationPrincipal User user, @RequestBody CreateReviewDTO dto) {
-        var review = reviewService.createReview(user, dto);
-        var reviewDTO = new ReviewDTO(
-                review.getId(),
-                review.getRating(),
-                review.getComment(),
-                review.getCreatedAt().toString(),
-                review.getUser().getUsername(),
-                review.getProduct().getId());
-        return ResponseEntity.ok(reviewDTO);
+    public ResponseEntity<ApiResponse<ReviewDTO>> addReview(@AuthenticationPrincipal User user, @RequestBody CreateReviewDTO dto) {
+        return ApiResponse.ok("Review added", reviewService.createReview(user, dto)).toResponseEntity();
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ReviewDTO>> getProductReviews(@PathVariable String productId) {
-        var result = reviewService.getReviewsByProductId(productId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<ReviewDTO>>> getProductReviews(@PathVariable String productId) {
+        return ApiResponse.ok("Reviews retrieved", reviewService.getReviewsByProductId(productId)).toResponseEntity();
     }
 
     @GetMapping("/product/{productId}/rating")
-    public ResponseEntity<ProductRatingDTO> getProductRating(@PathVariable String productId) {
-        var result = reviewService.getProductRating(productId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<ProductRatingDTO>> getProductRating(@PathVariable String productId) {
+        return ApiResponse.ok("Rating retrieved", reviewService.getProductRating(productId)).toResponseEntity();
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReviewDTO>> getUserReviews(@PathVariable String userId) {
-        var result = reviewService.getReviewsByUserId(userId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<ReviewDTO>>> getUserReviews(@PathVariable String userId) {
+        return ApiResponse.ok("User reviews retrieved", reviewService.getReviewsByUserId(userId)).toResponseEntity();
     }
 
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<Void> deleteReview(@AuthenticationPrincipal User user, @PathVariable String reviewId) {
-        reviewService.deleteReview(user, reviewId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse<Void>> deleteReview(@AuthenticationPrincipal User user, @PathVariable String reviewId) {
+        return reviewService.deleteReview(user, reviewId).toResponseEntity();
     }
 }

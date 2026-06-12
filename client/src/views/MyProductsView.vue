@@ -219,7 +219,7 @@ async function handleEditSubmit() {
     closeEditDialog()
     await loadProducts()
   } catch (e: any) {
-    dialogError.value = e?.response?.data?.message || '编辑失败'
+    dialogError.value = e?.message || '编辑失败'
   } finally {
     submitting.value = false
   }
@@ -241,7 +241,7 @@ async function handleResubmit(product: Product) {
     await productStore.editMyProduct(product.id, dto)
     await loadProducts()
   } catch (e: any) {
-    error.value = e?.response?.data?.message || '重新提交失败'
+    error.value = e?.message || '重新提交失败'
   }
 }
 
@@ -251,7 +251,7 @@ async function handleDelete(product: Product) {
     await productStore.deleteMyProduct(product.id)
     await loadProducts()
   } catch (e: any) {
-    error.value = e?.response?.data?.message || '删除失败'
+    error.value = e?.message || '删除失败'
   }
 }
 

@@ -1,5 +1,7 @@
 package me.code.springboot_postgres.controllers;
 
+import me.code.springboot_postgres.dtos.responses.ApiResponse;
+import me.code.springboot_postgres.dtos.responses.ProductDTO;
 import me.code.springboot_postgres.models.entities.Product;
 import me.code.springboot_postgres.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,45 +21,40 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Product>> getProducts() {
-        var result = productService.getProducts();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProducts() {
+        return ApiResponse.ok("Products retrieved", productService.getProducts()).toResponseEntity();
     }
 
     @GetMapping("/featured")
-    public ResponseEntity<List<Product>> getFeaturedProducts() {
-        var result = productService.getFeaturedProducts();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> getFeaturedProducts() {
+        return ApiResponse.ok("Featured products retrieved", productService.getFeaturedProducts()).toResponseEntity();
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProduct(@PathVariable String productId) {
-        var result = productService.getProduct(productId);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<ProductDTO>> getProduct(@PathVariable String productId) {
+        return ApiResponse.ok("Product retrieved", productService.getProduct(productId)).toResponseEntity();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProducts(
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> searchProducts(
             @RequestParam String query,
             @RequestParam String filter,
             @RequestParam(required = false) String category) {
-        var result = productService.getSearchedProducts(query, filter, category);
-        return ResponseEntity.ok(result);
+        return ApiResponse.ok("Search results retrieved", productService.getSearchedProducts(query, filter, category)).toResponseEntity();
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
-        var result = productService.getProductsByCategory(category);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsByCategory(@PathVariable String category) {
+        return ApiResponse.ok("Products by category retrieved", productService.getProductsByCategory(category)).toResponseEntity();
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<Product.Category[]> getCategories() {
-        return ResponseEntity.ok(Product.Category.values());
+    public ResponseEntity<ApiResponse<Product.Category[]>> getCategories() {
+        return ApiResponse.ok("Categories retrieved", Product.Category.values()).toResponseEntity();
     }
 
     @GetMapping("/conditions")
-    public ResponseEntity<Product.Condition[]> getConditions() {
-        return ResponseEntity.ok(Product.Condition.values());
+    public ResponseEntity<ApiResponse<Product.Condition[]>> getConditions() {
+        return ApiResponse.ok("Conditions retrieved", Product.Condition.values()).toResponseEntity();
     }
 }

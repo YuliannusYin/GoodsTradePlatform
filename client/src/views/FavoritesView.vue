@@ -5,14 +5,14 @@
       <div v-for="fav in favorites" :key="fav.id"
         class="bg-white rounded-xl shadow-md p-4 card-hover">
         <div class="flex gap-4">
-          <img :src="fav.productImageUrl" :alt="fav.productName"
+          <img :src="fav.imageUrl" :alt="fav.productName"
             class="w-24 h-24 object-contain rounded-lg cursor-pointer"
             @click="goToProduct(fav.productId)">
           <div class="flex-1 flex flex-col justify-between">
             <h3 class="font-semibold text-gray-800 cursor-pointer hover:text-primary-600"
               @click="goToProduct(fav.productId)">{{ fav.productName }}</h3>
             <div class="flex items-center justify-between">
-              <span class="text-lg font-bold text-accent-600">¥{{ fav.productPrice.toFixed(2) }}</span>
+              <span class="text-lg font-bold text-accent-600">¥{{ fav.price.toFixed(2) }}</span>
               <button @click="removeFavorite(fav.productId)"
                 class="text-xs text-red-400 hover:text-red-600 transition-colors">
                 取消收藏
