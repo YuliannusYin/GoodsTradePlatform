@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, String> {
@@ -13,8 +15,8 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     List<Product> findAllByOrderByPriceDesc();
 
-    @Query("SELECT p FROM Product p ORDER BY p.quantity DESC LIMIT :limit")
-    List<Product> findTopByQuantityDesc(@Param("limit") int limit);
+    @Query("SELECT p FROM Product p ORDER BY p.quantity DESC")
+    List<Product> findTopByQuantityDesc(Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%')) " +
            "ORDER BY CASE WHEN LOWER(p.name) LIKE LOWER(CONCAT(:query, '%')) THEN 0 ELSE 1 END")

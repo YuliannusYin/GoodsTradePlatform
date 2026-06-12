@@ -20,7 +20,7 @@ import java.util.List;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @UuidGenerator
     private String id;
 
@@ -35,7 +35,7 @@ public class Order {
     @Column(nullable = false, length = 25)
     private PaymentMethod paymentMethod;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String address;
 
     @Enumerated(EnumType.STRING)
@@ -54,7 +54,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"order"})
-    private List<OrderItem> items;
+    private List<OrderItem> items = new java.util.ArrayList<>();
 
     public Order(User user, List<OrderItem> items, String address, DeliveryMethod deliveryMethod, PaymentMethod paymentMethod) {
         this.status = Status.PENDING;

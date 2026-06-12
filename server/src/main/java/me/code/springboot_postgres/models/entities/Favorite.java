@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class Favorite {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @UuidGenerator
     private String id;
 

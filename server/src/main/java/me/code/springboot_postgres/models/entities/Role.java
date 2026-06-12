@@ -19,7 +19,7 @@ import java.util.Set;
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @UuidGenerator
     private String id;
 

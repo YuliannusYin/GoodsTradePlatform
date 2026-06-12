@@ -33,7 +33,7 @@ CREATE TABLE products (
 CREATE TABLE orders (
     id                  VARCHAR(36)    PRIMARY KEY,
     status              VARCHAR(15)    NOT NULL DEFAULT 'PENDING',
-    price               DOUBLE PRECISION NOT NULL,
+    price               DECIMAL(10,2) NOT NULL,
     payment_method      VARCHAR(25)    NOT NULL,
     address             TEXT           NOT NULL,
     delivery_method     VARCHAR(30)    NOT NULL,

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @UuidGenerator
     private String id;
 
@@ -45,6 +45,7 @@ public class User implements UserDetails {
     @Column(name = "role", nullable = false, length = 10)
     private LegacyRole legacyRole;
 
+    @Column(length = 500)
     private String avatarUrl;
 
     @Column(length = 500)

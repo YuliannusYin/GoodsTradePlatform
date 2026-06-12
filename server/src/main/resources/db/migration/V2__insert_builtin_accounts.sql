@@ -94,8 +94,7 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 -- ============================================================
 -- SuperAdmin -> SUPER_ADMIN role
 INSERT INTO user_roles (user_id, role_id)
-SELECT id, 'r-00000000-0000-0000-0000-000000000001'
-FROM users WHERE role = 'ADMIN' AND is_protected = true;
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01', 'r-00000000-0000-0000-0000-000000000001');
 
 -- Other ADMIN users -> ADMIN role (non-protected admins)
 INSERT INTO user_roles (user_id, role_id)

@@ -15,7 +15,7 @@ import org.hibernate.annotations.UuidGenerator;
 public class Permission {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @UuidGenerator
     private String id;
 

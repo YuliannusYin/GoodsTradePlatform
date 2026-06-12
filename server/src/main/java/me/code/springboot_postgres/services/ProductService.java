@@ -43,7 +43,7 @@ public class ProductService {
 
     public List<Product> getFeaturedProducts() {
         int productAmount = 4;
-        return productRepository.findTopByQuantityDesc(productAmount).stream()
+        return productRepository.findTopByQuantityDesc(org.springframework.data.domain.PageRequest.of(0, productAmount)).stream()
                 .filter(p -> p.getStatus() == Product.Status.APPROVED)
                 .limit(productAmount)
                 .toList();
