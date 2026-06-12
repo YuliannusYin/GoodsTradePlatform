@@ -1,57 +1,73 @@
 import { defineStore } from 'pinia'
-import type { CreateProductDto, EditProductDto, Product } from '@/types/product'
+import type { CreateProductDto, Product } from '@/types/product'
 import { callGet, callPost, callPut, callPatch, callDelete } from './requests'
 import type { UserOrder } from '@/types/order'
 
 export const useAdminToolsStore = defineStore('adminToolsStore', () => {
-  const API = {
-    addProduct: async (dto: CreateProductDto): Promise<Product> =>
-      await callPost(`/admin_tools/product/add`, dto),
+  async function addProduct(dto: CreateProductDto): Promise<Product> {
+    return callPost('/admin_tools/product/add', dto)
+  }
 
-    editProduct: async (productId: string, dto: EditProductDto): Promise<Product> =>
-      await callPut(`/admin_tools/product/edit/${productId}`, dto),
+  async function editProduct(productId: string, dto: CreateProductDto): Promise<Product> {
+    return callPut(`/admin_tools/product/edit/${productId}`, dto)
+  }
 
-    deleteProduct: async (productId: string): Promise<Product> =>
-      await callDelete(`/admin_tools/product/delete/${productId}`),
+  async function deleteProduct(productId: string): Promise<Product> {
+    return callDelete(`/admin_tools/product/delete/${productId}`)
+  }
 
-    getAllOrders: async (): Promise<UserOrder[]> => await callGet(`/admin_tools/order/all`),
+  async function getAllOrders(): Promise<UserOrder[]> {
+    return callGet('/admin_tools/order/all')
+  }
 
-    getAllOrdersWithStatus: async (status: string): Promise<UserOrder[]> =>
-      await callGet(`/admin_tools/order/all/${status}`),
+  async function getAllOrdersWithStatus(status: string): Promise<UserOrder[]> {
+    return callGet(`/admin_tools/order/all/${status}`)
+  }
 
-    sendOrder: async (orderId: string, expectedDelivery: string) =>
-      await callPatch(`/admin_tools/order/send`, {
-        orderId: orderId,
-        expectedDelivery: expectedDelivery
-      }),
+  async function sendOrder(orderId: string, expectedDelivery: string) {
+    return callPatch('/admin_tools/order/send', {
+      orderId,
+      expectedDelivery
+    })
+  }
 
-    changeExpectedDelivery: async (orderId: string, newExpectedDelivery: string) =>
-      await callPatch(`/admin_tools/order/expected_delivery`, {
-        orderId: orderId,
-        newExpectedDelivery: newExpectedDelivery
-      }),
+  async function changeExpectedDelivery(orderId: string, newExpectedDelivery: string) {
+    return callPatch('/admin_tools/order/expected_delivery', {
+      orderId,
+      newExpectedDelivery
+    })
+  }
 
-    // Product Review APIs
-    getPendingProducts: async (): Promise<Product[]> =>
-      await callGet('/admin_tools/product/pending'),
+  // Product Review APIs
+  async function getPendingProducts(): Promise<Product[]> {
+    return callGet('/admin_tools/product/pending')
+  }
 
-    getProductsByStatus: async (status: string): Promise<Product[]> =>
-      await callGet(`/admin_tools/product/status/${status}`),
+  async function getProductsByStatus(status: string): Promise<Product[]> {
+    return callGet(`/admin_tools/product/status/${status}`)
+  }
 
-    approveProduct: async (productId: string): Promise<Product> =>
-      await callPatch(`/admin_tools/product/approve/${productId}`, {}),
+  async function approveProduct(productId: string): Promise<Product> {
+    return callPatch(`/admin_tools/product/approve/${productId}`, {})
+  }
 
-    rejectProduct: async (productId: string, rejectReason: string): Promise<Product> =>
-      await callPatch(`/admin_tools/product/reject/${productId}`, { rejectReason }),
+  async function rejectProduct(productId: string, rejectReason: string): Promise<Product> {
+    return callPatch(`/admin_tools/product/reject/${productId}?rejectReason=${encodeURIComponent(rejectReason)}`, {})
+  }
 
-    disableProduct: async (productId: string): Promise<Product> =>
-      await callPatch(`/admin_tools/product/disable/${productId}`, {}),
+  async function disableProduct(productId: string): Promise<Product> {
+    return callPatch(`/admin_tools/product/disable/${productId}`, {})
+  }
 
-    enableProduct: async (productId: string): Promise<Product> =>
-      await callPatch(`/admin_tools/product/enable/${productId}`, {})
+  async function enableProduct(productId: string): Promise<Product> {
+    return callPatch(`/admin_tools/product/enable/${productId}`, {})
   }
 
   return {
-    API
+    addProduct, editProduct, deleteProduct,
+    getAllOrders, getAllOrdersWithStatus,
+    sendOrder, changeExpectedDelivery,
+    getPendingProducts, getProductsByStatus,
+    approveProduct, rejectProduct, disableProduct, enableProduct
   }
 })

@@ -4,10 +4,8 @@ import jakarta.transaction.Transactional;
 import me.code.springboot_postgres.dtos.responses.entities.OngoingOrderDTO;
 import me.code.springboot_postgres.dtos.responses.entities.PlacedOrderDTO;
 import me.code.springboot_postgres.dtos.responses.entities.UnavailableProductDTO;
-import me.code.springboot_postgres.dtos.responses.error.details.OrderErrorDetail;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
-import me.code.springboot_postgres.exceptions.types.variants.OrderException;
 import me.code.springboot_postgres.models.entities.Order;
 import me.code.springboot_postgres.models.entities.OrderItem;
 import me.code.springboot_postgres.models.entities.Product;
@@ -20,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderService {
@@ -56,12 +55,10 @@ public class OrderService {
                     productService.findUnavailableProducts(items);
 
             if (hasUnavailableProducts(unavailableProducts)) {
-                throw new OrderException(
+                throw new CustomRuntimeException(
                         HttpStatus.BAD_REQUEST,
                         "Could not place order",
-                        new OrderErrorDetail(
-                                "The order contains unavailable products",
-                                unavailableProducts));
+                        Map.of("unavailableProducts", unavailableProducts));
             }
 
             productService.updateProductQuantities(items);
@@ -74,7 +71,7 @@ public class OrderService {
                     HttpStatus.OK,
                     "The order was placed successfully");
 
-        } catch (OrderException exception) {
+        } catch (CustomRuntimeException exception) {
             throw exception;
 
         } catch (Exception exception) {

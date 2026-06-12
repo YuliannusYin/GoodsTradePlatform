@@ -1,10 +1,7 @@
 package me.code.springboot_postgres.controllers;
 
-import me.code.springboot_postgres.dtos.requests.AddProductDTO;
-import me.code.springboot_postgres.dtos.requests.ChangeExpectedDeliveryDTO;
-import me.code.springboot_postgres.dtos.requests.EditedProductDTO;
-import me.code.springboot_postgres.dtos.requests.ProductReviewDTO;
-import me.code.springboot_postgres.dtos.requests.SendOrderDTO;
+import me.code.springboot_postgres.dtos.requests.OrderDeliveryDTO;
+import me.code.springboot_postgres.dtos.requests.ProductDTO;
 import me.code.springboot_postgres.dtos.responses.entities.UserOrderDTO;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.models.entities.Product;
@@ -28,13 +25,13 @@ public class AdminToolsController {
     // ==================== Product Management ====================
 
     @PostMapping("/product/add")
-    public ResponseEntity<Product> addProduct(@RequestBody AddProductDTO dto) {
+    public ResponseEntity<Product> addProduct(@RequestBody ProductDTO dto) {
         var result = adminToolsService.addProduct(dto);
         return ResponseEntity.ok(result);
     }
 
     @PutMapping("/product/edit/{productId}")
-    public ResponseEntity<Success> editProduct(@PathVariable String productId, @RequestBody EditedProductDTO dto) {
+    public ResponseEntity<Success> editProduct(@PathVariable String productId, @RequestBody ProductDTO dto) {
         var result = adminToolsService.editProduct(productId, dto);
         return result.toResponseEntity();
     }
@@ -63,8 +60,8 @@ public class AdminToolsController {
     }
 
     @PatchMapping("/product/reject/{productId}")
-    public ResponseEntity<Success> rejectProduct(@PathVariable String productId, @RequestBody ProductReviewDTO dto) {
-        return adminToolsService.rejectProduct(productId, dto.rejectReason()).toResponseEntity();
+    public ResponseEntity<Success> rejectProduct(@PathVariable String productId, @RequestParam String rejectReason) {
+        return adminToolsService.rejectProduct(productId, rejectReason).toResponseEntity();
     }
 
     @PatchMapping("/product/disable/{productId}")
@@ -92,15 +89,14 @@ public class AdminToolsController {
     }
 
     @PatchMapping("/order/send")
-    public ResponseEntity<Success> sendOrder(@RequestBody SendOrderDTO dto) {
+    public ResponseEntity<Success> sendOrder(@RequestBody OrderDeliveryDTO dto) {
         var result = adminToolsService.sendOrder(dto.orderId(), dto.expectedDelivery());
         return result.toResponseEntity();
     }
 
     @PatchMapping("/order/expected_delivery")
-    public ResponseEntity<Success> changeExpectedDelivery(@RequestBody ChangeExpectedDeliveryDTO dto) {
-        var result = adminToolsService.changeExpectedDelivery(dto.orderId(), dto.newExpectedDelivery());
+    public ResponseEntity<Success> changeExpectedDelivery(@RequestBody OrderDeliveryDTO dto) {
+        var result = adminToolsService.changeExpectedDelivery(dto.orderId(), dto.expectedDelivery());
         return result.toResponseEntity();
     }
-
 }

@@ -12,12 +12,7 @@
   </footer>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import FooterNavItems from './FooterNavItems.vue'
 import SocialsIcons from './SocialsIcons.vue'
-
-export default {
-  name: "FooterInfo",
-  components: { FooterNavItems, SocialsIcons }
-}
 </script>

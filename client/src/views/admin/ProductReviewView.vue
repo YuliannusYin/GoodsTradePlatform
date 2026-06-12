@@ -151,151 +151,138 @@
   </section>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import { useAdminToolsStore } from '@/stores/network/adminToolsStore';
-import type { Product } from '@/types/product';
-import { PRODUCT_STATUSES, PRODUCT_STATUS_COLORS, PRODUCT_CATEGORIES } from '@/types/product';
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useAdminToolsStore } from '@/stores/network/adminToolsStore'
+import type { Product } from '@/types/product'
+import { PRODUCT_STATUSES, PRODUCT_STATUS_COLORS, PRODUCT_CATEGORIES } from '@/types/product'
 
-export default defineComponent({
-  name: 'ProductReviewView',
+const adminStore = useAdminToolsStore()
+const products = ref<Product[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
+const activeTab = ref('PENDING')
 
-  setup() {
-    const adminStore = useAdminToolsStore();
-    const products = ref<Product[]>([]);
-    const loading = ref(false);
-    const error = ref<string | null>(null);
-    const activeTab = ref('PENDING');
+const tabs = [
+  { value: 'PENDING', label: '待审核' },
+  { value: 'APPROVED', label: '已通过' },
+  { value: 'REJECTED', label: '已拒绝' },
+  { value: 'DISABLED', label: '已禁用' }
+]
 
-    const tabs = [
-      { value: 'PENDING', label: '待审核' },
-      { value: 'APPROVED', label: '已通过' },
-      { value: 'REJECTED', label: '已拒绝' },
-      { value: 'DISABLED', label: '已禁用' }
-    ];
+const tabCounts = ref<Record<string, number>>({
+  PENDING: 0,
+  APPROVED: 0,
+  REJECTED: 0,
+  DISABLED: 0
+})
 
-    const tabCounts = ref<Record<string, number>>({
-      PENDING: 0,
-      APPROVED: 0,
-      REJECTED: 0,
-      DISABLED: 0
-    });
+const showRejectDialog = ref(false)
+const rejectProduct = ref<Product | null>(null)
+const rejectReason = ref('')
+const submitting = ref(false)
+const dialogError = ref('')
 
-    const showRejectDialog = ref(false);
-    const rejectProduct = ref<Product | null>(null);
-    const rejectReason = ref('');
-    const submitting = ref(false);
-    const dialogError = ref('');
-
-    async function loadProducts() {
-      loading.value = true;
-      error.value = null;
-      try {
-        products.value = await adminStore.API.getProductsByStatus(activeTab.value);
-      } catch (e: any) {
-        error.value = '加载商品失败';
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    async function loadTabCounts() {
-      try {
-        const counts = { ...tabCounts.value };
-        await Promise.all(
-          tabs.map(async (tab) => {
-            try {
-              const result = await adminStore.API.getProductsByStatus(tab.value);
-              counts[tab.value] = Array.isArray(result) ? result.length : 0;
-            } catch {
-              counts[tab.value] = 0;
-            }
-          })
-        );
-        tabCounts.value = counts;
-      } catch {
-        // silently fail
-      }
-    }
-
-    function switchTab(tab: string) {
-      activeTab.value = tab;
-      loadProducts();
-    }
-
-    async function handleApprove(product: Product) {
-      if (!confirm(`确定通过商品「${product.name}」吗？`)) return;
-      try {
-        await adminStore.API.approveProduct(product.id);
-        await loadProducts();
-        await loadTabCounts();
-      } catch (e: any) {
-        error.value = e?.data?.message || '操作失败';
-      }
-    }
-
-    function openRejectDialog(product: Product) {
-      rejectProduct.value = product;
-      rejectReason.value = '';
-      dialogError.value = '';
-      showRejectDialog.value = true;
-    }
-
-    function closeRejectDialog() {
-      showRejectDialog.value = false;
-      rejectProduct.value = null;
-      dialogError.value = '';
-    }
-
-    async function handleReject() {
-      if (!rejectProduct.value || !rejectReason.value.trim()) return;
-      submitting.value = true;
-      dialogError.value = '';
-      try {
-        await adminStore.API.rejectProduct(rejectProduct.value.id, rejectReason.value.trim());
-        closeRejectDialog();
-        await loadProducts();
-        await loadTabCounts();
-      } catch (e: any) {
-        dialogError.value = e?.data?.message || '操作失败';
-      } finally {
-        submitting.value = false;
-      }
-    }
-
-    async function handleDisable(product: Product) {
-      if (!confirm(`确定禁用商品「${product.name}」吗？`)) return;
-      try {
-        await adminStore.API.disableProduct(product.id);
-        await loadProducts();
-        await loadTabCounts();
-      } catch (e: any) {
-        error.value = e?.data?.message || '操作失败';
-      }
-    }
-
-    async function handleEnable(product: Product) {
-      if (!confirm(`确定重新启用商品「${product.name}」吗？`)) return;
-      try {
-        await adminStore.API.enableProduct(product.id);
-        await loadProducts();
-        await loadTabCounts();
-      } catch (e: any) {
-        error.value = e?.data?.message || '操作失败';
-      }
-    }
-
-    onMounted(() => {
-      loadProducts();
-      loadTabCounts();
-    });
-
-    return {
-      products, loading, error, activeTab, tabs, tabCounts,
-      showRejectDialog, rejectProduct, rejectReason, submitting, dialogError,
-      PRODUCT_STATUSES, PRODUCT_STATUS_COLORS, PRODUCT_CATEGORIES,
-      switchTab, handleApprove, openRejectDialog, closeRejectDialog, handleReject, handleDisable, handleEnable
-    };
+async function loadProducts() {
+  loading.value = true
+  error.value = null
+  try {
+    products.value = await adminStore.getProductsByStatus(activeTab.value)
+  } catch (e: any) {
+    error.value = '加载商品失败'
+  } finally {
+    loading.value = false
   }
-});
+}
+
+async function loadTabCounts() {
+  try {
+    const counts = { ...tabCounts.value }
+    await Promise.all(
+      tabs.map(async (tab) => {
+        try {
+          const result = await adminStore.getProductsByStatus(tab.value)
+          counts[tab.value] = Array.isArray(result) ? result.length : 0
+        } catch {
+          counts[tab.value] = 0
+        }
+      })
+    )
+    tabCounts.value = counts
+  } catch {
+    // silently fail
+  }
+}
+
+function switchTab(tab: string) {
+  activeTab.value = tab
+  loadProducts()
+}
+
+async function handleApprove(product: Product) {
+  if (!confirm(`确定通过商品「${product.name}」吗？`)) return
+  try {
+    await adminStore.approveProduct(product.id)
+    await loadProducts()
+    await loadTabCounts()
+  } catch (e: any) {
+    error.value = e?.data?.message || '操作失败'
+  }
+}
+
+function openRejectDialog(product: Product) {
+  rejectProduct.value = product
+  rejectReason.value = ''
+  dialogError.value = ''
+  showRejectDialog.value = true
+}
+
+function closeRejectDialog() {
+  showRejectDialog.value = false
+  rejectProduct.value = null
+  dialogError.value = ''
+}
+
+async function handleReject() {
+  if (!rejectProduct.value || !rejectReason.value.trim()) return
+  submitting.value = true
+  dialogError.value = ''
+  try {
+    await adminStore.rejectProduct(rejectProduct.value.id, rejectReason.value.trim())
+    closeRejectDialog()
+    await loadProducts()
+    await loadTabCounts()
+  } catch (e: any) {
+    dialogError.value = e?.data?.message || '操作失败'
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function handleDisable(product: Product) {
+  if (!confirm(`确定禁用商品「${product.name}」吗？`)) return
+  try {
+    await adminStore.disableProduct(product.id)
+    await loadProducts()
+    await loadTabCounts()
+  } catch (e: any) {
+    error.value = e?.data?.message || '操作失败'
+  }
+}
+
+async function handleEnable(product: Product) {
+  if (!confirm(`确定重新启用商品「${product.name}」吗？`)) return
+  try {
+    await adminStore.enableProduct(product.id)
+    await loadProducts()
+    await loadTabCounts()
+  } catch (e: any) {
+    error.value = e?.data?.message || '操作失败'
+  }
+}
+
+onMounted(() => {
+  loadProducts()
+  loadTabCounts()
+})
 </script>

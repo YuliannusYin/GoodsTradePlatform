@@ -1,6 +1,6 @@
 package me.code.springboot_postgres.services;
 
-import me.code.springboot_postgres.dtos.requests.EditedProductDTO;
+import me.code.springboot_postgres.dtos.requests.ProductDTO;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import me.code.springboot_postgres.models.entities.Product;
@@ -20,7 +20,26 @@ public class UserProductService {
         this.productRepository = productRepository;
     }
 
-    public Success editOwnProduct(User user, String productId, EditedProductDTO dto) {
+    public Product addProductByUser(User user, ProductDTO dto) {
+        try {
+            Product.Condition condition = dto.condition() != null
+                    ? Product.Condition.valueOf(dto.condition())
+                    : Product.Condition.NEW;
+            Product.Category category = Product.Category.valueOf(dto.category());
+
+            Product product = new Product(
+                    dto.name(), dto.description(), dto.imageUrls(),
+                    dto.price(), dto.quantity(), category, condition, "USER");
+
+            product.setSeller(user);
+            product.setStatus(Product.Status.PENDING);
+            return productRepository.save(product);
+        } catch (Exception exception) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not create product");
+        }
+    }
+
+    public Success editOwnProduct(User user, String productId, ProductDTO dto) {
         Product product = loadProductAndVerifyOwnership(user, productId);
 
         product.setName(dto.name());
@@ -33,7 +52,6 @@ public class UserProductService {
             product.setCondition(Product.Condition.valueOf(dto.condition()));
         }
 
-        // If product was rejected, re-editing sets it back to PENDING for re-review
         if (product.getStatus() == Product.Status.REJECTED) {
             product.setStatus(Product.Status.PENDING);
             product.setRejectReason(null);

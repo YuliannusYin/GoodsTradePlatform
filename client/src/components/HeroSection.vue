@@ -6,8 +6,7 @@
         <span class="text-accent-300">周边</span>交易平台
       </h1>
       <p class="text-lg md:text-xl font-medium mb-8 text-primary-100">发现你心爱的动漫 · 游戏 · 偶像周边</p>
-      <router-link to="/shop"
-        class="btn-accent text-lg inline-block">探索周边</router-link>
+      <router-link to="/shop" class="btn-accent text-lg inline-block">探索周边</router-link>
     </div>
     <div class="absolute -bottom-1 left-0 right-0">
       <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,15 +16,7 @@
   </article>
 </template>
 
-<script lang="ts">
-import { RouterLink } from 'vue-router'
-
-export default {
-  name: "HeroSection",
-  components: {
-    RouterLink,
-  },
-}
+<script setup lang="ts">
 </script>
 
 <style scoped>

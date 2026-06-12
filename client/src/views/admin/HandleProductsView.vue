@@ -8,7 +8,7 @@
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'EditProduct' }" class="text-black hover:text-gray-500 font-semibold"
         :class="{ 'text-blue-600': isOnEditProductRoute, 'bg-white': !isOnEditProductRoute }">
-        Edit
+        编辑
       </router-link>
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'DeleteProduct' }" class="text-black hover:text-gray-500 font-semibold"
@@ -21,38 +21,27 @@
   </section>
 </template>
 
-<script lang="ts">
-import { onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
-export default {
-  name: 'HandleProductsView',
+const route = useRoute()
 
-  setup() {
-    const route = useRoute();
+const isOnAddProductRoute = ref(false)
+const isOnEditProductRoute = ref(false)
+const isOnDeleteProductRoute = ref(false)
 
-    const isOnAddProductRoute = ref<boolean>(false)
-    const isOnEditProductRoute = ref<boolean>(false)
-    const isOnDeleteProductRoute = ref<boolean>(false)
+function assignHighlightedButton() {
+  isOnAddProductRoute.value = ['AddProduct'].includes(route.name as string)
+  isOnEditProductRoute.value = ['EditProduct'].includes(route.name as string)
+  isOnDeleteProductRoute.value = ['DeleteProduct'].includes(route.name as string)
+}
 
+onMounted(() => {
+  assignHighlightedButton()
+})
 
-    function assignHighlightedButton() {
-      isOnAddProductRoute.value = ['AddProduct'].includes(route.name as string);
-      isOnEditProductRoute.value = ['EditProduct'].includes(route.name as string);
-      isOnDeleteProductRoute.value = ['DeleteProduct'].includes(route.name as string);
-    }
-
-    onMounted(() => {
-      assignHighlightedButton();
-    });
-
-    watch(() => route.name, () => {
-      assignHighlightedButton();
-    });
-
-    return { isOnAddProductRoute, isOnEditProductRoute, isOnDeleteProductRoute };
-  },
-
-  components: {}
-};
+watch(() => route.name, () => {
+  assignHighlightedButton()
+})
 </script>

@@ -15,143 +15,91 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class UserAccountService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RegistrationValidationService credentialsValidator;
-    private final me.code.springboot_postgres.repositories.RoleRepository roleRepository;
 
     @Autowired
-    public UserAccountService(UserRepository userRepository,
-                              PasswordEncoder passwordEncoder,
-                              RegistrationValidationService credentialsValidator,
-                              me.code.springboot_postgres.repositories.RoleRepository roleRepository) {
+    public UserAccountService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.credentialsValidator = credentialsValidator;
-        this.roleRepository = roleRepository;
     }
 
     public Success submitRegistration(CreateUserDTO dto) {
-        checkForValidationErrors(dto.email(), dto.username(), dto.password());
+        checkUniqueValues(dto.email(), dto.username());
         try {
             String encryptedPassword = passwordEncoder.encode(dto.password());
-            User newUser = new User(dto.email(), dto.username(), encryptedPassword, User.LegacyRole.USER);
-
-            // Assign default USER role from RBAC system
-            me.code.springboot_postgres.models.entities.Role defaultRole = roleRepository.findByName("USER")
-                    .orElseThrow(() -> new CustomRuntimeException(
-                            HttpStatus.INTERNAL_SERVER_ERROR, "Default USER role not found"));
-            newUser.setRoles(java.util.Set.of(defaultRole));
-
+            User newUser = new User(dto.email(), dto.username(), encryptedPassword, User.Role.USER);
             userRepository.save(newUser);
-
-            return new Success(
-                    HttpStatus.CREATED,
-                    "Successfully registered a new account");
-
+            return new Success(HttpStatus.CREATED, "Successfully registered a new account");
         } catch (Exception exception) {
-            throw new CustomRuntimeException(
-                    HttpStatus.BAD_REQUEST,
-                    "Could not register a new account");
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not register a new account");
         }
     }
 
-    private void checkForValidationErrors(String email, String username, String password) {
-        credentialsValidator.findFormattingErrors(email, username, password);
-        credentialsValidator.findNonUniqueValues(email, username);
+    private void checkUniqueValues(String email, String username) {
+        if (userRepository.existsByEmail(email)) {
+            throw new CustomRuntimeException(HttpStatus.CONFLICT, "An account with the chosen email already exists");
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw new CustomRuntimeException(HttpStatus.CONFLICT, "An account with the chosen username already exists");
+        }
     }
-
 
     public Success getUserDetails(User user) {
         try {
-            List<String> roleNames = user.getRoles().stream()
-                    .map(role -> role.getName())
-                    .collect(Collectors.toList());
-
             return new UserDetailsSuccess(HttpStatus.OK,
                     "User details were successfully retrieved",
                     user.getEmail(), user.getUsername(),
-                    user.getBalance(), user.isProtected(), roleNames);
-
+                    user.getBalance(), user.isProtected(),
+                    user.getRole().name());
         } catch (Exception exception) {
-            throw new CustomRuntimeException(
-                    HttpStatus.BAD_REQUEST,
-                    "Could not fetch user details");
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not fetch user details");
         }
     }
 
     public Success changeUsername(User user, ChangeUsernameDTO dto) {
         checkNotProtected(user, "change username");
-        credentialsValidator.findNullUsername(dto.newUsername());
-        credentialsValidator.findUsernameFormattingError(dto.newUsername());
-        credentialsValidator.findNonUniqueUsername(dto.newUsername());
-
+        if (userRepository.existsByUsername(dto.newUsername())) {
+            throw new CustomRuntimeException(HttpStatus.CONFLICT, "An account with the chosen username already exists");
+        }
         try {
             user.setUsername(dto.newUsername());
             userRepository.save(user);
-
-            return new Success(
-                    HttpStatus.OK,
-                    "The username was successfully changed");
-
+            return new Success(HttpStatus.OK, "The username was successfully changed");
         } catch (Exception exception) {
-            throw new CustomRuntimeException(
-                    HttpStatus.BAD_REQUEST,
-                    "Could not change username");
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not change username");
         }
     }
 
     public Success changeEmail(User user, ChangeEmailDTO dto) {
         checkNotProtected(user, "change email");
-        credentialsValidator.findNullEmail(dto.newEmail());
-        credentialsValidator.findEmailFormattingError(dto.newEmail());
-        credentialsValidator.findNonUniqueEmail(dto.newEmail());
-
+        if (userRepository.existsByEmail(dto.newEmail())) {
+            throw new CustomRuntimeException(HttpStatus.CONFLICT, "An account with the chosen email already exists");
+        }
         try {
             user.setEmail(dto.newEmail());
             userRepository.save(user);
-
-            return new Success(
-                    HttpStatus.OK,
-                    "The email was successfully changed");
-
+            return new Success(HttpStatus.OK, "The email was successfully changed");
         } catch (Exception exception) {
-            throw new CustomRuntimeException(
-                    HttpStatus.BAD_REQUEST,
-                    "Could not change email");
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not change email");
         }
     }
 
     public Success changePassword(User user, ChangePasswordDTO dto) {
         checkNotProtected(user, "change password");
         if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
-            throw new CustomRuntimeException(
-                    HttpStatus.BAD_REQUEST,
-                    "Current password is incorrect");
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
         }
-
-        credentialsValidator.findNullPassword(dto.newPassword());
-        credentialsValidator.findPasswordFormattingError(dto.newPassword());
-
         try {
             String encryptedPassword = passwordEncoder.encode(dto.newPassword());
             user.setPassword(encryptedPassword);
             userRepository.save(user);
-
-            return new Success(
-                    HttpStatus.OK,
-                    "The password was successfully changed");
-
+            return new Success(HttpStatus.OK, "The password was successfully changed");
         } catch (Exception exception) {
-            throw new CustomRuntimeException(
-                    HttpStatus.BAD_REQUEST,
-                    "Could not change password");
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not change password");
         }
     }
 
@@ -159,15 +107,9 @@ public class UserAccountService implements UserDetailsService {
         checkNotProtected(user, "delete account");
         try {
             userRepository.deleteById(user.getId());
-
-            return new Success(
-                    HttpStatus.OK,
-                    "The account was successfully deleted");
-
+            return new Success(HttpStatus.OK, "The account was successfully deleted");
         } catch (Exception exception) {
-            throw new CustomRuntimeException(
-                    HttpStatus.BAD_REQUEST,
-                    "Could not delete account");
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not delete account");
         }
     }
 
@@ -178,31 +120,23 @@ public class UserAccountService implements UserDetailsService {
 
     public User loadUserById(String userId) {
         return userRepository.findById(userId).orElseThrow(
-                () -> new CustomRuntimeException(
-                        HttpStatus.NOT_FOUND,
-                        "Could not find user with id: " + userId));
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find user with id: " + userId));
     }
 
     public User loadUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(
-                () -> new CustomRuntimeException(
-                        HttpStatus.NOT_FOUND,
-                        "Could not find user with email: " + email));
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find user with email: " + email));
     }
 
     @Override
     public User loadUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new CustomRuntimeException(
-                        HttpStatus.NOT_FOUND,
-                        "Could not find user with username: " + username));
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find user with username: " + username));
     }
 
     private void checkNotProtected(User user, String action) {
         if (user.isProtected()) {
-            throw new CustomRuntimeException(
-                    HttpStatus.FORBIDDEN,
-                    "This is a system account. You cannot " + action + ".");
+            throw new CustomRuntimeException(HttpStatus.FORBIDDEN, "This is a system account. You cannot " + action + ".");
         }
     }
 }

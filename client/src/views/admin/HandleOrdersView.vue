@@ -3,12 +3,12 @@
     <div class="flex space-x-8 border-b p-2 sm:p-4 justify-center sm:justify-start">
       <router-link :to="{ name: 'PendingOrders' }" class="text-black hover:text-gray-500 font-semibold"
         :class="{ 'text-blue-600': isOnPendingOrdersRoute, 'bg-white': !isOnPendingOrdersRoute }">
-        Pending
+        待发货
       </router-link>
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'SentOrders' }" class="text-black hover:text-gray-500 font-semibold"
         :class="{ 'text-blue-600': isOnSentOrdersRoute, 'bg-white': !isOnSentOrdersRoute }">
-        Shipped
+        已发货
       </router-link>
       <p class="text-gray-400">|</p>
       <router-link :to="{ name: 'AllOrders' }" class="text-black hover:text-gray-500 font-semibold"
@@ -21,38 +21,27 @@
   </section>
 </template>
 
-<script lang="ts">
-import { onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
-export default {
-  name: 'HandleOrdersView',
+const route = useRoute()
 
-  setup() {
-    const route = useRoute();
+const isOnPendingOrdersRoute = ref(false)
+const isOnSentOrdersRoute = ref(false)
+const isOnAllOrdersRoute = ref(false)
 
-    const isOnPendingOrdersRoute = ref<boolean>(false)
-    const isOnSentOrdersRoute = ref<boolean>(false)
-    const isOnAllOrdersRoute = ref<boolean>(false)
+function assignHighlightedButton() {
+  isOnPendingOrdersRoute.value = ['PendingOrders'].includes(route.name as string)
+  isOnSentOrdersRoute.value = ['SentOrders'].includes(route.name as string)
+  isOnAllOrdersRoute.value = ['AllOrders'].includes(route.name as string)
+}
 
+onMounted(() => {
+  assignHighlightedButton()
+})
 
-    function assignHighlightedButton() {
-      isOnPendingOrdersRoute.value = ['PendingOrders'].includes(route.name as string);
-      isOnSentOrdersRoute.value = ['SentOrders'].includes(route.name as string);
-      isOnAllOrdersRoute.value = ['AllOrders'].includes(route.name as string);
-    }
-
-    onMounted(() => {
-      assignHighlightedButton();
-    });
-
-    watch(() => route.name, () => {
-      assignHighlightedButton();
-    });
-
-    return { isOnPendingOrdersRoute, isOnSentOrdersRoute, isOnAllOrdersRoute };
-  },
-
-  components: {}
-};
+watch(() => route.name, () => {
+  assignHighlightedButton()
+})
 </script>

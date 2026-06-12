@@ -86,7 +86,7 @@ public class ReviewService {
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Review not found with id: " + reviewId));
 
         boolean isOwner = review.getUser().getId().equals(user.getId());
-        boolean isAdmin = user.isAdmin();
+        boolean isAdmin = user.getRole() == User.Role.ADMIN || user.getRole() == User.Role.SUPER_ADMIN;
 
         if (!isOwner && !isAdmin) {
             throw new CustomRuntimeException(HttpStatus.FORBIDDEN, "You can only delete your own reviews");

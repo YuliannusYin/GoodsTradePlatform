@@ -9,21 +9,18 @@
             class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-primary-300 outline-none"
             placeholder="例如：初音未来 手办" />
         </div>
-
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">商品描述</label>
           <textarea v-model="form.description" rows="4" required
             class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none"
             placeholder="详细描述商品的情况..."></textarea>
         </div>
-
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">图片链接（每行一个）</label>
           <textarea v-model="imageUrlsText" rows="3"
             class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-primary-300 outline-none resize-none"
             placeholder="https://example.com/image1.jpg"></textarea>
         </div>
-
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">价格（元）</label>
@@ -36,7 +33,6 @@
               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-primary-300 outline-none" />
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">分类</label>
@@ -58,10 +54,8 @@
             </select>
           </div>
         </div>
-
         <div v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
         <div v-if="successMessage" class="text-mint-600 text-sm">{{ successMessage }}</div>
-
         <button type="submit" class="btn-primary w-full" :disabled="isSubmitting">
           {{ isSubmitting ? '发布中...' : '发布商品' }}
         </button>
@@ -90,27 +84,65 @@
   </section>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref, computed } from 'vue';
-import { useUserProductStore } from '@/stores/network/userProductStore';
-import { useAuthenticationStore } from '@/stores/authenticationStore';
-import type { Product, CreateProductDto } from '@/types/product';
-import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from '@/types/product';
-import { useRouter } from 'vue-router';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useProductStore } from '@/stores/network/productStore'
+import { useAccountStore } from '@/stores/network/accountStore'
+import type { Product, CreateProductDto } from '@/types/product'
+import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from '@/types/product'
+import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  name: "PublishProductView",
-  setup() {
-    const userProductStore = useUserProductStore();
-    const authStore = useAuthenticationStore();
-    const router = useRouter();
-    const myProducts = ref<Product[]>([]);
-    const isSubmitting = ref(false);
-    const errorMessage = ref('');
-    const successMessage = ref('');
-    const imageUrlsText = ref('');
+const productStore = useProductStore()
+const accountStore = useAccountStore()
+const router = useRouter()
+const myProducts = ref<Product[]>([])
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+const imageUrlsText = ref('')
 
-    const form = ref<CreateProductDto>({
+const form = ref<CreateProductDto>({
+  name: '',
+  description: '',
+  imageUrls: [],
+  price: 0,
+  quantity: 1,
+  category: '',
+  condition: 'NEW',
+  source: 'USER'
+})
+
+async function loadMyProducts() {
+  try {
+    myProducts.value = await productStore.getMyProducts()
+  } catch (error) {
+    console.error('Failed to load my products:', error)
+  }
+}
+
+async function handleSubmit() {
+  if (!accountStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
+  isSubmitting.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  try {
+    form.value.imageUrls = imageUrlsText.value
+      .split('\n')
+      .map(url => url.trim())
+      .filter(url => url.length > 0)
+
+    if (form.value.imageUrls.length === 0) {
+      form.value.imageUrls = ['https://via.placeholder.com/300x300?text=No+Image']
+    }
+
+    await productStore.addMyProduct(form.value)
+    successMessage.value = '商品发布成功！'
+    form.value = {
       name: '',
       description: '',
       imageUrls: [],
@@ -119,70 +151,21 @@ export default defineComponent({
       category: '',
       condition: 'NEW',
       source: 'USER'
-    });
-
-    async function loadMyProducts() {
-      try {
-        myProducts.value = await userProductStore.API.getMyProducts();
-      } catch (error) {
-        console.error('Failed to load my products:', error);
-      }
     }
-
-    async function handleSubmit() {
-      if (!authStore.states.isAuthenticated) {
-        router.push('/login');
-        return;
-      }
-
-      isSubmitting.value = true;
-      errorMessage.value = '';
-      successMessage.value = '';
-
-      try {
-        form.value.imageUrls = imageUrlsText.value
-          .split('\n')
-          .map(url => url.trim())
-          .filter(url => url.length > 0);
-
-        if (form.value.imageUrls.length === 0) {
-          form.value.imageUrls = ['https://via.placeholder.com/300x300?text=No+Image'];
-        }
-
-        await userProductStore.API.addProduct(form.value);
-        successMessage.value = '商品发布成功！';
-        form.value = {
-          name: '',
-          description: '',
-          imageUrls: [],
-          price: 0,
-          quantity: 1,
-          category: '',
-          condition: 'NEW',
-          source: 'USER'
-        };
-        imageUrlsText.value = '';
-        await loadMyProducts();
-      } catch (error: any) {
-        errorMessage.value = '发布失败，请重试';
-      } finally {
-        isSubmitting.value = false;
-      }
-    }
-
-    onMounted(() => {
-      if (!authStore.states.isAuthenticated) {
-        router.push('/login');
-        return;
-      }
-      loadMyProducts();
-    });
-
-    return {
-      form, imageUrlsText, myProducts, isSubmitting,
-      errorMessage, successMessage, handleSubmit,
-      PRODUCT_CATEGORIES, PRODUCT_CONDITIONS
-    };
+    imageUrlsText.value = ''
+    await loadMyProducts()
+  } catch (error: any) {
+    errorMessage.value = '发布失败，请重试'
+  } finally {
+    isSubmitting.value = false
   }
-});
+}
+
+onMounted(() => {
+  if (!accountStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+  loadMyProducts()
+})
 </script>

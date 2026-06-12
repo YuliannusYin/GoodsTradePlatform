@@ -26,44 +26,33 @@
         <button type="submit" :disabled="password === '' || password != confirmPassword"
           class="w-full bg-blue-500 hover:bg-blue-700 disabled:bg-gray-500 disabled:hover:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded focus:outline-none">注册</button>
       </form>
-      <div v-if="signupResponse" :class="['flex', 'justify-center', 'font-semibold', 'mt-2', responseMessageColor]">
-        <p>{{ signupResponse.message }}</p>
+      <div v-if="responseMessage" :class="['flex', 'justify-center', 'font-semibold', 'mt-2', responseMessageColor]">
+        <p>{{ responseMessage }}</p>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { useAccountStore } from '@/stores/network/accountStore';
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useAccountStore } from '@/stores/network/accountStore'
 
-export default defineComponent({
-  setup() {
-    const signupResponse = ref<any>(null)
-    const responseMessageColor = ref('')
+const accountStore = useAccountStore()
+const username = ref('')
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const responseMessage = ref('')
+const responseMessageColor = ref('')
 
-    const username = ref('');
-    const email = ref('');
-    const password = ref('');
-    const confirmPassword = ref('');
-
-    async function handleSignup() {
-      await useAccountStore().API.submitSignup(username.value, email.value, password.value)
-      handleResponseMessage()
-    }
-
-    function handleResponseMessage() {
-      signupResponse.value = useAccountStore().states.signupResponse
-
-      if (signupResponse.value.error) {
-        responseMessageColor.value = "text-red-700"
-      }
-      else {
-        responseMessageColor.value = "text-green-700"
-      }
-    }
-
-    return { username, email, password, confirmPassword, handleSignup, signupResponse, responseMessageColor };
+async function handleSignup() {
+  try {
+    const response = await accountStore.register(email.value, username.value, password.value)
+    responseMessage.value = response.message || '注册成功'
+    responseMessageColor.value = 'text-green-700'
+  } catch (error: any) {
+    responseMessage.value = error?.response?.data?.message || '注册失败'
+    responseMessageColor.value = 'text-red-700'
   }
-})
+}
 </script>

@@ -24,10 +24,8 @@
               order.status === 'PENDING' ? 'bg-yellow-300' : 'bg-green-300']"></span>
             {{ order.status }}
           </td>
-          <td class="border p-2">{{ formatDateTime(order.received) }}
-          </td>
-          <td v-if="order.expectedDelivery" class="border p-2">{{ formatDateTime(order.expectedDelivery) }}
-          </td>
+          <td class="border p-2">{{ formatDateTime(order.received) }}</td>
+          <td v-if="order.expectedDelivery" class="border p-2">{{ formatDateTime(order.expectedDelivery) }}</td>
           <td v-else class="border p-2 text-left">
             <span class="bg-yellow-300 py-1 px-1 mr-2 rounded-full"></span>
             <span>暂无</span>
@@ -49,102 +47,77 @@
   </section>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
-import { useAdminToolsStore } from '@/stores/network/adminToolsStore';
+<script setup lang="ts">
+import { onMounted, ref, watch } from 'vue'
+import { useAdminToolsStore } from '@/stores/network/adminToolsStore'
 import UserOrderAside from '@/components/admintools/UserOrderAside.vue'
-import { OrderStatus, orderStatusToString, type UserOrder } from '@/types/order';
-import { useRoute } from 'vue-router';
-import SmallViewTitle from '../SmallViewTitle.vue';
+import { OrderStatus, orderStatusToString, type UserOrder } from '@/types/order'
+import { useRoute } from 'vue-router'
+import SmallViewTitle from '../SmallViewTitle.vue'
 
-export default defineComponent({
-  name: 'OrdersTable',
+const adminToolsStore = useAdminToolsStore()
+const orders = ref<UserOrder[]>([])
+const selectedOrder = ref<UserOrder | null>(null)
+const route = useRoute()
 
-  setup() {
-    const adminToolsStore = useAdminToolsStore();
-    const orders = ref<UserOrder[]>([]);
-    const selectedOrder = ref<UserOrder | null>(null);
+async function getAllOrders() {
+  orders.value = await adminToolsStore.getAllOrders()
+}
 
-    async function getAllOrders() {
-      orders.value = await adminToolsStore.API.getAllOrders();
-    }
+async function getAllOrdersByStatus(status: OrderStatus) {
+  orders.value = await adminToolsStore.getAllOrdersWithStatus(orderStatusToString(status))
+}
 
-    async function getAllOrdersByStatus(status: OrderStatus) {
-      orders.value = await adminToolsStore.API.getAllOrdersWithStatus(orderStatusToString(status));
-    }
+function generateHeader(): string {
+  if (route.name === 'PendingOrders') return '待发货订单'
+  else if (route.name === 'SentOrders') return '已发货订单'
+  else return '全部订单'
+}
 
-    const route = useRoute();
+async function loadOrders() {
+  if (route.name === 'AllOrders') getAllOrders()
+  else if (route.name === 'PendingOrders') getAllOrdersByStatus(OrderStatus.PENDING)
+  else if (route.name === 'SentOrders') getAllOrdersByStatus(OrderStatus.SHIPPED)
+}
 
-    function generateHeader(): string {
-      if (route.name === "PendingOrders") {
-        return '待发货订单'
-      }
+onMounted(() => {
+  loadOrders()
+})
 
-      else if (route.name === "SentOrders") {
-        return "已发货订单"
-      }
+watch(() => route.name, () => {
+  loadOrders()
+  hideUserOrderAside()
+})
 
-      else return '全部订单';
-    }
+function showUserOrderAside(order: UserOrder) {
+  selectedOrder.value = order
+}
 
-    async function loadOrders() {
-      if (route.name === "AllOrders") {
-        getAllOrders()
-      }
+async function hideUserOrderAside() {
+  selectedOrder.value = null
+}
 
-      else if (route.name === "PendingOrders") {
-        getAllOrdersByStatus(OrderStatus.PENDING)
-      }
+async function sendOrder(orderId: string, expectedDelivery: string) {
+  await adminToolsStore.sendOrder(orderId, expectedDelivery)
+  loadOrders()
+  hideUserOrderAside()
+}
 
-      else if (route.name === "SentOrders") {
-        getAllOrdersByStatus(OrderStatus.SHIPPED)
-      }
-    }
+async function changeExpectedDelivery(orderId: string, newExpectedDelivery: string) {
+  await adminToolsStore.changeExpectedDelivery(orderId, newExpectedDelivery)
+  loadOrders()
+  hideUserOrderAside()
+}
 
-    onMounted(() => {
-      loadOrders();
-    })
+function formatDateTime(dateTime: string) {
+  return formatDate(dateTime) + " - " + formatTime(dateTime)
+}
 
-    watch(() => route.name, async () => {
-      loadOrders();
-      hideUserOrderAside();
-    })
+function formatDate(dateTime: string) {
+  return dateTime.split('T')[0]
+}
 
-    function showUserOrderAside(order: UserOrder) {
-      selectedOrder.value = order;
-    }
-
-    async function hideUserOrderAside() {
-      selectedOrder.value = null;
-    }
-
-    async function sendOrder(orderId: string, expectedDelivery: string) {
-      await adminToolsStore.API.sendOrder(orderId, expectedDelivery);
-      loadOrders();
-      hideUserOrderAside();
-    }
-
-    async function changeExpectedDelivery(orderId: string, newExpectedDelivery: string) {
-      await adminToolsStore.API.changeExpectedDelivery(orderId, newExpectedDelivery);
-      loadOrders();
-      hideUserOrderAside();
-    }
-
-    function formatDateTime(dateTime: string) {
-      return formatDate(dateTime) + " - " + formatTime(dateTime)
-    }
-
-    function formatDate(dateTime: string) {
-      return dateTime.split('T')[0]
-    }
-
-    function formatTime(dateTime: string) {
-      return dateTime.split('T')[1].slice(0, 5)
-    }
-
-    return { generateHeader, orders, OrderStatus, selectedOrder, showUserOrderAside, hideUserOrderAside, sendOrder, changeExpectedDelivery, formatDateTime };
-  },
-
-  components: { UserOrderAside, SmallViewTitle }
-});
+function formatTime(dateTime: string) {
+  return dateTime.split('T')[1].slice(0, 5)
+}
 </script>

@@ -21,7 +21,7 @@
           </div>
         </div>
 
-        <div v-if="authStore.states.isAuthenticated" class="mb-6 p-4 bg-primary-50 rounded-xl">
+        <div v-if="accountStore.isAuthenticated" class="mb-6 p-4 bg-primary-50 rounded-xl">
           <h3 class="font-semibold text-gray-700 mb-3">发表评价</h3>
           <div class="flex items-center gap-1 mb-3">
             <span class="text-sm text-gray-600 mr-2">评分：</span>
@@ -70,78 +70,63 @@
     </div>
   </section>
 </template>
-  
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import type { Product } from '@/types/product';
-import type { Review, ProductRating } from '@/types/review';
-import { useShoppingCartStore } from '@/stores/shoppingCartStore';
-import { useProductStore } from '@/stores/network/productStore';
-import { useReviewStore } from '@/stores/network/reviewStore';
-import { useAuthenticationStore } from '@/stores/authenticationStore';
-import { useRoute } from 'vue-router';
-import ProductCard from '@/components/products/ProductCard.vue';
 
-export default defineComponent({
-  name: "ProductView",
-  setup() {
-    const route = useRoute();
-    const shoppingCartStore = useShoppingCartStore();
-    const productStore = useProductStore();
-    const reviewStore = useReviewStore();
-    const authStore = useAuthenticationStore();
-    const product = ref<Product | null>(null);
-    const reviews = ref<Review[]>([]);
-    const productRating = ref<ProductRating | null>(null);
-    const newRating = ref(0);
-    const newComment = ref('');
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import type { Product } from '@/types/product'
+import type { Review, ProductRating } from '@/types/review'
+import { useShoppingCartStore } from '@/stores/shoppingCartStore'
+import { useProductStore } from '@/stores/network/productStore'
+import { useReviewStore } from '@/stores/network/reviewStore'
+import { useAccountStore } from '@/stores/network/accountStore'
+import { useRoute } from 'vue-router'
+import ProductCard from '@/components/products/ProductCard.vue'
 
-    async function loadProductData() {
-      const productId = route.params.productId as string;
-      product.value = await productStore.API.getProduct(productId);
-      await loadReviews(productId);
-    }
+const route = useRoute()
+const shoppingCartStore = useShoppingCartStore()
+const productStore = useProductStore()
+const reviewStore = useReviewStore()
+const accountStore = useAccountStore()
+const product = ref<Product | null>(null)
+const reviews = ref<Review[]>([])
+const productRating = ref<ProductRating | null>(null)
+const newRating = ref(0)
+const newComment = ref('')
 
-    async function loadReviews(productId: string) {
-      try {
-        reviews.value = await reviewStore.API.getProductReviews(productId);
-        productRating.value = await reviewStore.API.getProductRating(productId);
-      } catch (error) {
-        console.error('Failed to load reviews:', error);
-      }
-    }
+async function loadProductData() {
+  const productId = route.params.productId as string
+  product.value = await productStore.getProduct(productId)
+  await loadReviews(productId)
+}
 
-    async function submitReview() {
-      if (!product.value || newRating.value === 0 || !newComment.value.trim()) return;
-
-      try {
-        await reviewStore.API.addReview({
-          rating: newRating.value,
-          comment: newComment.value,
-          productId: product.value.id
-        });
-        newRating.value = 0;
-        newComment.value = '';
-        await loadReviews(product.value.id);
-      } catch (error) {
-        console.error('Failed to submit review:', error);
-      }
-    }
-
-    function addToCart(productId: string) {
-      shoppingCartStore.methods.addProductId(productId)
-    };
-
-    onMounted(loadProductData)
-
-    return {
-      product, addToCart, reviews, productRating,
-      newRating, newComment, submitReview, authStore
-    };
-  },
-  components: {
-    ProductCard
+async function loadReviews(productId: string) {
+  try {
+    reviews.value = await reviewStore.getProductReviews(productId)
+    productRating.value = await reviewStore.getProductRating(productId)
+  } catch (error) {
+    console.error('Failed to load reviews:', error)
   }
+}
 
-});
+async function submitReview() {
+  if (!product.value || newRating.value === 0 || !newComment.value.trim()) return
+  try {
+    await reviewStore.addReview({
+      rating: newRating.value,
+      comment: newComment.value,
+      productId: product.value.id
+    })
+    newRating.value = 0
+    newComment.value = ''
+    await loadReviews(product.value.id)
+  } catch (error) {
+    console.error('Failed to submit review:', error)
+  }
+}
+
+function addToCart(productId: string) {
+  shoppingCartStore.addProductId(productId)
+}
+
+onMounted(loadProductData)
 </script>

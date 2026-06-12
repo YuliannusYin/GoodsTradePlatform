@@ -1,11 +1,9 @@
 package me.code.springboot_postgres.controllers;
 
-import me.code.springboot_postgres.dtos.requests.AddProductDTO;
-import me.code.springboot_postgres.dtos.requests.EditedProductDTO;
+import me.code.springboot_postgres.dtos.requests.ProductDTO;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.models.entities.Product;
 import me.code.springboot_postgres.models.entities.User;
-import me.code.springboot_postgres.services.AdminToolsService;
 import me.code.springboot_postgres.services.ProductService;
 import me.code.springboot_postgres.services.UserProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +17,18 @@ import java.util.List;
 @RequestMapping("api/user_products")
 public class UserProductController {
 
-    private final AdminToolsService adminToolsService;
     private final ProductService productService;
     private final UserProductService userProductService;
 
     @Autowired
-    public UserProductController(AdminToolsService adminToolsService, ProductService productService, UserProductService userProductService) {
-        this.adminToolsService = adminToolsService;
+    public UserProductController(ProductService productService, UserProductService userProductService) {
         this.productService = productService;
         this.userProductService = userProductService;
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Product> addProduct(@AuthenticationPrincipal User user, @RequestBody AddProductDTO dto) {
-        var result = adminToolsService.addProductByUser(user, dto);
+    public ResponseEntity<Product> addProduct(@AuthenticationPrincipal User user, @RequestBody ProductDTO dto) {
+        var result = userProductService.addProductByUser(user, dto);
         return ResponseEntity.ok(result);
     }
 
@@ -43,7 +39,7 @@ public class UserProductController {
     }
 
     @PutMapping("/edit/{productId}")
-    public ResponseEntity<Success> editMyProduct(@AuthenticationPrincipal User user, @PathVariable String productId, @RequestBody EditedProductDTO dto) {
+    public ResponseEntity<Success> editMyProduct(@AuthenticationPrincipal User user, @PathVariable String productId, @RequestBody ProductDTO dto) {
         var result = userProductService.editOwnProduct(user, productId, dto);
         return result.toResponseEntity();
     }

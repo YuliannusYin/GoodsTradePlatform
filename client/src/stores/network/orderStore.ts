@@ -3,38 +3,41 @@ import { callPost, callGet } from './requests'
 import { useShoppingCartStore } from '../shoppingCartStore'
 
 export const useOrderStore = defineStore('orderStore', () => {
-  const shoppingCartStore = useShoppingCartStore()
+  async function placeOrder(address: string, deliveryMethod: string, paymentMethod: string) {
+    const shoppingCartStore = useShoppingCartStore()
+    const response = await callPost('/orders/place', {
+      productIds: shoppingCartStore.getAllProductIds(),
+      address,
+      deliveryMethod,
+      paymentMethod
+    })
+    if (response.success) {
+      shoppingCartStore.clearProductIds()
+    }
+    return response
+  }
 
-  const API = {
-    placeOrder: async (
-      address: string,
-      deliveryMethod: string,
-      paymentMethod: string
-    ) => {
-      const response = await callPost('/orders/place', {
-        productIds: shoppingCartStore.methods.getAllProductIds(),
-        address: address,
-        deliveryMethod: deliveryMethod,
-        paymentMethod: paymentMethod
-      })
-      if (response.success) {
-        shoppingCartStore.methods.clearProductIds()
-      }
-    },
+  async function getOngoingOrder() {
+    const shoppingCartStore = useShoppingCartStore()
+    return callPost('/orders/ongoing', {
+      productIds: shoppingCartStore.getAllProductIds()
+    })
+  }
 
-    getOngoingOrder: async () =>
-      await callPost('/orders/ongoing', {
-        productIds: shoppingCartStore.methods.getAllProductIds()
-      }),
+  async function getPlacedOrders() {
+    return callGet('/orders/all')
+  }
 
-    getPlacedOrders: async () => await callGet('/orders/all'),
+  async function getAvailableDeliveryMethods() {
+    return callGet('/orders/delivery/methods')
+  }
 
-    getAvailableDeliveryMethods: async () => await callGet('/orders/delivery/methods'),
-
-    getAvailablePaymentMethods: async () => await callGet('/orders/payment/methods')
+  async function getAvailablePaymentMethods() {
+    return callGet('/orders/payment/methods')
   }
 
   return {
-    API
+    placeOrder, getOngoingOrder, getPlacedOrders,
+    getAvailableDeliveryMethods, getAvailablePaymentMethods
   }
 })

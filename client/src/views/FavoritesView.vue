@@ -29,43 +29,36 @@
   </section>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import type { Favorite } from '@/types/favorite';
-import { useFavoriteStore } from '@/stores/network/favoriteStore';
-import { useRouter } from 'vue-router';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import type { Favorite } from '@/types/favorite'
+import { useFavoriteStore } from '@/stores/network/favoriteStore'
+import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  name: "FavoritesView",
-  setup() {
-    const favoriteStore = useFavoriteStore();
-    const router = useRouter();
-    const favorites = ref<Favorite[]>([]);
+const favoriteStore = useFavoriteStore()
+const router = useRouter()
+const favorites = ref<Favorite[]>([])
 
-    async function loadFavorites() {
-      try {
-        favorites.value = await favoriteStore.API.getUserFavorites();
-      } catch (error) {
-        console.error('Failed to load favorites:', error);
-      }
-    }
-
-    async function removeFavorite(productId: string) {
-      try {
-        await favoriteStore.API.removeFavorite(productId);
-        favorites.value = favorites.value.filter(f => f.productId !== productId);
-      } catch (error) {
-        console.error('Failed to remove favorite:', error);
-      }
-    }
-
-    function goToProduct(productId: string) {
-      router.push({ name: 'productView', params: { productId } });
-    }
-
-    onMounted(loadFavorites);
-
-    return { favorites, removeFavorite, goToProduct };
+async function loadFavorites() {
+  try {
+    favorites.value = await favoriteStore.getUserFavorites()
+  } catch (error) {
+    console.error('Failed to load favorites:', error)
   }
-});
+}
+
+async function removeFavorite(productId: string) {
+  try {
+    await favoriteStore.removeFavorite(productId)
+    favorites.value = favorites.value.filter(f => f.productId !== productId)
+  } catch (error) {
+    console.error('Failed to remove favorite:', error)
+  }
+}
+
+function goToProduct(productId: string) {
+  router.push({ name: 'productView', params: { productId } })
+}
+
+onMounted(loadFavorites)
 </script>

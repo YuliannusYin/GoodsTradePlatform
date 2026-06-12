@@ -2,7 +2,6 @@
   <div class="p-4 bg-white rounded shadow">
     <h2 class="text-xl font-semibold mb-4">我的订单</h2>
     <ul>
-
       <li v-for="order in orders" :key="order.received" class="mb-4 p-4 border rounded">
         <div class="text-sm text-gray-500 border-b pb-3">
           状态：{{ order.status }} | 下单时间：{{ order.received }}
@@ -21,29 +20,19 @@
           <div class="font-bold">{{ order.price }}</div>
         </div>
       </li>
-
     </ul>
   </div>
 </template>
-  
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import { useOrderStore } from '@/stores/network/orderStore';
-import type { PlacedOrder } from '@/types/order';
 
-export default defineComponent({
-  name: 'ShowOrders',
-  setup() {
-    const orderStore = useOrderStore();
-    const orders = ref<PlacedOrder[]>([]);
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useOrderStore } from '@/stores/network/orderStore'
+import type { PlacedOrder } from '@/types/order'
 
-    onMounted(async () => {
-      const response = await orderStore.API.getPlacedOrders();
-      orders.value = response;
-    });
+const orderStore = useOrderStore()
+const orders = ref<PlacedOrder[]>([])
 
-    return { orders };
-  }
-});
+onMounted(async () => {
+  orders.value = await orderStore.getPlacedOrders()
+})
 </script>
-  

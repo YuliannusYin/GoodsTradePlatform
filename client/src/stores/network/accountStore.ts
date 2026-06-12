@@ -1,160 +1,150 @@
 import { defineStore } from 'pinia'
-import { callPost, callGet, callPut, callDelete, ApiError } from './requests'
-import { ref, watch } from 'vue'
-import { useAuthenticationStore } from '../authenticationStore'
+import { ref } from 'vue'
+import { callGet, callPost, callPut, callDelete } from './requests'
 
-export interface ResponseError {
-  error: boolean
-  message: string
-}
-
-export interface ResponseSuccess {
+export interface LoginResponse {
   success: boolean
   message: string
+  userRoles: string[]
+  token: string
+}
+
+export interface AccountResponse {
+  success: boolean
+  message: string
+  email?: string
+  username?: string
+  balance?: number
+  isProtected?: boolean
+  role?: string
 }
 
 export const useAccountStore = defineStore('accountStore', () => {
-  const states = {
-    signupResponse: ref<ResponseSuccess | ResponseError | null>(null),
+  // State
+  const isAuthenticated = ref(false)
+  const jwtToken = ref<string | null>(null)
+  const userRole = ref<string | null>(null)
+  const email = ref<string | null>(null)
+  const username = ref<string | null>(null)
+  const balance = ref<number>(0)
+  const isProtected = ref(false)
 
-    changeUsernameResponse: ref<ResponseSuccess | ResponseError | null>(null),
-
-    changeEmailResponse: ref<ResponseSuccess | ResponseError | null>(null),
-
-    changePasswordResponse: ref<ResponseSuccess | ResponseError | null>(null),
-
-    deleteAccountResponse: ref<ResponseSuccess | ResponseError | null>(null),
-
-    isConfirmationErrorResponse: ref<boolean>(false),
-
-    username: ref<string | null>(null),
-    email: ref<string | null>(null),
-    balance: ref<number>(0),
-    isProtected: ref<boolean>(false),
-    orders: ref<any | null>(null)
+  // Auth methods
+  async function login(loginEmail: string, password: string): Promise<LoginResponse> {
+    const response = await callPost<LoginResponse>('/api/account/login', {
+      email: loginEmail,
+      password
+    })
+    if (response.token) {
+      jwtToken.value = response.token
+      userRole.value = response.userRoles?.[0] || 'USER'
+      isAuthenticated.value = true
+      sessionStorage.setItem('jwtToken', response.token)
+      sessionStorage.setItem('userRole', userRole.value)
+      // Fetch user details after login
+      await fetchUserDetails()
+    }
+    return response
   }
 
-  watch(
-    async () => useAuthenticationStore().states.isAuthenticated,
-    async (change) => {
-      const isAuthenticated: boolean = await change
-      if (isAuthenticated) {
-        await API.getUserDetails()
-      }
-    }
-  )
+  function logout() {
+    jwtToken.value = null
+    userRole.value = null
+    isAuthenticated.value = false
+    email.value = null
+    username.value = null
+    balance.value = 0
+    isProtected.value = false
+    sessionStorage.removeItem('jwtToken')
+    sessionStorage.removeItem('userRole')
+  }
 
-  const API = {
-    submitSignup: async (username: string, email: string, password: string): Promise<ResponseSuccess | ResponseError> => {
-      try {
-        const response: ResponseSuccess = await callPost('/account/register', {
-          username: username,
-          email: email,
-          password: password
-        })
-        states.signupResponse.value = { success: true, message: response.message }
-        return response
-      } catch (error) {
-        const errorResponse = toResponseError(error)
-        states.signupResponse.value = errorResponse
-        return errorResponse
-      }
-    },
-
-    confirmCredentials: async (password: string): Promise<boolean> => {
-      try {
-        const response: any = await callPost('/account/confirm', {
-          email: useAccountStore().states.email,
-          password: password
-        })
-        return !!response
-      } catch (error) {
-        states.isConfirmationErrorResponse.value = true
-        return false
-      }
-    },
-
-    getUserDetails: async () => {
-      try {
-        const response = await callGet('/account/details')
-        if (response.success) {
-          states.username.value = response.username
-          states.email.value = response.email
-          states.balance.value = response.balance ?? 0
-          states.isProtected.value = response.isProtected ?? false
-        }
-      } catch (error) {
-        // silently fail - user details can be fetched again
-      }
-    },
-
-    changeUsername: async (newUsername: string): Promise<ResponseSuccess | ResponseError> => {
-      try {
-        const response: ResponseSuccess = await callPut('/account/username', {
-          newUsername: newUsername
-        })
-        states.changeUsernameResponse.value = { success: true, message: response.message }
-        return response
-      } catch (error) {
-        const errorResponse = toResponseError(error)
-        states.changeUsernameResponse.value = errorResponse
-        return errorResponse
-      }
-    },
-
-    changeEmail: async (newEmail: string): Promise<ResponseSuccess | ResponseError> => {
-      try {
-        const response: ResponseSuccess = await callPut('/account/email', {
-          newEmail: newEmail
-        })
-        states.changeEmailResponse.value = { success: true, message: response.message }
-        return response
-      } catch (error) {
-        const errorResponse = toResponseError(error)
-        states.changeEmailResponse.value = errorResponse
-        return errorResponse
-      }
-    },
-
-    changePassword: async (currentPassword: string, newPassword: string): Promise<ResponseSuccess | ResponseError> => {
-      try {
-        const response: ResponseSuccess = await callPut('/account/password', {
-          currentPassword: currentPassword,
-          newPassword: newPassword
-        })
-        states.changePasswordResponse.value = { success: true, message: response.message }
-        return response
-      } catch (error) {
-        const errorResponse = toResponseError(error)
-        states.changePasswordResponse.value = errorResponse
-        return errorResponse
-      }
-    },
-
-    getOrders: () => callGet('/account/orders/all'),
-
-    deleteAccount: async (): Promise<ResponseSuccess | ResponseError> => {
-      try {
-        const response: ResponseSuccess = await callDelete('/account/delete')
-        states.deleteAccountResponse.value = { success: true, message: response.message }
-        return response
-      } catch (error) {
-        const errorResponse = toResponseError(error)
-        states.deleteAccountResponse.value = errorResponse
-        return errorResponse
-      }
+  function restoreSession() {
+    const token = sessionStorage.getItem('jwtToken')
+    const role = sessionStorage.getItem('userRole')
+    if (token && role) {
+      jwtToken.value = token
+      userRole.value = role
+      isAuthenticated.value = true
+      fetchUserDetails()
     }
   }
 
-  function toResponseError(error: unknown): ResponseError {
-    if (error instanceof ApiError) {
-      return { error: true, message: error.data?.message || '请求失败' }
+  async function fetchUserDetails() {
+    try {
+      const response = await callGet<AccountResponse>('/api/account/details')
+      email.value = response.email || null
+      username.value = response.username || null
+      balance.value = response.balance || 0
+      isProtected.value = response.isProtected || false
+      userRole.value = response.role || userRole.value
+    } catch (e) {
+      // ignore
     }
-    return { error: true, message: '网络错误' }
+  }
+
+  // Account methods
+  async function register(userEmail: string, userName: string, password: string) {
+    return callPost('/api/account/register', {
+      email: userEmail,
+      username: userName,
+      password
+    })
+  }
+
+  async function changeUsername(newUsername: string) {
+    const response = await callPut('/api/account/username', { newUsername })
+    if (response.success) username.value = newUsername
+    return response
+  }
+
+  async function changeEmail(newEmail: string) {
+    const response = await callPut('/api/account/email', { newEmail })
+    if (response.success) email.value = newEmail
+    return response
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string) {
+    return callPut('/api/account/password', { currentPassword, newPassword })
+  }
+
+  async function deleteAccount() {
+    const response = await callDelete('/api/account/delete')
+    if (response.success) logout()
+    return response
+  }
+
+  async function isValidCredentials(emailAddress: string, password: string) {
+    return callPost('/api/account/confirm', { email: emailAddress, password })
+  }
+
+  async function getOrders() {
+    return callGet('/api/account/orders/all')
+  }
+
+  // Helper
+  function getJwtToken(): string | null {
+    return jwtToken.value || sessionStorage.getItem('jwtToken')
+  }
+
+  function hasRole(role: string): boolean {
+    return userRole.value === role
+  }
+
+  function isAdmin(): boolean {
+    return userRole.value === 'SUPER_ADMIN' || userRole.value === 'ADMIN'
+  }
+
+  function isMerchant(): boolean {
+    return userRole.value === 'MERCHANT'
   }
 
   return {
-    states,
-    API
+    // State
+    isAuthenticated, jwtToken, userRole, email, username, balance, isProtected,
+    // Auth methods
+    login, logout, restoreSession, getJwtToken, hasRole, isAdmin, isMerchant,
+    // Account methods
+    register, fetchUserDetails, changeUsername, changeEmail, changePassword, deleteAccount, isValidCredentials, getOrders
   }
 })

@@ -1,19 +1,9 @@
 <template>
-    <nav class="space-x-6">
-        <StyledRouterLink text="首页" path="/"
-            additionalClass="text-primary-200 hover:text-white transition duration-300 ease-in-out" />
-        <StyledRouterLink text="周边商城" path="/shop"
-            additionalClass="text-primary-200 hover:text-white transition duration-300 ease-in-out" />
-    </nav>
+  <nav class="space-x-6">
+    <router-link to="/" class="text-primary-200 hover:text-white transition duration-300 ease-in-out">首页</router-link>
+    <router-link to="/shop" class="text-primary-200 hover:text-white transition duration-300 ease-in-out">周边商城</router-link>
+  </nav>
 </template>
-  
-<script lang="ts">
-import StyledRouterLink from '../StyledRouterLink.vue';
 
-export default {
-    name: "FooterNavItems",
-    components: {
-        StyledRouterLink
-    },
-}
+<script setup lang="ts">
 </script>

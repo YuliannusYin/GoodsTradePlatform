@@ -5,15 +5,7 @@
   </section>
 </template>
 
-<script lang="ts">
-import HeroSection from '@/components/HeroSection.vue';
-import FeaturedProducts from '@/components/products/FeaturedProducts.vue';
-
-
-export default {
-  components: {
-    HeroSection,
-    FeaturedProducts
-  },
-}
+<script setup lang="ts">
+import HeroSection from '@/components/HeroSection.vue'
+import FeaturedProducts from '@/components/products/FeaturedProducts.vue'
 </script>

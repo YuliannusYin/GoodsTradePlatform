@@ -26,102 +26,85 @@
   </section>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
-import ProductCards from '@/components/products/ProductCards.vue';
-import { useProductStore } from '@/stores/network/productStore';
-import type { Product } from '@/types/product';
-import { PRODUCT_CATEGORIES } from '@/types/product';
-import { useRoute, useRouter } from 'vue-router';
+<script setup lang="ts">
+import { onMounted, ref, watch } from 'vue'
+import ProductCards from '@/components/products/ProductCards.vue'
+import { useProductStore } from '@/stores/network/productStore'
+import type { Product } from '@/types/product'
+import { PRODUCT_CATEGORIES } from '@/types/product'
+import { useRoute } from 'vue-router'
 
-export default defineComponent({
-  name: "ShopView",
-  setup() {
-    const productStore = useProductStore();
-    const products = ref<Product[]>([]);
-    const selectedCategory = ref('');
-    const route = useRoute();
-    const router = useRouter();
+const productStore = useProductStore()
+const products = ref<Product[]>([])
+const selectedCategory = ref('')
+const route = useRoute()
 
-    async function getAllProducts() {
-      products.value = await productStore.API.getAllProducts();
-    }
+async function getAllProducts() {
+  products.value = await productStore.getAllProducts()
+}
 
-    async function getSearchedProducts(query: string, filter: any, category?: string) {
-      products.value = await productStore.API.getSearchedProducts(query, filter, category);
-    }
+async function getSearchedProducts(query: string, filter: any, category?: string) {
+  products.value = await productStore.getSearchedProducts(query, filter, category)
+}
 
-    function isEmpty(query: string): boolean {
-      return query === '';
-    }
+function isEmpty(query: string): boolean {
+  return query === ''
+}
 
-    function hasNoFilter(filter: any): boolean {
-      return filter === null;
-    }
+function hasNoFilter(filter: any): boolean {
+  return filter === null
+}
 
-    async function handleSearch(query: string, filter: any, category?: string) {
-      if (isEmpty(query) && hasNoFilter(filter) && !category) {
-        getAllProducts();
-      } else {
-        getSearchedProducts(query, filter, category);
-      }
-    };
-
-    function selectCategory(category: string) {
-      selectedCategory.value = category;
-      const query = (route.query.query as string) || '';
-      const filter = (route.query.filter as string) || 'none';
-      handleSearch(query, filter, category || undefined);
-    }
-
-    onMounted(async () => {
-      const query = route.query.query as string;
-      const filter = route.query.filter as string;
-      const category = route.query.category as string;
-
-      if (category) {
-        selectedCategory.value = category;
-      }
-
-      const hasNoSearchQuery = query == undefined;
-      const hasNoFilter = filter == undefined;
-
-      if (hasNoSearchQuery || hasNoFilter) {
-        if (category) {
-          handleSearch('', 'none', category);
-        } else {
-          getAllProducts();
-        }
-      } else {
-        handleSearch(query, filter, category || undefined);
-      }
-    })
-
-    watch(
-      () => ({
-        query: route.query.query as string,
-        filter: route.query.filter as string,
-        category: route.query.category as string,
-      }),
-      (newQuery) => {
-        const { query, filter, category } = newQuery;
-        if (category) {
-          selectedCategory.value = category;
-        }
-        handleSearch(query || '', filter || null, category || selectedCategory.value || undefined);
-      },
-    );
-
-    return {
-      products,
-      handleSearch,
-      selectedCategory,
-      selectCategory,
-      PRODUCT_CATEGORIES
-    };
-  },
-  components: {
-    ProductCards
+async function handleSearch(query: string, filter: any, category?: string) {
+  if (isEmpty(query) && hasNoFilter(filter) && !category) {
+    getAllProducts()
+  } else {
+    getSearchedProducts(query, filter, category)
   }
-});
+}
+
+function selectCategory(category: string) {
+  selectedCategory.value = category
+  const query = (route.query.query as string) || ''
+  const filter = (route.query.filter as string) || 'none'
+  handleSearch(query, filter, category || undefined)
+}
+
+onMounted(async () => {
+  const query = route.query.query as string
+  const filter = route.query.filter as string
+  const category = route.query.category as string
+
+  if (category) {
+    selectedCategory.value = category
+  }
+
+  const hasNoSearchQuery = query == undefined
+  const hasNoFilter = filter == undefined
+
+  if (hasNoSearchQuery || hasNoFilter) {
+    if (category) {
+      handleSearch('', 'none', category)
+    } else {
+      getAllProducts()
+    }
+  } else {
+    handleSearch(query, filter, category || undefined)
+  }
+})
+
+watch(
+  () => ({
+    query: route.query.query as string,
+    filter: route.query.filter as string,
+    category: route.query.category as string,
+  }),
+  (newQuery) => {
+    const { query, filter, category } = newQuery
+    if (category) {
+      selectedCategory.value = category
+    }
+    handleSearch(query || '', filter || null, category || selectedCategory.value || undefined)
+  }
+)
 </script>

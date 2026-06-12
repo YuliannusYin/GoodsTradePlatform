@@ -36,7 +36,7 @@ export interface CreateProductDto {
   source: string
 }
 
-export type EditProductDto = CreateProductDto
+export type EditProductDto = Partial<CreateProductDto>
 
 export const PRODUCT_CATEGORIES: Record<string, string> = {
   ANIME_FIGURE: '手办',

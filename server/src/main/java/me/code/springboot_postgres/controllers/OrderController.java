@@ -1,6 +1,5 @@
 package me.code.springboot_postgres.controllers;
 
-import me.code.springboot_postgres.dtos.requests.GetOngoingOrderDTO;
 import me.code.springboot_postgres.dtos.requests.PlaceOrderDTO;
 import me.code.springboot_postgres.dtos.responses.entities.OngoingOrderDTO;
 import me.code.springboot_postgres.dtos.responses.entities.PlacedOrderDTO;
@@ -26,8 +25,8 @@ public class OrderController {
     }
 
     @PostMapping("/ongoing")
-    public ResponseEntity<OngoingOrderDTO> getOngoingOrder(@RequestBody GetOngoingOrderDTO dto) {
-        var result = orderService.getOngoingOrder(dto.productIds());
+    public ResponseEntity<OngoingOrderDTO> getOngoingOrder(@RequestBody String[] productIds) {
+        var result = orderService.getOngoingOrder(productIds);
         return ResponseEntity.ok(result);
     }
 

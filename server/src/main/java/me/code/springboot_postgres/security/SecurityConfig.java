@@ -1,7 +1,6 @@
 package me.code.springboot_postgres.security;
 
 import me.code.springboot_postgres.services.UserAccountService;
-import me.code.springboot_postgres.services.RegistrationValidationService;
 import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,15 +42,16 @@ public class SecurityConfig {
             REVIEWS_PATH + "/product/**",
     };
 
-    // SUPER_ADMIN only: role management
     private static final String[] SUPER_ADMIN_URLS = {
-            API_PATH + "/admin/roles/**"
+            API_PATH + "/admin/users/**"
     };
 
-    // ADMIN + SUPER_ADMIN: product & order management
     private static final String[] ADMIN_URLS = {
-            API_PATH + "/admin_tools/**",
-            API_PATH + "/admin/users/**"
+            API_PATH + "/admin_tools/**"
+    };
+
+    private static final String[] MERCHANT_URLS = {
+            API_PATH + "/user_products/**"
     };
 
     @Bean
@@ -60,9 +60,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(new JwtValidationFilter(jwtTokenUtil, userAccountService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(SUPER_ADMIN_URLS).hasAuthority("ROLE_READ")
-                        .requestMatchers(ADMIN_URLS).hasAuthority("PRODUCT_READ_ALL")
                         .requestMatchers(PUBLIC_URLS).permitAll()
+                        .requestMatchers(SUPER_ADMIN_URLS).hasRole("SUPER_ADMIN")
+                        .requestMatchers(ADMIN_URLS).hasAnyRole("SUPER_ADMIN", "ADMIN")
+                        .requestMatchers(MERCHANT_URLS).hasAnyRole("MERCHANT", "SUPER_ADMIN", "ADMIN")
                         .anyRequest().authenticated());
         return security.build();
     }
@@ -70,20 +71,14 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authProvider(UserDetailsService userAccountService, PasswordEncoder encoder) {
         var dao = new DaoAuthenticationProvider();
-
         dao.setUserDetailsService(userAccountService);
         dao.setPasswordEncoder(encoder);
-
         return dao;
     }
 
     @Bean
-    public UserDetailsService userDetailsService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            RegistrationValidationService registrationValidationService,
-            me.code.springboot_postgres.repositories.RoleRepository roleRepository) {
-        return new UserAccountService(userRepository, passwordEncoder, registrationValidationService, roleRepository);
+    public UserDetailsService userDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        return new UserAccountService(userRepository, passwordEncoder);
     }
 
     @Bean

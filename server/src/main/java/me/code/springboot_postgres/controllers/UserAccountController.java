@@ -4,6 +4,7 @@ import me.code.springboot_postgres.dtos.requests.*;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.UserAccountService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +22,7 @@ public class UserAccountController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Success> register(@RequestBody CreateUserDTO dto) {
+    public ResponseEntity<Success> register(@Valid @RequestBody CreateUserDTO dto) {
         var result = userAccountService.submitRegistration(dto);
         return result.toResponseEntity();
     }

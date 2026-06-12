@@ -1,52 +1,46 @@
 <template>
-    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 min-h-[15rem]">
-        <div v-for="card in placeholderCards" :key="card.id"
-            class="bg-white p-4 shadow-md rounded-lg flex justify-center items-center">
-            <LoadingSpinner />
-        </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 min-h-[15rem]">
+    <div v-for="card in placeholderCards" :key="card.id"
+      class="bg-white p-4 shadow-md rounded-lg flex justify-center items-center">
+      <div class="spinner-border" role="status" />
     </div>
+  </div>
 </template>
-  
-<script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
-import LoadingSpinner from '../LoadingSpinner.vue';
-import { useLoadingStore } from '@/stores/network/loadingStore';
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 
 interface PlaceHolderCard {
-    id: string;
+  id: string
 }
 
-export default defineComponent({
-    name: "ProductCards",
+const props = defineProps<{
+  placeholderAmount: number
+}>()
 
-    props: {
-        placeholderAmount: {
-            type: Number,
-            required: true
-        }
-    },
+const placeholderCards = ref<PlaceHolderCard[]>([])
 
-    setup(props) {
-        const loadingStore = useLoadingStore();
-        const isLoading = computed(() => loadingStore.states.isLoading);
-        const placeholderCards = ref<PlaceHolderCard[]>([]);
-
-        function generatePlaceHolderCards() {
-            for (let amount = 0; amount < props.placeholderAmount; amount++) {
-                placeholderCards.value.push({ id: `${amount}` })
-            }
-        };
-
-        onMounted(() => {
-            generatePlaceHolderCards()
-
-        });
-
-        return {
-            isLoading, placeholderCards
-        };
-    },
-
-    components: { LoadingSpinner }
-});
+onMounted(() => {
+  for (let amount = 0; amount < props.placeholderAmount; amount++) {
+    placeholderCards.value.push({ id: `${amount}` })
+  }
+})
 </script>
+
+<style scoped>
+.spinner-border {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border-width: .25em;
+  border-color: gray;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border .75s linear infinite;
+}
+
+@keyframes spinner-border {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>

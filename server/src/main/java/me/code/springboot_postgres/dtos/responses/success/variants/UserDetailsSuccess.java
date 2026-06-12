@@ -5,7 +5,6 @@ import me.code.springboot_postgres.dtos.responses.success.Success;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public class UserDetailsSuccess extends Success {
 
@@ -21,16 +20,16 @@ public class UserDetailsSuccess extends Success {
     @JsonProperty("isProtected")
     private boolean isProtected;
 
-    @JsonProperty("roles")
-    private List<String> roles;
+    @JsonProperty("role")
+    private String role;
 
     public UserDetailsSuccess(HttpStatus status, String message, String email, String username,
-                               BigDecimal balance, boolean isProtected, List<String> roles) {
+                               BigDecimal balance, boolean isProtected, String role) {
         super(status, message);
         this.email = email;
         this.username = username;
         this.balance = balance;
         this.isProtected = isProtected;
-        this.roles = roles;
+        this.role = role;
     }
 }

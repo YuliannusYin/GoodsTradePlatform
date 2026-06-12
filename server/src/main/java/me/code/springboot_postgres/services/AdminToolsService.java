@@ -1,17 +1,14 @@
 package me.code.springboot_postgres.services;
 
 import jakarta.transaction.Transactional;
-import me.code.springboot_postgres.dtos.requests.AddProductDTO;
-import me.code.springboot_postgres.dtos.requests.EditedProductDTO;
+import me.code.springboot_postgres.dtos.requests.ProductDTO;
 import me.code.springboot_postgres.dtos.responses.entities.UserOrderDTO;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import me.code.springboot_postgres.models.entities.Order;
 import me.code.springboot_postgres.models.entities.Product;
-import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.repositories.OrderRepository;
 import me.code.springboot_postgres.repositories.ProductRepository;
-import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,26 +21,13 @@ import java.util.Locale;
 @Service
 public class AdminToolsService {
 
-    private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
 
     @Autowired
-    public AdminToolsService(
-            UserRepository userRepository,
-            OrderRepository orderRepository,
-            ProductRepository productRepository) {
-        this.userRepository = userRepository;
+    public AdminToolsService(OrderRepository orderRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
-    }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
     }
 
     @Transactional
@@ -81,15 +65,11 @@ public class AdminToolsService {
     public Success sendOrder(String orderId, String dateAndTime) {
         try {
             Order order = findOrder(orderId);
-
             LocalDateTime expectedDelivery = generateLocalDateTime(dateAndTime);
-
             order.setStatus(Order.Status.SHIPPED);
             order.setExpectedDelivery(expectedDelivery);
             orderRepository.save(order);
-
             return new Success(HttpStatus.OK, "Order was successfully sent");
-
         } catch (Exception exception) {
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, exception.getMessage());
         }
@@ -104,14 +84,10 @@ public class AdminToolsService {
     public Success changeExpectedDelivery(String orderId, String newDateAndTime) {
         try {
             Order order = findOrder(orderId);
-
             LocalDateTime newExpectedDelivery = generateLocalDateTime(newDateAndTime);
-
             order.setExpectedDelivery(newExpectedDelivery);
             orderRepository.save(order);
-
             return new Success(HttpStatus.OK, "Successfully updated expected delivery");
-
         } catch (Exception exception) {
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, exception.getMessage());
         }
@@ -119,12 +95,10 @@ public class AdminToolsService {
 
     public Order findOrder(String orderId) {
         return orderRepository.findById(orderId).orElseThrow(
-                () -> new CustomRuntimeException(
-                        HttpStatus.NOT_FOUND,
-                        "Could not find order with id: " + orderId));
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find order with id: " + orderId));
     }
 
-    public Product addProduct(AddProductDTO dto) {
+    public Product addProduct(ProductDTO dto) {
         try {
             Product.Condition condition = dto.condition() != null
                     ? Product.Condition.valueOf(dto.condition())
@@ -132,15 +106,9 @@ public class AdminToolsService {
             Product.Category category = Product.Category.valueOf(dto.category());
 
             Product product = new Product(
-                    dto.name(),
-                    dto.description(),
-                    dto.imageUrls(),
-                    dto.price(),
-                    dto.quantity(),
-                    category,
-                    condition,
+                    dto.name(), dto.description(), dto.imageUrls(),
+                    dto.price(), dto.quantity(), category, condition,
                     dto.source() != null ? dto.source() : "PLATFORM");
-            // Admin-created products are auto-approved
             product.setStatus(Product.Status.APPROVED);
             return productRepository.save(product);
         } catch (Exception exception) {
@@ -148,34 +116,8 @@ public class AdminToolsService {
         }
     }
 
-    public Product addProductByUser(User user, AddProductDTO dto) {
-        try {
-            Product.Condition condition = dto.condition() != null
-                    ? Product.Condition.valueOf(dto.condition())
-                    : Product.Condition.NEW;
-            Product.Category category = Product.Category.valueOf(dto.category());
-
-            Product product = new Product(
-                    dto.name(),
-                    dto.description(),
-                    dto.imageUrls(),
-                    dto.price(),
-                    dto.quantity(),
-                    category,
-                    condition,
-                    "USER");
-
-            product.setSeller(user);
-            // User-created products need review
-            product.setStatus(Product.Status.PENDING);
-            return productRepository.save(product);
-        } catch (Exception exception) {
-            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not create product");
-        }
-    }
-
     public Success deleteProduct(String productId) {
-        if (isValidProductID(productId)) {
+        if (productRepository.existsById(productId)) {
             productRepository.deleteById(productId);
             return new Success(HttpStatus.OK, "The product was deleted successfully");
         } else {
@@ -183,14 +125,9 @@ public class AdminToolsService {
         }
     }
 
-    private boolean isValidProductID(String product_id) {
-        return productRepository.existsById(product_id);
-    }
-
-    public Success editProduct(String productId, EditedProductDTO dto) {
-        if (isValidProductID(productId)) {
+    public Success editProduct(String productId, ProductDTO dto) {
+        if (productRepository.existsById(productId)) {
             Product product = loadProductById(productId);
-
             product.setName(dto.name());
             product.setDescription(dto.description());
             product.setImageUrls(dto.imageUrls());
@@ -201,10 +138,8 @@ public class AdminToolsService {
                 product.setCondition(Product.Condition.valueOf(dto.condition()));
             }
             product.setSource(dto.source());
-
             productRepository.save(product);
             return new Success(HttpStatus.OK, "The product was edited successfully");
-
         } else throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Failed to edit the product");
     }
 
@@ -266,5 +201,4 @@ public class AdminToolsService {
         return productRepository.findById(productId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Product with id: " + productId + " not found"));
     }
-
 }

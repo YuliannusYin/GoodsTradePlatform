@@ -1,4 +1,9 @@
 package me.code.springboot_postgres.dtos.requests;
 
-public record ChangePasswordDTO(String currentPassword, String newPassword) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record ChangePasswordDTO(
+        @NotBlank String currentPassword,
+        @NotBlank @Size(min = 6, max = 17) String newPassword) {
 }

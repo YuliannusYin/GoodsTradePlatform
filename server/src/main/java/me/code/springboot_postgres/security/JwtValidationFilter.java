@@ -1,33 +1,31 @@
 package me.code.springboot_postgres.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.UserAccountService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 public class JwtValidationFilter extends OncePerRequestFilter {
-
-    private static final Logger log = LoggerFactory.getLogger(JwtValidationFilter.class);
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenUtil jwtTokenUtil;
     private final UserAccountService userAccountService;
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JwtValidationFilter(JwtTokenUtil jwtTokenUtil, UserAccountService userAccountService) {
         this.jwtTokenUtil = jwtTokenUtil;
@@ -38,19 +36,26 @@ public class JwtValidationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain securityFilterChain)
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String token = extractToken(request);
 
-        if (isTokenMissing(token)) {
-            continueFilterChain(securityFilterChain, request, response);
+        if (token == null || token.isBlank()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        } else if (isValidToken(token)) {
-            continueFilterChainWithAuthentication(token, securityFilterChain, request, response);
+        if (!jwtTokenUtil.isValidToken(token)) {
+            sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "The provided token is not valid");
+            return;
+        }
 
-        } else {
-            throw new CustomRuntimeException(HttpStatus.UNAUTHORIZED, "The provided token is not valid.");
+        try {
+            setAuthenticationContext(token);
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "Authentication failed");
         }
     }
 
@@ -65,60 +70,22 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         return header;
     }
 
-    private boolean isTokenMissing(String token) {
-        return token == null || token.isBlank();
-    }
-
-    private boolean isValidToken(String token) {
-        return jwtTokenUtil.isValidToken(token);
-    }
-
-    private void continueFilterChain(
-            FilterChain filterChain,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            handleFilterChainException(e);
-        }
-    }
-
     private void setAuthenticationContext(String token) {
-        User user = getUser(token);
-        var authToken = getAuthToken(user);
-
+        String userId = jwtTokenUtil.getTokenId(token);
+        User user = userAccountService.loadUserById(userId);
+        var authToken = new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    private void continueFilterChainWithAuthentication(
-            String token,
-            FilterChain filterChain,
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-        setAuthenticationContext(token);
-        continueFilterChain(filterChain, request, response);
-    }
-
-    private User getUser(String token) {
-        String userId = jwtTokenUtil.getTokenId(token);
-        return this.userAccountService.loadUserById(userId);
-    }
-
-    private UsernamePasswordAuthenticationToken getAuthToken(User principal) {
-        return new UsernamePasswordAuthenticationToken(principal, principal.getPassword(), principal.getAuthorities());
-    }
-
-    private void handleFilterChainException(Exception exception) throws ServletException, IOException {
-        if (exception instanceof ServletException) {
-            throw new ServletException("Servlet exception: " + exception.getMessage());
-        } else if (exception instanceof IOException) {
-            throw new IOException("IO exception: " + exception.getMessage());
-        } else {
-            log.error("Unexpected exception in filter chain", exception);
-            throw new ServletException("Unexpected error during request processing", exception);
-        }
+    private void sendErrorResponse(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        Map<String, Object> errorBody = Map.of(
+                "error", true,
+                "status", status.value(),
+                "message", message,
+                "timestamp", LocalDateTime.now().toString()
+        );
+        objectMapper.writeValue(response.getOutputStream(), errorBody);
     }
 }

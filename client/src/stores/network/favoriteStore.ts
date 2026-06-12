@@ -3,21 +3,23 @@ import type { Favorite } from '@/types/favorite'
 import { callGet, callPost, callDelete } from './requests'
 
 export const useFavoriteStore = defineStore('favoriteStore', () => {
-  const API = {
-    getUserFavorites: async (): Promise<Favorite[]> =>
-      await callGet('/favorites/list'),
+  async function getUserFavorites(): Promise<Favorite[]> {
+    return callGet('/favorites/list')
+  }
 
-    addFavorite: async (productId: string): Promise<any> =>
-      await callPost('/favorites/add', { productId }),
+  async function addFavorite(productId: string): Promise<any> {
+    return callPost(`/favorites/add?productId=${encodeURIComponent(productId)}`)
+  }
 
-    removeFavorite: async (productId: string): Promise<any> =>
-      await callDelete(`/favorites/remove/${productId}`),
+  async function removeFavorite(productId: string): Promise<any> {
+    return callDelete(`/favorites/remove/${productId}`)
+  }
 
-    isFavorite: async (productId: string): Promise<boolean> =>
-      await callGet(`/favorites/check/${productId}`)
+  async function isFavorite(productId: string): Promise<boolean> {
+    return callGet(`/favorites/check/${productId}`)
   }
 
   return {
-    API
+    getUserFavorites, addFavorite, removeFavorite, isFavorite
   }
 })

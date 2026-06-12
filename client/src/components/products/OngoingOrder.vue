@@ -1,10 +1,8 @@
 <template>
   <div class="flex flex-col justify-center items-center w-full">
     <div v-if="!isConfirmedOrder" class="w-full flex flex-col items-center justify-center">
-      <h2 class="text-l font-bold text-center sm:text-left uppercase w-full sm:min-w-max sm:w-[70%] py-4">查看购物车
-      </h2>
+      <h2 class="text-l font-bold text-center sm:text-left uppercase w-full sm:min-w-max sm:w-[70%] py-4">查看购物车</h2>
       <div class="p-4 bg-white rounded shadow w-full sm:min-w-max sm:w-[70%] mb-4">
-        <LoadingScreen />
         <ul>
           <div v-if="ongoingOrder !== null && !isConfirmedOrder">
             <div v-for="item in ongoingOrder?.items" :key="item.product.id">
@@ -23,7 +21,6 @@
                     <div class="px-3 py-3 text-left flex text-l">
                       <p class="text-gray-700">{{ item.amount }}</p>
                     </div>
-
                     <div class="flex flex-col">
                       <button @click="() => addProduct(item.product.id)" :disabled="item.amount >= item.product.quantity"
                         class="text-center border-l border-b font-bold text-2xl px-2"
@@ -32,22 +29,14 @@
                         class="text-center border-l font-bold text-2xl px-2">-</button>
                     </div>
                   </div>
-
                   <div class="flex justify-reverse sm:justify-center mt-2 w-full sm:ml-9 max-w-[2rem]">
                     <p class="font-semibold max-w-[4rem]">{{ item.price.toFixed(2) }}:-</p>
                   </div>
-
                 </div>
-
               </li>
             </div>
           </div>
-          <div v-if="ongoingOrder === null && !isConfirmedOrder"
-            class="bg-white opacity-40 flex justify-center items-center">
-            <LoadingSpinner />
-          </div>
         </ul>
-
         <div v-if="ongoingOrder !== null && !isConfirmedOrder"
           class="w-full font-bold flex justify-between items-center mt-4 mb-1 px-2">
           <p class="ml-[0.47rem]">总价：</p>
@@ -55,7 +44,7 @@
         </div>
       </div>
 
-      <div v-if="isAuthenticated" class="sm:min-w-max w-full space-y-4 text-l font-bold sm:w-[70%] pb-4">
+      <div v-if="accountStore.isAuthenticated" class="sm:min-w-max w-full space-y-4 text-l font-bold sm:w-[70%] pb-4">
         <h2 class="text-l font-bold uppercase text-center sm:text-left">2. 填写配送信息</h2>
         <div class="p-4 bg-white rounded shadow pb-4 w-full flex flex-col justify-center items-center">
           <iframe id="googleMap" class="w-full h-[20rem] rounded-md mb-4"
@@ -84,14 +73,14 @@
               <select v-model="selectedPaymentMethod" id="selectedDeliveryMethod"
                 class="px-3 py-2 border rounded border-gray-300 focus:outline-none">
                 <option v-for="paymentMethod in paymentMethods" :key="paymentMethod" :value="paymentMethod">
-                  {{ paymentMethod === "PAY_ON_DELIVERY" ? "货到付款" : paymentMethod }} </option>
+                  {{ paymentMethod === "PAY_ON_DELIVERY" ? "货到付款" : paymentMethod }}</option>
               </select>
             </div>
           </div>
         </div>
 
         <div class="p-4 bg-white rounded shadow">
-          <h2 class="text-l font-bold mb-3 text-center sm:text-left uppercase">{{ isAuthenticated ? '5' : '2' }}. 确认订单</h2>
+          <h2 class="text-l font-bold mb-3 text-center sm:text-left uppercase">{{ accountStore.isAuthenticated ? '5' : '2' }}. 确认订单</h2>
           <div class="w-full flex justify-center items-center">
             <button @click="placeOrder"
               :disabled="deliveryCoordinates.latitude == '' || deliveryCoordinates.longitude == ''"
@@ -99,17 +88,16 @@
           </div>
         </div>
       </div>
-      <div v-if="!isAuthenticated && !isConfirmedOrder">
+      <div v-if="!accountStore.isAuthenticated && !isConfirmedOrder">
         <h2 class="text-l font-bold my-6 text-center sm:text-left uppercase">2. 登录以完成下单</h2>
         <div class="flex flex-col justify-center">
-          <button
-            class="w-max-min bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none transition duration-300">
-            <StyledRouterLink text="登录" path="/login" additional-class="text-md" />
-          </button>
+          <router-link to="/login"
+            class="w-max-min bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none transition duration-300 text-center">
+            登录
+          </router-link>
           <div class="flex justify-center items-center mt-4">
             <p class="mr-1 text-sm">新用户？</p>
-            <StyledRouterLink text="点击注册" path="/signup" textClass="text-blue-700 hover:text-blue-600"
-              additional-class="text-blue-700 hover:text-blue-400 text-sm" />
+            <router-link to="/signup" class="text-blue-700 hover:text-blue-400 text-sm">点击注册</router-link>
           </div>
         </div>
       </div>
@@ -124,125 +112,95 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref, watch, type Ref } from 'vue';
-import LoadingScreen from '../LoadingScreen.vue';
-import LoadingSpinner from '../LoadingSpinner.vue';
-import { useOrderStore } from '@/stores/network/orderStore';
-import { useShoppingCartStore } from '@/stores/shoppingCartStore';
-import { useAuthenticationStore } from '@/stores/authenticationStore';
-import type { OngoingOrder } from '@/types/order';
-import StyledRouterLink from '../StyledRouterLink.vue';
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref, watch, type Ref } from 'vue'
+import { useOrderStore } from '@/stores/network/orderStore'
+import { useShoppingCartStore } from '@/stores/shoppingCartStore'
+import { useAccountStore } from '@/stores/network/accountStore'
+import type { OngoingOrder } from '@/types/order'
 
-export default defineComponent({
-  name: 'OngoingOrder',
-  setup() {
-    const orderStore = useOrderStore();
-    const shoppingCartStore = useShoppingCartStore();
-    const ongoingOrder = ref<OngoingOrder | null>(null);
-    const isAuthenticated = computed(() => useAuthenticationStore().states.isAuthenticated);
-    const deliveryMethods = ref<string[] | []>()
-    const paymentMethods = ref<string[] | []>()
+const orderStore = useOrderStore()
+const shoppingCartStore = useShoppingCartStore()
+const accountStore = useAccountStore()
+const ongoingOrder = ref<OngoingOrder | null>(null)
+const deliveryMethods = ref<string[]>([])
+const paymentMethods = ref<string[]>([])
 
-    const deliveryCoordinates = reactive({
-      latitude: '',
-      longitude: ''
-    })
+const deliveryCoordinates = reactive({
+  latitude: '',
+  longitude: ''
+})
 
-    const selectedDeliveryMethod = ref<string>('')
-    const selectedPaymentMethod = ref<string>('')
+const selectedDeliveryMethod = ref('')
+const selectedPaymentMethod = ref('')
+const isConfirmedOrder = ref(false)
 
-    const isConfirmedOrder = ref<boolean>(false);
+onMounted(() => {
+  updateOngoingOrder()
+  getDeliveryMethods()
+  getPaymentMethods()
+})
 
-    onMounted(() => {
-      updateOngoingOrder();
-      getDeliveryMethods();
-      getPaymentMethods();
-    });
-
-    watch(
-      () => shoppingCartStore.states.productAmount,
-      (newItemsState: number) => {
-        if (newItemsState) {
-          updateOngoingOrder();
-        }
-      }
-    );
-
-    async function getDeliveryMethods() {
-      deliveryMethods.value = await orderStore.API.getAvailableDeliveryMethods();
+watch(
+  () => shoppingCartStore.productAmount,
+  (newItemsState: number) => {
+    if (newItemsState) {
+      updateOngoingOrder()
     }
+  }
+)
 
-    watch(deliveryMethods as Ref, (newMethods: string[]) => {
-      if (newMethods.length > 0) {
-        selectedDeliveryMethod.value = newMethods[0];
-      }
-    });
+async function getDeliveryMethods() {
+  deliveryMethods.value = await orderStore.getAvailableDeliveryMethods()
+}
 
-    async function getPaymentMethods() {
-      paymentMethods.value = await orderStore.API.getAvailablePaymentMethods();
-    }
+watch(deliveryMethods as Ref, (newMethods: string[]) => {
+  if (newMethods.length > 0) {
+    selectedDeliveryMethod.value = newMethods[0]
+  }
+})
 
-    watch(paymentMethods as Ref, (newMethods: string[]) => {
-      if (newMethods.length > 0) {
-        selectedPaymentMethod.value = newMethods[0];
-      }
-    });
+async function getPaymentMethods() {
+  paymentMethods.value = await orderStore.getAvailablePaymentMethods()
+}
 
-    async function updateOngoingOrder() {
-      ongoingOrder.value = await orderStore.API.getOngoingOrder();
+watch(paymentMethods as Ref, (newMethods: string[]) => {
+  if (newMethods.length > 0) {
+    selectedPaymentMethod.value = newMethods[0]
+  }
+})
 
-    }
+async function updateOngoingOrder() {
+  ongoingOrder.value = await orderStore.getOngoingOrder()
+}
 
-    function addProduct(productId: string) {
-      shoppingCartStore.methods.addProductId(productId);
-    }
+function addProduct(productId: string) {
+  shoppingCartStore.addProductId(productId)
+}
 
-    function removeProduct(productId: string) {
-      shoppingCartStore.methods.removeProductId(productId);
-    }
+function removeProduct(productId: string) {
+  shoppingCartStore.removeProductId(productId)
+}
 
-    async function placeOrder() {
-      const address = `${deliveryCoordinates.latitude},${deliveryCoordinates.longitude}`
-      await orderStore.API.placeOrder(
-        address,
-        selectedDeliveryMethod.value,
-        selectedPaymentMethod.value)
-      ongoingOrder.value = null
-      isConfirmedOrder.value = true;
-    }
+async function placeOrder() {
+  const address = `${deliveryCoordinates.latitude},${deliveryCoordinates.longitude}`
+  await orderStore.placeOrder(address, selectedDeliveryMethod.value, selectedPaymentMethod.value)
+  ongoingOrder.value = null
+  isConfirmedOrder.value = true
+}
 
-    function getGeoLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(showPosition);
-      }
-    }
-    function showPosition(position: any) {
-      deliveryCoordinates.latitude = position.coords.latitude;
-      deliveryCoordinates.longitude = position.coords.longitude;
-    }
+function getGeoLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(showPosition)
+  }
+}
 
-    function clearConfirmedOrder() {
-      isConfirmedOrder.value = false;
-    }
+function showPosition(position: any) {
+  deliveryCoordinates.latitude = position.coords.latitude
+  deliveryCoordinates.longitude = position.coords.longitude
+}
 
-    return {
-      ongoingOrder,
-      addProduct,
-      removeProduct,
-      deliveryMethods,
-      selectedDeliveryMethod,
-      deliveryCoordinates,
-      paymentMethods,
-      selectedPaymentMethod,
-      placeOrder,
-      isAuthenticated,
-      isConfirmedOrder,
-      getGeoLocation,
-      clearConfirmedOrder
-    };
-  },
-
-  components: { LoadingScreen, LoadingSpinner, StyledRouterLink }
-});
+function clearConfirmedOrder() {
+  isConfirmedOrder.value = false
+}
 </script>

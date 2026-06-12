@@ -6,19 +6,16 @@ import AccountView from '../views/AccountView.vue'
 import ProductView from '@/views/ProductView.vue'
 import EditAccountView from '../views/EditAccountView.vue'
 import ShowAccountOrdersView from '@/views/ShowAccountOrdersView.vue'
-import { useAuthenticationStore } from '@/stores/authenticationStore'
+import { useAccountStore } from '@/stores/network/accountStore'
 import { useShoppingCartStore } from '@/stores/shoppingCartStore'
 import AdminToolsView from '@/views/admin/AdminToolsView.vue'
 import HandleProductsView from '@/views/admin/HandleProductsView.vue'
-import AddProduct from '@/components/admintools/AddProduct.vue'
-import EditProduct from '@/components/admintools/EditProduct.vue'
-import DeleteProduct from '@/components/admintools/DeleteProduct.vue'
+import ProductForm from '@/components/admintools/ProductForm.vue'
 import HandleOrdersView from '@/views/admin/HandleOrdersView.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
 import UsersOrdersTable from '@/components/admintools/UsersOrdersTable.vue'
 import PublishProductView from '@/views/PublishProductView.vue'
 import FavoritesView from '@/views/FavoritesView.vue'
-import RoleManagementView from '@/views/admin/RoleManagementView.vue'
 import UserManagementView from '@/views/admin/UserManagementView.vue'
 import ProductReviewView from '@/views/admin/ProductReviewView.vue'
 import MyProductsView from '@/views/MyProductsView.vue'
@@ -61,7 +58,7 @@ const router = createRouter({
       name: 'account',
       component: AccountView,
       beforeEnter: (to, from, next) => {
-        if (useAuthenticationStore().states.isAuthenticated) {
+        if (useAccountStore().isAuthenticated) {
           next()
         } else {
           next('/login')
@@ -90,7 +87,7 @@ const router = createRouter({
       name: 'checkout',
       component: CheckoutView,
       beforeEnter: (to, from, next) => {
-        if (useShoppingCartStore().states.productAmount > 0) {
+        if (useShoppingCartStore().productAmount > 0) {
           next()
         } else {
           next('/shop')
@@ -102,7 +99,7 @@ const router = createRouter({
       name: 'publishProduct',
       component: PublishProductView,
       beforeEnter: (to, from, next) => {
-        if (useAuthenticationStore().states.isAuthenticated) {
+        if (useAccountStore().isAuthenticated) {
           next()
         } else {
           next('/login')
@@ -114,7 +111,7 @@ const router = createRouter({
       name: 'favorites',
       component: FavoritesView,
       beforeEnter: (to, from, next) => {
-        if (useAuthenticationStore().states.isAuthenticated) {
+        if (useAccountStore().isAuthenticated) {
           next()
         } else {
           next('/login')
@@ -127,10 +124,8 @@ const router = createRouter({
       redirect: '/admin_tools/products',
       component: AdminToolsView,
       beforeEnter: (to, from, next) => {
-        if (
-          useAuthenticationStore().states.isAuthenticated &&
-          useAuthenticationStore().states.isAdmin
-        ) {
+        const accountStore = useAccountStore()
+        if (accountStore.isAuthenticated && accountStore.isAdmin()) {
           next()
         } else {
           next('/login')
@@ -146,17 +141,20 @@ const router = createRouter({
             {
               path: 'add',
               name: 'AddProduct',
-              component: AddProduct
+              component: ProductForm,
+              props: { formMode: 'add' }
             },
             {
               path: 'edit',
               name: 'EditProduct',
-              component: EditProduct
+              component: ProductForm,
+              props: { formMode: 'edit' }
             },
             {
               path: 'delete',
               name: 'DeleteProduct',
-              component: DeleteProduct
+              component: ProductForm,
+              props: { formMode: 'delete' }
             }
           ]
         },
@@ -184,23 +182,11 @@ const router = createRouter({
           ]
         },
         {
-          path: 'roles',
-          name: 'RoleManagementView',
-          component: RoleManagementView,
-          beforeEnter: (to, from, next) => {
-            if (useAuthenticationStore().states.isSuperAdmin) {
-              next()
-            } else {
-              next('/admin_tools')
-            }
-          }
-        },
-        {
           path: 'users',
           name: 'UserManagementView',
           component: UserManagementView,
           beforeEnter: (to, from, next) => {
-            if (useAuthenticationStore().states.isAdmin) {
+            if (useAccountStore().isAdmin()) {
               next()
             } else {
               next('/admin_tools')
@@ -212,7 +198,7 @@ const router = createRouter({
           name: 'ProductReviewView',
           component: ProductReviewView,
           beforeEnter: (to, from, next) => {
-            if (useAuthenticationStore().states.isAdmin) {
+            if (useAccountStore().isAdmin()) {
               next()
             } else {
               next('/admin_tools')

@@ -17,9 +17,5 @@
   </section>
 </template>
 
-<script lang="ts">
-export default {
-  name: 'AccountView',
-  components: {}
-}
+<script setup lang="ts">
 </script>

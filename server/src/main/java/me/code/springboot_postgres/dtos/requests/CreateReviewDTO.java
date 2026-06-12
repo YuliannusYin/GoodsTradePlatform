@@ -1,7 +1,11 @@
 package me.code.springboot_postgres.dtos.requests;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
 public record CreateReviewDTO(
-        int rating,
+        @Min(1) @Max(5) int rating,
         String comment,
-        String productId) {
+        @NotBlank String productId) {
 }

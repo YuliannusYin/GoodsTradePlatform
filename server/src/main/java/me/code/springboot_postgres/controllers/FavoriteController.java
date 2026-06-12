@@ -1,6 +1,5 @@
 package me.code.springboot_postgres.controllers;
 
-import me.code.springboot_postgres.dtos.requests.FavoriteRequestDTO;
 import me.code.springboot_postgres.dtos.responses.entities.FavoriteDTO;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.models.entities.User;
@@ -24,8 +23,8 @@ public class FavoriteController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Success> addFavorite(@AuthenticationPrincipal User user, @RequestBody FavoriteRequestDTO dto) {
-        var result = favoriteService.addFavorite(user, dto.productId());
+    public ResponseEntity<Success> addFavorite(@AuthenticationPrincipal User user, @RequestParam String productId) {
+        var result = favoriteService.addFavorite(user, productId);
         return result.toResponseEntity();
     }
 

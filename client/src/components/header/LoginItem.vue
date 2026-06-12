@@ -1,34 +1,21 @@
 <template>
-    <div class="cursor-pointer transition duration-300" @mouseover="showPopup" @mouseleave="hidePopup">
-        <StyledRouterLink text="登录" path="/login" />
-        <LoginOrSignupPopup v-if="isShowingPopup" />
-    </div>
+  <div class="cursor-pointer transition duration-300" @mouseover="showPopup" @mouseleave="hidePopup">
+    <router-link to="/login" class="text-gray-700 hover:text-primary-600 font-medium">登录</router-link>
+    <LoginOrSignupPopup v-if="isShowingPopup" />
+  </div>
 </template>
-  
-<script lang="ts">
-import StyledRouterLink from '../StyledRouterLink.vue';
-import LoginOrSignupPopup from '../LoginOrSignupPopup.vue';
-import { defineComponent, ref } from 'vue';
 
-export default defineComponent({
-    name: "LoginItem",
-    setup() {
-        const isShowingPopup = ref(false);
+<script setup lang="ts">
+import { ref } from 'vue'
+import LoginOrSignupPopup from '../LoginOrSignupPopup.vue'
 
-        function showPopup() {
-            isShowingPopup.value = true;
-        }
+const isShowingPopup = ref(false)
 
-        function hidePopup() {
-            isShowingPopup.value = false;
-        }
+function showPopup() {
+  isShowingPopup.value = true
+}
 
-        return { isShowingPopup, showPopup, hidePopup }
-
-    },
-    components: {
-        StyledRouterLink,
-        LoginOrSignupPopup
-    },
-})
+function hidePopup() {
+  isShowingPopup.value = false
+}
 </script>

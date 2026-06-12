@@ -6,10 +6,17 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import { useAccountStore } from './stores/network/accountStore'
 
 const app = createApp(App)
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
+
+// Restore session before mounting the app
+const accountStore = useAccountStore()
+accountStore.restoreSession()
+
 app.use(router)
 
 app.mount('#app')

@@ -1,6 +1,5 @@
 package me.code.springboot_postgres.controllers;
 
-import me.code.springboot_postgres.dtos.requests.AssignRolesDTO;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.services.UserManagementService;
@@ -9,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/admin/users")
@@ -31,9 +31,9 @@ public class UserManagementController {
         return ResponseEntity.ok(userManagementService.getUserById(userId));
     }
 
-    @PutMapping("/{userId}/roles")
-    public ResponseEntity<Success> assignRoles(@PathVariable String userId, @RequestBody AssignRolesDTO dto) {
-        return userManagementService.assignRoles(userId, dto.roleIds()).toResponseEntity();
+    @PutMapping("/{userId}/role")
+    public ResponseEntity<Success> assignRole(@PathVariable String userId, @RequestBody Map<String, String> body) {
+        return userManagementService.assignRole(userId, body.get("role")).toResponseEntity();
     }
 
     @PatchMapping("/{userId}/toggle-enabled")

@@ -4,12 +4,12 @@
 
 ## 项目简介
 
-本项目是一个基于 Vue 3 + Spring Boot + PostgreSQL 的**周边交易平台**，支持 B2C 平台自营和 C2C 用户闲置交易两种模式。用户可以浏览、搜索、购买各类动漫、游戏、偶像周边商品，也可以发布自己的闲置周边进行售卖。系统采用 RBAC 权限模型，支持细粒度的角色与权限管理。
+本项目是一个基于 Vue 3 + Spring Boot + PostgreSQL 的**周边交易平台**，支持 B2C 平台自营和 C2C 用户闲置交易两种模式。用户可以浏览、搜索、购买各类动漫、游戏、偶像周边商品，也可以申请成为商户发布自己的闲置周边进行售卖。系统采用固定角色权限模型，支持超级管理员、管理员、商户、普通用户四种角色。
 
 ## 功能特性
 
 ### 核心功能
-- **用户注册/登录**：JWT 认证，RBAC 权限模型（超级管理员、管理员、普通用户）
+- **用户注册/登录**：JWT 认证，固定角色权限模型（超级管理员、管理员、商户、普通用户）
 - **商品浏览与搜索**：支持关键词搜索、价格排序、分类筛选
 - **商品分类**：手办、海报、钥匙扣、徽章、抱枕、立牌、服饰、专辑、配件等
 - **商品成色**：全新、几乎全新、良好、一般
@@ -20,31 +20,29 @@
 - **商品收藏**：用户可收藏感兴趣的商品，在收藏夹中统一管理
 - **商品评价/评分**：购买后可对商品进行 1-5 星评分和文字评价
 - **分类筛选**：商城页面左侧分类导航，快速筛选目标品类
-- **用户发布商品（C2C）**：普通用户可发布闲置周边，标记为"个人闲置"
-- **商品审核**：用户发布的商品需经管理员审核（通过/驳回），平台商品自动通过
+- **商户发布商品（C2C）**：用户可申请成为商户，发布闲置周边，标记为"个人闲置"
+- **商品审核**：商户发布的商品需经管理员审核（通过/驳回），平台商品自动通过
 - **商品多图展示**：支持多张商品图片
 
 ### 管理员功能
-- 商品增删改查、审核（通过/驳回）
+- 商品增删改查、审核（通过/驳回）、禁用/启用
 - 订单管理（查看、发货、修改预计送达时间）
-- 用户管理（查看、编辑、禁用/启用、分配角色）
-- 角色管理（创建、编辑、删除角色及权限分配）
+- 用户管理（查看、禁用/启用、分配角色）
 
-### RBAC 权限系统
-- **SUPER_ADMIN**：拥有所有权限，包括角色管理
-- **ADMIN**：管理商品和订单，无角色管理权限
-- **USER**：可发布商品、购买、收藏和评价
-
-权限模块：角色管理、用户管理、商品管理、订单管理、个人商品、购物
+### 角色权限系统
+- **SUPER_ADMIN**：拥有所有权限，包括用户管理
+- **ADMIN**：管理商品、订单和审核
+- **MERCHANT**：可发布/编辑/删除自己的商品
+- **USER**：可浏览、购买、收藏和评价
 
 ## 技术栈
 
 | 层级 | 技术 |
 |------|------|
-| 前端 | Vue 3 (Composition API) + TypeScript 5 + Pinia + Vue Router 4 |
-| UI 框架 | Tailwind CSS 3 + Headless UI + Heroicons + Font Awesome |
+| 前端 | Vue 3 (`<script setup>` + Composition API) + TypeScript 5 + Pinia + Vue Router 4 |
+| UI 框架 | Tailwind CSS 3 + Font Awesome |
 | 构建工具 | Vite 4 |
-| 后端 | Java 17 + Spring Boot 3.2 + Spring Security + Spring Data JPA |
+| 后端 | Java 17 + Spring Boot 3.2 + Spring Security + Spring Data JPA + Bean Validation |
 | 数据库 | PostgreSQL 16 (关系型数据库) |
 | 数据库迁移 | Flyway 10.10 |
 | 认证 | JWT (jjwt 0.11.5) |
@@ -60,41 +58,42 @@ eCommerce-Project/
 │   │   └── favicon.ico
 │   ├── src/
 │   │   ├── components/              # Vue 组件
-│   │   │   ├── account/             # 账户相关 (信息、修改、删除、订单)
-│   │   │   ├── admintools/          # 管理员工具 (增删改商品、订单管理)
-│   │   │   ├── footer/              # 页脚 (导航、信息、社交图标)
-│   │   │   ├── header/              # 导航栏 (搜索、购物车、账户、汉堡菜单)
-│   │   │   └── products/            # 商品相关 (卡片、搜索、收藏、下单)
-│   │   ├── router/                  # Vue Router 路由配置
-│   │   │   ├── index.ts             # 路由定义与导航守卫
-│   │   │   └── navigationProvider.ts
+│   │   │   ├── account/             # 账户相关 (AccountInfo, AccountEditForm, ShowOrders)
+│   │   │   ├── admintools/          # 管理员工具 (ProductForm, UsersOrdersTable, UserOrderAside)
+│   │   │   ├── footer/              # 页脚 (FooterInfo, FooterNavItems, SocialsIcons)
+│   │   │   ├── header/              # 导航栏 (NavBar, SearchBar, AccountItem, LoginItem, ShoppingCartItem)
+│   │   │   ├── products/            # 商品相关 (ProductCard, ProductCards, FeaturedProducts, OngoingOrder, PlaceholderCards)
+│   │   │   ├── ConfirmDialogue.vue
+│   │   │   ├── HeroSection.vue
+│   │   │   ├── LoadingOverlay.vue
+│   │   │   ├── LoginOrSignupPopup.vue
+│   │   │   ├── ProductPreview.vue
+│   │   │   └── SmallViewTitle.vue
+│   │   ├── router/
+│   │   │   └── index.ts             # 路由定义与导航守卫
 │   │   ├── stores/                  # Pinia 状态管理
-│   │   │   ├── network/             # 网络请求相关 Store
-│   │   │   │   ├── accountStore.ts  # 账户状态
-│   │   │   │   ├── adminToolsStore.ts
-│   │   │   │   ├── connectionStore.ts
-│   │   │   │   ├── favoriteStore.ts
-│   │   │   │   ├── loadingStore.ts
-│   │   │   │   ├── orderStore.ts
-│   │   │   │   ├── productStore.ts
-│   │   │   │   ├── requests.ts      # Axios 请求封装
-│   │   │   │   ├── reviewStore.ts
-│   │   │   │   ├── roleManagementStore.ts
-│   │   │   │   └── userProductStore.ts
-│   │   │   ├── authenticationStore.ts # 认证状态
-│   │   │   └── shoppingCartStore.ts   # 购物车状态
+│   │   │   └── network/             # 网络请求相关 Store
+│   │   │       ├── accountStore.ts  # 账户与认证状态
+│   │   │       ├── adminToolsStore.ts
+│   │   │       ├── favoriteStore.ts
+│   │   │       ├── orderStore.ts
+│   │   │       ├── productStore.ts  # 商品状态（含商户商品管理）
+│   │   │       ├── reviewStore.ts
+│   │   │       └── requests.ts      # Axios 请求封装（拦截器）
+│   │   │   └── shoppingCartStore.ts # 购物车状态
 │   │   ├── types/                   # TypeScript 类型定义
+│   │   │   ├── api.ts
 │   │   │   ├── favorite.ts
 │   │   │   ├── order.ts
 │   │   │   ├── product.ts
-│   │   │   └── review.ts
+│   │   │   ├── review.ts
+│   │   │   └── user.ts
 │   │   ├── views/                   # 页面视图
 │   │   │   ├── admin/               # 管理员页面
 │   │   │   │   ├── AdminToolsView.vue
 │   │   │   │   ├── HandleOrdersView.vue
 │   │   │   │   ├── HandleProductsView.vue
 │   │   │   │   ├── ProductReviewView.vue
-│   │   │   │   ├── RoleManagementView.vue
 │   │   │   │   └── UserManagementView.vue
 │   │   │   ├── AccountView.vue
 │   │   │   ├── CheckoutView.vue
@@ -128,17 +127,17 @@ eCommerce-Project/
 │   │   │   ├── OrderController.java
 │   │   │   ├── ProductController.java
 │   │   │   ├── ReviewController.java
-│   │   │   ├── RoleManagementController.java
 │   │   │   ├── UserAccountController.java
 │   │   │   ├── UserManagementController.java
 │   │   │   └── UserProductController.java
 │   │   ├── dtos/                    # 数据传输对象
-│   │   │   ├── requests/            # 请求 DTO
+│   │   │   ├── requests/            # 请求 DTO (含 Bean Validation)
 │   │   │   └── responses/           # 响应 DTO (success/ error/ entities/)
 │   │   ├── exceptions/              # 全局异常处理
-│   │   │   └── types/               # 自定义异常 (Validation/Order)
+│   │   │   ├── GlobalExceptionHandler.java
+│   │   │   └── types/               # CustomRuntimeException
 │   │   ├── models/                  # JPA 实体模型
-│   │   │   └── entities/            # User, Product, Order, OrderItem, Review, Favorite, Role, Permission
+│   │   │   └── entities/            # User, Product, Order, OrderItem, Review, Favorite
 │   │   ├── repositories/            # Spring Data JPA Repository
 │   │   ├── security/                # 安全配置
 │   │   │   ├── CorsConfig.java
@@ -151,16 +150,15 @@ eCommerce-Project/
 │   │   └── db/migration/            # Flyway 数据库迁移脚本
 │   │       ├── V1__create_initial_schema.sql
 │   │       ├── V2__insert_builtin_accounts.sql
-│   │       └── V3__insert_seed_products.sql
+│   │       ├── V3__insert_seed_products.sql
+│   │       └── V4__simplify_rbac.sql
 │   ├── Dockerfile                   # 后端 Docker 构建 (Maven → JRE)
 │   └── pom.xml
+├── docs/                            # 项目文档
+│   ├── develop-log.md
+│   ├── migration-plan.md
+│   └── refactoring-plan.md
 ├── images/                          # 项目截图
-│   ├── home_page.png
-│   ├── product_search.png
-│   ├── ongoing_order.png
-│   ├── user_orders.png
-│   ├── admin_ui.png
-│   └── admin_orders.png
 ├── docker-compose.yml               # Docker Compose 编排
 ├── .gitignore
 └── README.md
@@ -168,20 +166,18 @@ eCommerce-Project/
 
 ## 数据库设计
 
-共 10 张表：
+共 5 张表（RBAC 简化后）：
 
 | 表名 | 说明 |
 |------|------|
-| `users` | 用户表（含 is_enabled 禁用状态、is_protected 保护标记） |
+| `users` | 用户表（含 role 枚举字段、is_enabled 禁用状态、is_protected 保护标记） |
 | `products` | 商品表（含 status 审核状态、reject_reason 驳回原因） |
 | `orders` | 订单表 |
 | `order_items` | 订单项表 |
 | `favorites` | 收藏表 |
 | `reviews` | 评价表 |
-| `roles` | 角色表（RBAC） |
-| `permissions` | 权限表（RBAC，按 module 分组） |
-| `role_permissions` | 角色-权限关联表 |
-| `user_roles` | 用户-角色关联表 |
+
+> V4 迁移脚本已将原 RBAC 四张表（roles, permissions, role_permissions, user_roles）合并为 users 表的 role 枚举字段。
 
 ## 快速开始
 
@@ -297,23 +293,42 @@ npm run dev
 |------|------|------|------|
 | POST | /api/account/register | 用户注册 | 否 |
 | POST | /api/account/login | 用户登录 | 否 |
+| GET | /api/account/details | 获取账户详情 | 是 |
+| PUT | /api/account/username | 修改用户名 | 是 |
+| PUT | /api/account/email | 修改邮箱 | 是 |
+| PUT | /api/account/password | 修改密码 | 是 |
+| DELETE | /api/account/delete | 删除账户 | 是 |
 
 ### 商品相关
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| GET | /api/products/all | 获取所有商品 | 否 |
+| GET | /api/products/all | 获取所有已审核商品 | 否 |
 | GET | /api/products/featured | 获取热门商品 | 否 |
 | GET | /api/products/{id} | 获取商品详情 | 否 |
 | GET | /api/products/search | 搜索商品（支持分类） | 否 |
+| GET | /api/products/category/{category} | 按分类获取商品 | 否 |
 | GET | /api/products/categories | 获取分类列表 | 否 |
+| GET | /api/products/conditions | 获取成色列表 | 否 |
+
+### 用户商品（C2C / 商户）
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| POST | /api/user_products/add | 商户发布商品 | 商户 |
+| GET | /api/user_products/my | 获取我的商品 | 商户 |
+| PUT | /api/user_products/edit/{id} | 编辑我的商品 | 商户 |
+| DELETE | /api/user_products/delete/{id} | 删除我的商品 | 商户 |
 
 ### 订单相关
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
+| POST | /api/orders/ongoing | 获取进行中订单预览 | 否 |
 | POST | /api/orders/place | 下单 | 是 |
 | GET | /api/orders/all | 获取用户订单 | 是 |
+| GET | /api/orders/delivery/methods | 获取配送方式 | 否 |
+| GET | /api/orders/payment/methods | 获取支付方式 | 否 |
 
 ### 评价相关
 
@@ -321,63 +336,51 @@ npm run dev
 |------|------|------|------|
 | POST | /api/reviews/add | 添加评价 | 是 |
 | GET | /api/reviews/product/{id} | 获取商品评价 | 否 |
+| GET | /api/reviews/product/{id}/rating | 获取商品评分 | 否 |
+| GET | /api/reviews/user/{id} | 获取用户评价 | 是 |
+| DELETE | /api/reviews/{id} | 删除评价 | 是 |
 
 ### 收藏相关
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| POST | /api/favorites/add | 添加收藏 | 是 |
+| POST | /api/favorites/add?productId= | 添加收藏 | 是 |
 | DELETE | /api/favorites/remove/{id} | 取消收藏 | 是 |
 | GET | /api/favorites/list | 获取收藏列表 | 是 |
-
-### 用户商品（C2C）
-
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | /api/user_products/add | 用户发布商品 | 是 |
-| GET | /api/user_products/my | 获取我的商品 | 是 |
+| GET | /api/favorites/check/{id} | 检查是否已收藏 | 是 |
 
 ### 管理员 - 商品管理
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| POST | /api/admin_tools/products/add | 添加商品 | 管理员 |
-| PUT | /api/admin_tools/products/edit | 编辑商品 | 管理员 |
-| DELETE | /api/admin_tools/products/delete/{id} | 删除商品 | 管理员 |
+| POST | /api/admin_tools/product/add | 添加商品 | ADMIN+ |
+| PUT | /api/admin_tools/product/edit/{id} | 编辑商品 | ADMIN+ |
+| DELETE | /api/admin_tools/product/delete/{id} | 删除商品 | ADMIN+ |
+| PATCH | /api/admin_tools/product/approve/{id} | 审核通过 | ADMIN+ |
+| PATCH | /api/admin_tools/product/reject/{id}?rejectReason= | 审核驳回 | ADMIN+ |
+| PATCH | /api/admin_tools/product/disable/{id} | 禁用商品 | ADMIN+ |
+| PATCH | /api/admin_tools/product/enable/{id} | 启用商品 | ADMIN+ |
+| GET | /api/admin_tools/product/pending | 获取待审核商品 | ADMIN+ |
+| GET | /api/admin_tools/product/status/{status} | 按状态查商品 | ADMIN+ |
 
 ### 管理员 - 订单管理
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| GET | /api/admin_tools/orders/all | 获取所有订单 | 管理员 |
-| PUT | /api/admin_tools/orders/send | 发货 | 管理员 |
-| PUT | /api/admin_tools/orders/expected_delivery | 修改预计送达时间 | 管理员 |
-
-### 管理员 - 商品审核
-
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | /api/admin_tools/reviews/pending | 获取待审核商品 | 管理员 |
-| PUT | /api/admin_tools/reviews/{id}/approve | 审核通过 | 管理员 |
-| PUT | /api/admin_tools/reviews/{id}/reject | 审核驳回 | 管理员 |
+| GET | /api/admin_tools/order/all | 获取所有订单 | ADMIN+ |
+| GET | /api/admin_tools/order/all/{status} | 按状态查订单 | ADMIN+ |
+| PATCH | /api/admin_tools/order/send | 发货 | ADMIN+ |
+| PATCH | /api/admin_tools/order/expected_delivery | 修改预计送达时间 | ADMIN+ |
 
 ### 管理员 - 用户管理
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| GET | /api/admin/users | 获取用户列表 | 超级管理员/管理员 |
-| PUT | /api/admin/users/{id} | 编辑用户信息 | 超级管理员/管理员 |
-| PUT | /api/admin/users/{id}/roles | 分配用户角色 | 超级管理员/管理员 |
-| PUT | /api/admin/users/{id}/toggle-enabled | 禁用/启用用户 | 超级管理员/管理员 |
-
-### 管理员 - 角色管理
-
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | /api/admin/roles | 获取角色列表 | 超级管理员 |
-| POST | /api/admin/roles | 创建角色 | 超级管理员 |
-| PUT | /api/admin/roles/{id} | 编辑角色及权限 | 超级管理员 |
-| DELETE | /api/admin/roles/{id} | 删除角色 | 超级管理员 |
+| GET | /api/admin/users/all | 获取用户列表 | SUPER_ADMIN |
+| GET | /api/admin/users/{id} | 获取用户详情 | SUPER_ADMIN |
+| PUT | /api/admin/users/{id}/role | 分配用户角色 | SUPER_ADMIN |
+| PATCH | /api/admin/users/{id}/toggle-enabled | 禁用/启用用户 | SUPER_ADMIN |
+| DELETE | /api/admin/users/{id} | 删除用户 | SUPER_ADMIN |
 
 ## 页面路由
 
@@ -391,15 +394,14 @@ npm run dev
 | `/account` | 账户中心 | 是 |
 | `/account/edit` | 编辑账户 | 是 |
 | `/account/orders` | 我的订单 | 是 |
-| `/account/my-products` | 我的商品 | 是 |
+| `/account/my-products` | 我的商品 | 商户 |
 | `/checkout` | 结算页 | 否（需购物车有商品） |
-| `/publish` | 发布商品 | 是 |
+| `/publish` | 发布商品 | 商户 |
 | `/favorites` | 我的收藏 | 是 |
 | `/admin_tools/products` | 管理商品 | 管理员 |
 | `/admin_tools/orders` | 管理订单 | 管理员 |
 | `/admin_tools/reviews` | 商品审核 | 管理员 |
-| `/admin_tools/users` | 用户管理 | 管理员 |
-| `/admin_tools/roles` | 角色管理 | 超级管理员 |
+| `/admin_tools/users` | 用户管理 | 超级管理员 |
 
 ## 环境变量
 
@@ -439,4 +441,4 @@ npm run dev
 
 ## 许可证
 
-本项目为《互联网应用开发》课程期末大作业，仅供学习参考。
+本项目为本科毕业设计项目，仅供学习参考。

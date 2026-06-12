@@ -1,4 +1,8 @@
 package me.code.springboot_postgres.dtos.requests;
 
-public record ChangeEmailDTO(String newEmail) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record ChangeEmailDTO(
+        @NotBlank @Email String newEmail) {
 }

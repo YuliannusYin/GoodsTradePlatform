@@ -3,14 +3,7 @@
     <ShowOrders />
   </section>
 </template>
-  
-<script lang="ts">
+
+<script setup lang="ts">
 import ShowOrders from '@/components/account/ShowOrders.vue'
-
-
-export default {
-  name: 'ShowAccountOrdersView',
-  components: { ShowOrders }
-}
 </script>
-  

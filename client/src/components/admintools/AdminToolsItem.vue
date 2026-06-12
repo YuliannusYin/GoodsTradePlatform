@@ -1,35 +1,23 @@
 <template>
-    <div class="cursor-pointer transition duration-300" @mouseover="showPopup" @mouseleave="hidePopup">
-        <IconRouterLink iconClass="fas fa-id-card text-blue-500" path="/admin_tools" />
-        <AdminToolsPopup v-if="isShowingPopup" />
-    </div>
+  <div class="cursor-pointer transition duration-300" @mouseover="showPopup" @mouseleave="hidePopup">
+    <router-link to="/admin_tools" class="text-blue-500">
+      <i class="fas fa-id-card"></i>
+    </router-link>
+    <AdminToolsPopup v-if="isShowingPopup" />
+  </div>
 </template>
-  
-<script lang="ts">
-import AdminToolsPopup from './AdminToolsPopup.vue';
 
-import { defineComponent, ref } from 'vue';
-import IconRouterLink from '../IconRouterLink.vue';
+<script setup lang="ts">
+import { ref } from 'vue'
+import AdminToolsPopup from './AdminToolsPopup.vue'
 
-export default defineComponent({
-    name: "AdminToolsItem",
-    setup() {
-        const isShowingPopup = ref(false);
+const isShowingPopup = ref(false)
 
-        function showPopup() {
-            isShowingPopup.value = true;
-        }
+function showPopup() {
+  isShowingPopup.value = true
+}
 
-        function hidePopup() {
-            isShowingPopup.value = false;
-        }
-
-        return { isShowingPopup, showPopup, hidePopup }
-
-    },
-    components: {
-        AdminToolsPopup,
-        IconRouterLink
-    },
-})
+function hidePopup() {
+  isShowingPopup.value = false
+}
 </script>
