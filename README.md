@@ -40,13 +40,13 @@
 | 层级 | 技术 |
 |------|------|
 | 前端 | Vue 3 (`<script setup>` + Composition API) + TypeScript 5 + Pinia + Vue Router 4 |
-| UI 框架 | Tailwind CSS 3 + Font Awesome |
+| UI 框架 | Tailwind CSS 3 + Font Awesome + Headless UI + Heroicons |
 | 构建工具 | Vite 4 |
+| HTTP 客户端 | Axios |
 | 后端 | Java 17 + Spring Boot 3.2 + Spring Security + Spring Data JPA + Bean Validation |
-| 数据库 | PostgreSQL 16 (关系型数据库) |
-| 数据库迁移 | Flyway 10.10 |
+| 数据库 | PostgreSQL 16（关系型数据库，JPA 自动建表） |
 | 认证 | JWT (jjwt 0.11.5) |
-| 工具库 | Lombok |
+| 工具库 | Lombok + JetBrains Annotations |
 | 部署 | Docker + Docker Compose + Nginx |
 
 ## 项目结构
@@ -58,107 +58,142 @@ eCommerce-Project/
 │   │   └── favicon.ico
 │   ├── src/
 │   │   ├── components/              # Vue 组件
-│   │   │   ├── account/             # 账户相关 (AccountInfo, AccountEditForm, ShowOrders)
-│   │   │   ├── admintools/          # 管理员工具 (ProductForm, UsersOrdersTable, UserOrderAside)
+│   │   │   ├── account/             # 账户相关 (AccountEditForm, AccountInfo, ShowOrders)
+│   │   │   ├── admintools/          # 管理员工具 (AdminToolsItem, AdminToolsPopup, ProductForm, UserOrderAside, UsersOrdersTable)
 │   │   │   ├── footer/              # 页脚 (FooterInfo, FooterNavItems, SocialsIcons)
 │   │   │   ├── header/              # 导航栏 (NavBar, SearchBar, AccountItem, LoginItem, ShoppingCartItem)
 │   │   │   ├── products/            # 商品相关 (ProductCard, ProductCards, FeaturedProducts, OngoingOrder, PlaceholderCards)
-│   │   │   ├── ConfirmDialogue.vue
-│   │   │   ├── HeroSection.vue
-│   │   │   ├── LoadingOverlay.vue
-│   │   │   ├── LoginOrSignupPopup.vue
-│   │   │   ├── ProductPreview.vue
-│   │   │   └── SmallViewTitle.vue
+│   │   │   ├── ConfirmDialogue.vue  # 确认对话框
+│   │   │   ├── HeroSection.vue      # 首页横幅
+│   │   │   ├── LoadingOverlay.vue   # 加载遮罩
+│   │   │   ├── LoginOrSignupPopup.vue # 登录/注册弹窗
+│   │   │   ├── ProductPreview.vue   # 商品预览
+│   │   │   └── SmallViewTitle.vue   # 小视图标题
 │   │   ├── router/
 │   │   │   └── index.ts             # 路由定义与导航守卫
 │   │   ├── stores/                  # Pinia 状态管理
-│   │   │   └── network/             # 网络请求相关 Store
-│   │   │       ├── accountStore.ts  # 账户与认证状态
-│   │   │       ├── adminToolsStore.ts
-│   │   │       ├── favoriteStore.ts
-│   │   │       ├── orderStore.ts
-│   │   │       ├── productStore.ts  # 商品状态（含商户商品管理）
-│   │   │       ├── reviewStore.ts
-│   │   │       └── requests.ts      # Axios 请求封装（拦截器）
+│   │   │   ├── network/             # 网络请求相关 Store
+│   │   │   │   ├── accountStore.ts  # 账户与认证状态
+│   │   │   │   ├── adminToolsStore.ts # 管理员工具状态
+│   │   │   │   ├── favoriteStore.ts # 收藏状态
+│   │   │   │   ├── orderStore.ts    # 订单状态
+│   │   │   │   ├── productStore.ts  # 商品状态（含商户商品管理）
+│   │   │   │   ├── reviewStore.ts   # 评价状态
+│   │   │   │   └── requests.ts      # Axios 请求封装（拦截器）
 │   │   │   └── shoppingCartStore.ts # 购物车状态
 │   │   ├── types/                   # TypeScript 类型定义
-│   │   │   ├── api.ts
-│   │   │   ├── favorite.ts
-│   │   │   ├── order.ts
-│   │   │   ├── product.ts
-│   │   │   ├── review.ts
-│   │   │   └── user.ts
+│   │   │   ├── api.ts               # 通用 API 响应类型
+│   │   │   ├── favorite.ts          # 收藏类型
+│   │   │   ├── order.ts             # 订单类型
+│   │   │   ├── product.ts           # 商品类型
+│   │   │   ├── review.ts            # 评价类型
+│   │   │   └── user.ts              # 用户类型
 │   │   ├── views/                   # 页面视图
 │   │   │   ├── admin/               # 管理员页面
-│   │   │   │   ├── AdminToolsView.vue
-│   │   │   │   ├── HandleOrdersView.vue
-│   │   │   │   ├── HandleProductsView.vue
-│   │   │   │   ├── ProductReviewView.vue
-│   │   │   │   └── UserManagementView.vue
-│   │   │   ├── AccountView.vue
-│   │   │   ├── CheckoutView.vue
-│   │   │   ├── EditAccountView.vue
-│   │   │   ├── FavoritesView.vue
-│   │   │   ├── HomeView.vue
-│   │   │   ├── LoginView.vue
-│   │   │   ├── MyProductsView.vue
-│   │   │   ├── ProductView.vue
-│   │   │   ├── PublishProductView.vue
-│   │   │   ├── ShopView.vue
-│   │   │   ├── ShowAccountOrdersView.vue
-│   │   │   └── SignupView.vue
-│   │   ├── App.vue
-│   │   ├── index.css
-│   │   └── main.ts
+│   │   │   │   ├── AdminToolsView.vue     # 管理工具主页
+│   │   │   │   ├── HandleOrdersView.vue   # 订单管理
+│   │   │   │   ├── HandleProductsView.vue # 商品管理
+│   │   │   │   ├── ProductReviewView.vue  # 商品审核
+│   │   │   │   └── UserManagementView.vue # 用户管理
+│   │   │   ├── AccountView.vue            # 账户中心
+│   │   │   ├── CheckoutView.vue           # 结算页
+│   │   │   ├── EditAccountView.vue        # 编辑账户
+│   │   │   ├── FavoritesView.vue          # 我的收藏
+│   │   │   ├── HomeView.vue               # 首页
+│   │   │   ├── LoginView.vue              # 登录
+│   │   │   ├── MyProductsView.vue         # 我的商品（商户）
+│   │   │   ├── ProductView.vue            # 商品详情
+│   │   │   ├── PublishProductView.vue     # 发布商品（商户）
+│   │   │   ├── ShopView.vue               # 商城
+│   │   │   ├── ShowAccountOrdersView.vue  # 我的订单
+│   │   │   └── SignupView.vue             # 注册
+│   │   ├── App.vue                  # 根组件
+│   │   ├── index.css                # 全局样式
+│   │   └── main.ts                  # 应用入口
 │   ├── Dockerfile                   # 前端 Docker 构建 (Node → Nginx)
 │   ├── nginx.conf                   # Nginx 反向代理配置
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   ├── tsconfig.json
+│   ├── vite.config.ts               # Vite 配置（含 API 代理）
+│   ├── tailwind.config.js           # Tailwind CSS 配置（自定义主题色）
+│   ├── tsconfig.json                # TypeScript 配置
 │   └── package.json
 ├── server/                          # 后端项目 (Spring Boot + PostgreSQL)
 │   ├── src/main/java/me/code/springboot_postgres/
 │   │   ├── config/                  # 配置类
-│   │   │   └── DataInitializer.java # 数据初始化 (种子用户)
+│   │   │   └── DataInitializer.java # 数据初始化（启动时确保内置用户存在）
 │   │   ├── controllers/             # REST 控制器
-│   │   │   ├── AdminToolsController.java
-│   │   │   ├── FavoriteController.java
-│   │   │   ├── LoginController.java
-│   │   │   ├── OrderController.java
-│   │   │   ├── ProductController.java
-│   │   │   ├── ReviewController.java
-│   │   │   ├── UserAccountController.java
-│   │   │   ├── UserManagementController.java
-│   │   │   └── UserProductController.java
+│   │   │   ├── AdminToolsController.java      # 管理员工具（商品/订单管理）
+│   │   │   ├── FavoriteController.java        # 收藏管理
+│   │   │   ├── LoginController.java           # 登录认证
+│   │   │   ├── OrderController.java           # 订单管理
+│   │   │   ├── ProductController.java         # 商品浏览/搜索
+│   │   │   ├── ReviewController.java          # 评价管理
+│   │   │   ├── UserAccountController.java     # 用户账户管理
+│   │   │   ├── UserManagementController.java  # 用户管理（超级管理员）
+│   │   │   └── UserProductController.java     # 商户商品管理
 │   │   ├── dtos/                    # 数据传输对象
-│   │   │   ├── requests/            # 请求 DTO (含 Bean Validation)
-│   │   │   └── responses/           # 响应 DTO (success/ error/ entities/)
+│   │   │   ├── requests/            # 请求 DTO（含 Bean Validation）
+│   │   │   │   ├── ChangeEmailDTO.java
+│   │   │   │   ├── ChangePasswordDTO.java
+│   │   │   │   ├── ChangeUsernameDTO.java
+│   │   │   │   ├── CreateReviewDTO.java
+│   │   │   │   ├── CreateUserDTO.java
+│   │   │   │   ├── OrderDeliveryDTO.java
+│   │   │   │   ├── PlaceOrderDTO.java
+│   │   │   │   ├── ProductDTO.java
+│   │   │   │   └── UserLoginDTO.java
+│   │   │   └── responses/          # 响应 DTO
+│   │   │       ├── ApiResponse.java          # 统一 API 响应包装
+│   │   │       ├── AuthenticationDTO.java    # 认证响应
+│   │   │       ├── FavoriteDTO.java
+│   │   │       ├── OngoingOrderDTO.java
+│   │   │       ├── OrderDTO.java
+│   │   │       ├── ProductDTO.java
+│   │   │       ├── ProductRatingDTO.java
+│   │   │       ├── ReviewDTO.java
+│   │   │       ├── UnavailableProductDTO.java
+│   │   │       ├── UserDTO.java
+│   │   │       ├── UserDetailsDTO.java
+│   │   │       └── UserOrderDTO.java
 │   │   ├── exceptions/              # 全局异常处理
-│   │   │   ├── GlobalExceptionHandler.java
-│   │   │   └── types/               # CustomRuntimeException
+│   │   │   ├── GlobalExceptionHandler.java   # 全局异常处理器
+│   │   │   └── types/
+│   │   │       └── CustomRuntimeException.java # 自定义运行时异常
 │   │   ├── models/                  # JPA 实体模型
-│   │   │   └── entities/            # User, Product, Order, OrderItem, Review, Favorite
+│   │   │   └── entities/
+│   │   │       ├── User.java        # 用户实体（含 Role 枚举，实现 UserDetails）
+│   │   │       ├── Product.java     # 商品实体（含 Category/Condition/Status 枚举）
+│   │   │       ├── Order.java       # 订单实体（含 Status/DeliveryMethod/PaymentMethod 枚举）
+│   │   │       ├── OrderItem.java   # 订单项实体
+│   │   │       ├── Review.java      # 评价实体
+│   │   │       └── Favorite.java    # 收藏实体
 │   │   ├── repositories/            # Spring Data JPA Repository
+│   │   │   ├── FavoriteRepository.java
+│   │   │   ├── OrderRepository.java
+│   │   │   ├── ProductRepository.java
+│   │   │   ├── ProductSpecifications.java  # 商品动态查询条件构建
+│   │   │   ├── ReviewRepository.java
+│   │   │   └── UserRepository.java
 │   │   ├── security/                # 安全配置
-│   │   │   ├── CorsConfig.java
-│   │   │   ├── JwtTokenUtil.java
-│   │   │   ├── JwtValidationFilter.java
-│   │   │   └── SecurityConfig.java
-│   │   └── services/                # 业务逻辑层
+│   │   │   ├── CorsConfig.java            # CORS 跨域配置
+│   │   │   ├── JwtTokenUtil.java          # JWT 令牌生成与解析
+│   │   │   ├── JwtValidationFilter.java   # JWT 请求验证过滤器
+│   │   │   └── SecurityConfig.java        # 安全过滤链与权限配置
+│   │   ├── services/                # 业务逻辑层
+│   │   │   ├── AdminToolsService.java      # 管理员工具服务
+│   │   │   ├── FavoriteService.java        # 收藏服务
+│   │   │   ├── OrderItemService.java       # 订单项服务
+│   │   │   ├── OrderService.java           # 订单服务
+│   │   │   ├── ProductService.java         # 商品服务
+│   │   │   ├── ReviewService.java          # 评价服务
+│   │   │   ├── UserAccountService.java     # 用户账户服务（含 UserDetailsService）
+│   │   │   ├── UserManagementService.java  # 用户管理服务
+│   │   │   └── UserProductService.java     # 商户商品服务
+│   │   └── Application.java         # Spring Boot 启动类
 │   ├── src/main/resources/
-│   │   ├── application.yml          # Spring Boot 配置
-│   │   └── db/migration/            # Flyway 数据库迁移脚本
-│   │       ├── V1__create_initial_schema.sql
-│   │       ├── V2__insert_builtin_accounts.sql
-│   │       ├── V3__insert_seed_products.sql
-│   │       └── V4__simplify_rbac.sql
+│   │   └── application.yml          # Spring Boot 配置
+│   ├── src/test/                    # 测试
 │   ├── Dockerfile                   # 后端 Docker 构建 (Maven → JRE)
 │   └── pom.xml
-├── docs/                            # 项目文档
-│   ├── develop-log.md
-│   ├── migration-plan.md
-│   └── refactoring-plan.md
-├── images/                          # 项目截图
 ├── docker-compose.yml               # Docker Compose 编排
 ├── .gitignore
 └── README.md
@@ -166,18 +201,18 @@ eCommerce-Project/
 
 ## 数据库设计
 
-共 5 张表（RBAC 简化后）：
+共 6 张表，由 JPA 自动建表（`hibernate.ddl-auto=update`）：
 
 | 表名 | 说明 |
 |------|------|
-| `users` | 用户表（含 role 枚举字段、is_enabled 禁用状态、is_protected 保护标记） |
-| `products` | 商品表（含 status 审核状态、reject_reason 驳回原因） |
-| `orders` | 订单表 |
-| `order_items` | 订单项表 |
-| `favorites` | 收藏表 |
-| `reviews` | 评价表 |
+| `users` | 用户表（含 role 枚举字段、is_enabled 禁用状态、is_protected 保护标记、version 乐观锁） |
+| `products` | 商品表（含 status 审核状态、reject_reason 驳回原因、imageUrls JSONB 图片列表、version 乐观锁） |
+| `orders` | 订单表（含 status/delivery_method/payment_method 枚举字段） |
+| `order_items` | 订单项表（关联订单和商品） |
+| `favorites` | 收藏表（用户与商品的多对多关系） |
+| `reviews` | 评价表（含 1-5 星评分和文字评价） |
 
-> V4 迁移脚本已将原 RBAC 四张表（roles, permissions, role_permissions, user_roles）合并为 users 表的 role 枚举字段。
+> 系统使用 `DataInitializer` 在应用启动时自动确保内置用户（超级管理员、商户、测试用户）存在且字段正确，无需手动执行 SQL 迁移脚本。
 
 ## 快速开始
 
@@ -215,9 +250,9 @@ docker compose logs -f server
 
 5. **默认测试账号**
 ```
-超级管理员：admin@merchandise.com / Admin@2024（不可改名/改密码/删除）
-测试商户：merchant@merchandise.com / Merchant@2024（所有内置商品的卖家）
-测试用户：testuser@merchandise.com / Test@2024（余额 $10,000,000）
+超级管理员：admin@merchandise.com / Admin@2024（受保护账号，不可改名/改密码/删除）
+测试商户：merchant@merchandise.com / Merchant@2024（受保护账号，所有内置商品的卖家）
+测试用户：testuser@merchandise.com / Test@2024（受保护账号，余额 $10,000,000）
 ```
 
 6. **停止服务**
@@ -282,7 +317,7 @@ npm run dev
 ```
 
 5. **访问应用**
-- 前端：http://localhost:5173
+- 前端：http://localhost:5173（Vite 开发服务器自动代理 `/api` 到后端）
 - 后端：http://localhost:8080
 
 ## API 接口概览
@@ -293,6 +328,7 @@ npm run dev
 |------|------|------|------|
 | POST | /api/account/register | 用户注册 | 否 |
 | POST | /api/account/login | 用户登录 | 否 |
+| POST | /api/account/confirm | 验证凭据 | 是 |
 | GET | /api/account/details | 获取账户详情 | 是 |
 | PUT | /api/account/username | 修改用户名 | 是 |
 | PUT | /api/account/email | 修改邮箱 | 是 |
@@ -315,10 +351,10 @@ npm run dev
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| POST | /api/user_products/add | 商户发布商品 | 商户 |
-| GET | /api/user_products/my | 获取我的商品 | 商户 |
-| PUT | /api/user_products/edit/{id} | 编辑我的商品 | 商户 |
-| DELETE | /api/user_products/delete/{id} | 删除我的商品 | 商户 |
+| POST | /api/user_products/add | 商户发布商品 | MERCHANT+ |
+| GET | /api/user_products/my | 获取我的商品 | MERCHANT+ |
+| PUT | /api/user_products/edit/{id} | 编辑我的商品 | MERCHANT+ |
+| DELETE | /api/user_products/delete/{id} | 删除我的商品 | MERCHANT+ |
 
 ### 订单相关
 
@@ -413,9 +449,9 @@ npm run dev
 | `SPRING_DATASOURCE_URL` | 数据库连接地址 | `jdbc:postgresql://localhost:5432/merchandise` |
 | `SPRING_DATASOURCE_USERNAME` | 数据库用户名 | `postgres` |
 | `SPRING_DATASOURCE_PASSWORD` | 数据库密码 | 同 `POSTGRES_PASSWORD` |
-| `JWT_SECRET` | JWT 签名密钥 | `dev-only-secret-key-change-in-production-min-32-chars` |
+| `JWT_SECRET` | JWT 签名密钥 | `please-change-this-to-a-secure-random-secret-key-in-production` |
 | `JWT_EXPIRATION_MS` | JWT 过期时间（毫秒） | `3600000`（1 小时） |
-| `CORS_ALLOWED_ORIGINS` | CORS 允许的来源 | `*` |
+| `CORS_ALLOWED_ORIGINS` | CORS 允许的来源 | `http://localhost` |
 | `SHOW_SQL` | 是否打印 SQL | `false` |
 
 ## Docker 架构
@@ -438,6 +474,14 @@ npm run dev
                     │  PostgreSQL 16  │  ← 关系型数据库 :5432
                     └─────────────────┘
 ```
+
+### 容器说明
+
+| 容器 | 镜像 | 端口 | 说明 |
+|------|------|------|------|
+| `merchandise-client` | 自定义（Node 构建 → Nginx 运行） | 80:80 | 前端静态资源 + API 反向代理 |
+| `merchandise-server` | 自定义（Maven 构建 → JRE 运行） | 8080:8080 | Spring Boot 后端服务 |
+| `merchandise-postgres` | postgres:16-alpine | 5432:5432 | PostgreSQL 数据库（含健康检查） |
 
 ## 许可证
 
