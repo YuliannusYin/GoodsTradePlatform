@@ -39,7 +39,7 @@ public class User implements UserDetails {
      * New code should use the `roles` ManyToMany relationship instead.
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(name = "role", nullable = false, length = 10)
     private LegacyRole legacyRole;
 
     private String avatarUrl;

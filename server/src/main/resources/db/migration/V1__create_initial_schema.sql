@@ -11,7 +11,8 @@ CREATE TABLE users (
     avatar_url      VARCHAR(500),
     bio             VARCHAR(500),
     balance         DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-    is_protected    BOOLEAN        NOT NULL DEFAULT false
+    is_protected    BOOLEAN        NOT NULL DEFAULT false,
+    is_enabled      BOOLEAN        NOT NULL DEFAULT true
 );
 
 CREATE TABLE products (
