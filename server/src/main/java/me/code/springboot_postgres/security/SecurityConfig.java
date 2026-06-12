@@ -1,7 +1,6 @@
 package me.code.springboot_postgres.security;
 
 import me.code.springboot_postgres.services.UserAccountService;
-import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -10,7 +9,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -40,6 +38,7 @@ public class SecurityConfig {
             ORDERS_PATH + "/delivery/methods",
             ORDERS_PATH + "/payment/methods",
             REVIEWS_PATH + "/product/**",
+            REVIEWS_PATH + "/product/*/rating",
     };
 
     private static final String[] SUPER_ADMIN_URLS = {
@@ -69,16 +68,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider authProvider(UserDetailsService userAccountService, PasswordEncoder encoder) {
+    public AuthenticationProvider authProvider(UserAccountService userAccountService, PasswordEncoder encoder) {
         var dao = new DaoAuthenticationProvider();
         dao.setUserDetailsService(userAccountService);
         dao.setPasswordEncoder(encoder);
         return dao;
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        return new UserAccountService(userRepository, passwordEncoder);
     }
 
     @Bean
