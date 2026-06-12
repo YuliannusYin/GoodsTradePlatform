@@ -11,6 +11,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ProductPreview.vue
+ * @description 商品预览组件，在管理后台表单旁展示商品的图片、名称、描述和价格
+ */
 import SmallViewTitle from './SmallViewTitle.vue'
 
 defineProps<{

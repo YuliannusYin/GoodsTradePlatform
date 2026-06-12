@@ -26,6 +26,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ConfirmDialogue.vue
+ * @description 确认对话框组件，支持可选的密码验证，用于操作前的二次确认
+ */
 import { ref } from 'vue'
 import { useAccountStore } from '@/stores/network/accountStore'
 
@@ -38,12 +42,19 @@ const props = defineProps<{
 }>()
 
 const accountStore = useAccountStore()
+// 密码验证错误提示是否可见
 const isConfirmationErrorResponse = ref(false)
+// 用户输入的密码
 const password = ref('')
 
+/**
+ * 确认操作处理函数
+ * 需要密码验证时先校验密码，验证通过后执行确认回调；无需验证时直接执行确认回调
+ */
 async function handleConfirm() {
   if (props.isPasswordRequired) {
     try {
+      // 验证用户输入的密码是否正确
       const confirmed = await accountStore.isValidCredentials(accountStore.email || '', password.value)
       if (confirmed) {
         props.onConfirm(password.value)
@@ -54,11 +65,13 @@ async function handleConfirm() {
       isConfirmationErrorResponse.value = true
     }
   } else {
+    // 无需密码验证，直接确认
     props.onConfirm(password.value)
   }
   props.onCancel()
 }
 
+// 取消操作，关闭对话框
 function cancel() {
   props.onCancel()
 }

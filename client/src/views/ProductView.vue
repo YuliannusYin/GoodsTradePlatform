@@ -72,6 +72,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ProductView.vue
+ * @description 商品详情视图，展示商品信息、评价列表，支持发表评价和加入购物车
+ */
 import { onMounted, ref } from 'vue'
 import type { Product } from '@/types/product'
 import type { Review, ProductRating } from '@/types/review'
@@ -83,22 +87,29 @@ import { useRoute } from 'vue-router'
 import ProductCard from '@/components/products/ProductCard.vue'
 
 const route = useRoute()
-const shoppingCartStore = useShoppingCartStore()
-const productStore = useProductStore()
-const reviewStore = useReviewStore()
-const accountStore = useAccountStore()
-const product = ref<Product | null>(null)
-const reviews = ref<Review[]>([])
-const productRating = ref<ProductRating | null>(null)
-const newRating = ref(0)
-const newComment = ref('')
+const shoppingCartStore = useShoppingCartStore() // 购物车状态管理
+const productStore = useProductStore()           // 商品状态管理
+const reviewStore = useReviewStore()             // 评价状态管理
+const accountStore = useAccountStore()           // 账户状态管理
+const product = ref<Product | null>(null)        // 商品详情数据
+const reviews = ref<Review[]>([])                // 评价列表数据
+const productRating = ref<ProductRating | null>(null) // 商品评分统计
+const newRating = ref(0)                          // 新评价的评分
+const newComment = ref('')                        // 新评价的评论内容
 
+/**
+ * 加载商品详情和评价数据
+ */
 async function loadProductData() {
   const productId = route.params.productId as string
   product.value = await productStore.getProduct(productId)
   await loadReviews(productId)
 }
 
+/**
+ * 加载商品评价列表和评分统计
+ * @param {string} productId - 商品ID
+ */
 async function loadReviews(productId: string) {
   try {
     reviews.value = await reviewStore.getProductReviews(productId)
@@ -108,6 +119,9 @@ async function loadReviews(productId: string) {
   }
 }
 
+/**
+ * 提交新评价，成功后刷新评价列表
+ */
 async function submitReview() {
   if (!product.value || newRating.value === 0 || !newComment.value.trim()) return
   try {
@@ -116,6 +130,7 @@ async function submitReview() {
       comment: newComment.value,
       productId: product.value.id
     })
+    // 重置评价表单
     newRating.value = 0
     newComment.value = ''
     await loadReviews(product.value.id)
@@ -124,9 +139,14 @@ async function submitReview() {
   }
 }
 
+/**
+ * 将商品添加到购物车
+ * @param {string} productId - 商品ID
+ */
 function addToCart(productId: string) {
   shoppingCartStore.addProductId(productId)
 }
 
+// 组件挂载时加载商品数据
 onMounted(loadProductData)
 </script>

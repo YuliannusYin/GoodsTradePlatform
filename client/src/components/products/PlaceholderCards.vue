@@ -8,8 +8,13 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file PlaceholderCards.vue
+ * @description 商品加载占位卡片组件，在商品数据加载完成前显示旋转加载动画
+ */
 import { ref, onMounted } from 'vue'
 
+// 占位卡片数据结构
 interface PlaceHolderCard {
   id: string
 }
@@ -18,8 +23,10 @@ const props = defineProps<{
   placeholderAmount: number
 }>()
 
+// 占位卡片列表
 const placeholderCards = ref<PlaceHolderCard[]>([])
 
+// 组件挂载时根据数量生成占位卡片
 onMounted(() => {
   for (let amount = 0; amount < props.placeholderAmount; amount++) {
     placeholderCards.value.push({ id: `${amount}` })

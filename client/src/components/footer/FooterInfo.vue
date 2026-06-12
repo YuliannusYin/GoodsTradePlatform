@@ -13,6 +13,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file FooterInfo.vue
+ * @description 页脚组件，包含导航链接、社交媒体图标和版权信息
+ */
 import FooterNavItems from './FooterNavItems.vue'
 import SocialsIcons from './SocialsIcons.vue'
 </script>

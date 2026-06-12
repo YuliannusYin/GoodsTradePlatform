@@ -111,10 +111,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file UserManagementView.vue
+ * @description 用户管理视图，管理员可查看用户列表、分配角色、启用/禁用用户、删除用户
+ */
 import { ref, onMounted } from 'vue'
 import { useAdminToolsStore } from '@/stores/network/adminToolsStore'
 import { callGet, callPatch, callDelete } from '@/stores/network/requests'
 
+/**
+ * 管理员用户信息接口
+ */
 interface AdminUser {
   id: string
   email: string
@@ -125,18 +132,23 @@ interface AdminUser {
 }
 
 const adminStore = useAdminToolsStore()
-const users = ref<AdminUser[]>([])
-const loading = ref(false)
-const error = ref<string | null>(null)
+const users = ref<AdminUser[]>([])       // 用户列表数据
+const loading = ref(false)                // 加载状态
+const error = ref<string | null>(null)    // 错误信息
 
+// 可分配的角色列表
 const availableRoles = ['USER', 'MERCHANT', 'ADMIN']
 
-const showRoleDialog = ref(false)
-const selectedUser = ref<AdminUser | null>(null)
-const selectedRole = ref('USER')
-const submitting = ref(false)
-const dialogError = ref('')
+// 角色分配对话框相关状态
+const showRoleDialog = ref(false)               // 是否显示角色分配对话框
+const selectedUser = ref<AdminUser | null>(null) // 当前选中的用户
+const selectedRole = ref('USER')                  // 选中的角色
+const submitting = ref(false)                     // 提交中状态
+const dialogError = ref('')                       // 对话框错误信息
 
+/**
+ * 加载所有用户数据
+ */
 async function loadData() {
   loading.value = true
   error.value = null
@@ -149,19 +161,27 @@ async function loadData() {
   }
 }
 
+/**
+ * 打开角色分配对话框
+ * @param {AdminUser} user - 待分配角色的用户
+ */
 function openRoleDialog(user: AdminUser) {
   selectedUser.value = user
-  selectedRole.value = user.role || 'USER'
+  selectedRole.value = user.role || 'USER' // 默认选中用户当前角色
   dialogError.value = ''
   showRoleDialog.value = true
 }
 
+// 关闭角色分配对话框并重置状态
 function closeRoleDialog() {
   showRoleDialog.value = false
   selectedUser.value = null
   dialogError.value = ''
 }
 
+/**
+ * 确认分配角色，提交角色变更请求
+ */
 async function handleAssignRole() {
   if (!selectedUser.value) return
   submitting.value = true
@@ -177,6 +197,10 @@ async function handleAssignRole() {
   }
 }
 
+/**
+ * 切换用户的启用/禁用状态
+ * @param {AdminUser} user - 待操作的用户
+ */
 async function handleToggleEnabled(user: AdminUser) {
   const action = user.enabled ? '禁用' : '启用'
   if (!confirm(`确定${action}用户「${user.username}」吗？`)) return
@@ -188,6 +212,10 @@ async function handleToggleEnabled(user: AdminUser) {
   }
 }
 
+/**
+ * 删除用户（不可撤销）
+ * @param {AdminUser} user - 待删除的用户
+ */
 async function handleDeleteUser(user: AdminUser) {
   if (!confirm(`确定删除用户「${user.username}」吗？此操作不可撤销。`)) return
   try {
@@ -198,6 +226,7 @@ async function handleDeleteUser(user: AdminUser) {
   }
 }
 
+// 组件挂载时加载用户数据
 onMounted(() => {
   loadData()
 })

@@ -5,6 +5,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file LoadingOverlay.vue
+ * @description 加载遮罩层组件，在数据加载时显示半透明遮罩和旋转加载动画
+ */
 import { ref } from 'vue'
 
 defineProps<{

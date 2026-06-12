@@ -14,4 +14,8 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file AdminToolsPopup.vue
+ * @description 管理工具弹出菜单组件，提供管理商品和管理订单的快捷链接
+ */
 </script>

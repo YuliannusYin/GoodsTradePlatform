@@ -85,6 +85,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file PublishProductView.vue
+ * @description 发布商品视图，提供商品信息填写表单及已发布商品列表展示
+ */
 import { onMounted, ref } from 'vue'
 import { useProductStore } from '@/stores/network/productStore'
 import { useAccountStore } from '@/stores/network/accountStore'
@@ -92,15 +96,16 @@ import type { Product, CreateProductDto } from '@/types/product'
 import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from '@/types/product'
 import { useRouter } from 'vue-router'
 
-const productStore = useProductStore()
-const accountStore = useAccountStore()
+const productStore = useProductStore()    // 商品状态管理
+const accountStore = useAccountStore()    // 账户状态管理
 const router = useRouter()
-const myProducts = ref<Product[]>([])
-const isSubmitting = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
-const imageUrlsText = ref('')
+const myProducts = ref<Product[]>([])     // 用户已发布的商品列表
+const isSubmitting = ref(false)            // 提交中状态
+const errorMessage = ref('')               // 错误提示信息
+const successMessage = ref('')             // 成功提示信息
+const imageUrlsText = ref('')              // 图片链接文本（每行一个）
 
+// 商品发布表单数据
 const form = ref<CreateProductDto>({
   name: '',
   description: '',
@@ -112,6 +117,9 @@ const form = ref<CreateProductDto>({
   source: 'USER'
 })
 
+/**
+ * 加载当前用户已发布的商品列表
+ */
 async function loadMyProducts() {
   try {
     myProducts.value = await productStore.getMyProducts()
@@ -120,7 +128,11 @@ async function loadMyProducts() {
   }
 }
 
+/**
+ * 处理商品发布提交，验证登录状态后提交表单数据
+ */
 async function handleSubmit() {
+  // 未登录则跳转登录页
   if (!accountStore.isAuthenticated) {
     router.push('/login')
     return
@@ -131,17 +143,20 @@ async function handleSubmit() {
   successMessage.value = ''
 
   try {
+    // 将换行分隔的图片文本转为数组
     form.value.imageUrls = imageUrlsText.value
       .split('\n')
       .map(url => url.trim())
       .filter(url => url.length > 0)
 
+    // 若无图片则使用占位图
     if (form.value.imageUrls.length === 0) {
       form.value.imageUrls = ['https://via.placeholder.com/300x300?text=No+Image']
     }
 
     await productStore.addMyProduct(form.value)
     successMessage.value = '商品发布成功！'
+    // 重置表单
     form.value = {
       name: '',
       description: '',
@@ -161,6 +176,7 @@ async function handleSubmit() {
   }
 }
 
+// 组件挂载时检查登录状态并加载商品列表
 onMounted(() => {
   if (!accountStore.isAuthenticated) {
     router.push('/login')

@@ -62,6 +62,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file NavBar.vue
+ * @description 顶部导航栏组件，包含 Logo、搜索栏、桌面端导航项和移动端汉堡菜单
+ */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '@/stores/network/accountStore'
@@ -74,31 +78,39 @@ import AdminToolsItem from '@/components/admintools/AdminToolsItem.vue'
 const accountStore = useAccountStore()
 const router = useRouter()
 
+// 移动端侧边栏是否展开
 const isAsideOpen = ref(false)
+// 移动端搜索框是否展开
 const isSearchInputOpen = ref(false)
 
+// 切换移动端侧边栏的展开/收起状态
 function toggleAsideVisibility() {
   isAsideOpen.value = !isAsideOpen.value
 }
 
+// 关闭移动端侧边栏
 function closeAside() {
   isAsideOpen.value = false
 }
 
+// 点击侧边栏外部区域时关闭侧边栏
 function handleClickOutsideAside(event: any) {
   if (event.target.className?.includes?.('outside-aside-components')) {
     closeAside()
   }
 }
 
+// 切换移动端搜索框的展开/收起状态
 function toggleSearchInput() {
   isSearchInputOpen.value = !isSearchInputOpen.value
 }
 
+// 关闭移动端搜索框
 function closeSearchInput() {
   isSearchInputOpen.value = false
 }
 
+// 退出登录并跳转到首页
 function handleLogout() {
   accountStore.logout()
   closeAside()

@@ -29,6 +29,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file SearchBar.vue
+ * @description 商品搜索栏组件，支持关键词搜索和价格排序筛选
+ */
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -48,8 +52,11 @@ const emit = defineEmits<{
   onClose: [value: boolean]
 }>()
 
+// 搜索输入内容
 const searchInput = ref('')
+// 排序下拉菜单是否可见
 const isOpenDropdown = ref(false)
+// 价格排序筛选状态
 const filters = reactive({
   lowestPrice: false,
   highestPrice: false
@@ -57,10 +64,12 @@ const filters = reactive({
 const router = useRouter()
 const route = useRoute()
 
+// 组件挂载时从 URL 查询参数恢复搜索状态
 onMounted(() => {
   const query = route.query.query as string
   const filter = route.query.filter as string
   searchInput.value = query || ''
+  // 根据 URL 中的筛选参数恢复选中状态
   if (filter === 'lowest_price') {
     filters.lowestPrice = true
   } else if (filter === 'highest_price') {
@@ -68,14 +77,19 @@ onMounted(() => {
   }
 })
 
+// 鼠标悬停时显示排序下拉菜单
 function showDropdown() {
   isOpenDropdown.value = true
 }
 
+// 鼠标离开时隐藏排序下拉菜单
 function hideDropdown() {
   isOpenDropdown.value = false
 }
 
+/**
+ * 执行搜索操作，触发搜索事件并跳转到商城页面
+ */
 function handleSearch() {
   emit('search',
     searchInput.value || '',
@@ -88,17 +102,24 @@ function handleSearch() {
   router.push({ name: 'shop', query: queryParameters })
 }
 
+/**
+ * 切换排序筛选条件，同一时间只能选中一个价格排序
+ * @param {string} targetFilter - 目标筛选条件标识
+ */
 function handleFilterChange(targetFilter: string) {
   if (targetFilter === 'lowest_price') {
     filters.lowestPrice = !filters.lowestPrice
+    // 互斥：选中最低价时取消最高价
     filters.highestPrice = false
   }
   if (targetFilter === 'highest_price') {
     filters.highestPrice = !filters.highestPrice
+    // 互斥：选中最高价时取消最低价
     filters.lowestPrice = false
   }
 }
 
+// 关闭搜索框（移动端使用）
 function handleCloseSearch() {
   emit('onClose', true)
 }

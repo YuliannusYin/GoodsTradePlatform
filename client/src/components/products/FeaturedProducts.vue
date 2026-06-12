@@ -7,14 +7,20 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file FeaturedProducts.vue
+ * @description 热门周边商品展示组件，加载并展示推荐商品卡片列表
+ */
 import { onMounted, ref } from 'vue'
 import { useProductStore } from '@/stores/network/productStore'
 import ProductCards from './ProductCards.vue'
 import type { Product } from '@/types/product'
 
 const productStore = useProductStore()
+// 热门推荐商品列表
 const featuredProducts = ref<Product[]>([])
 
+// 组件挂载时获取热门推荐商品数据
 onMounted(async () => {
   featuredProducts.value = await productStore.getFeaturedProducts()
 })

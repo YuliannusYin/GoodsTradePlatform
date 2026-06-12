@@ -18,4 +18,8 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file AccountView.vue
+ * @description 账户视图，提供编辑信息、查看订单、我的商品的导航入口及子路由展示
+ */
 </script>

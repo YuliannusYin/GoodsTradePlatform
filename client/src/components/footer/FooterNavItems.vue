@@ -6,4 +6,8 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file FooterNavItems.vue
+ * @description 页脚导航链接组件，提供首页和周边商城的快捷入口
+ */
 </script>

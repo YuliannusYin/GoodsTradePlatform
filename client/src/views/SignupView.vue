@@ -34,25 +34,33 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file SignupView.vue
+ * @description 注册视图，提供用户名、邮箱、密码输入表单，处理用户注册逻辑
+ */
 import { ref } from 'vue'
 import { useAccountStore } from '@/stores/network/accountStore'
 
-const accountStore = useAccountStore()
-const username = ref('')
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const responseMessage = ref('')
-const responseMessageColor = ref('')
+const accountStore = useAccountStore()   // 账户状态管理实例
+const username = ref('')                  // 用户名
+const email = ref('')                     // 邮箱
+const password = ref('')                  // 密码
+const confirmPassword = ref('')           // 确认密码
+const responseMessage = ref('')           // 响应提示信息
+const responseMessageColor = ref('')      // 提示信息颜色样式
 
+/**
+ * 处理用户注册，成功后显示成功提示，失败显示错误信息
+ */
 async function handleSignup() {
   try {
     await accountStore.register(email.value, username.value, password.value)
     responseMessage.value = '注册成功'
-    responseMessageColor.value = 'text-green-700'
+    responseMessageColor.value = 'text-green-700' // 成功提示为绿色
   } catch (error: any) {
+    // 注册失败时显示错误信息
     responseMessage.value = error?.message || error?.response?.data?.message || '注册失败'
-    responseMessageColor.value = 'text-red-700'
+    responseMessageColor.value = 'text-red-700' // 错误提示为红色
   }
 }
 </script>

@@ -1,3 +1,9 @@
+/**
+ * @file UserManagementService.java
+ * @description 用户管理服务类（超级管理员），提供查询用户、分配角色、启用/禁用和删除用户的业务逻辑
+ * @input 用户ID、角色名称
+ * @output 用户DTO列表、用户DTO或操作结果
+ */
 package me.code.springboot_postgres.services;
 
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
@@ -12,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 用户管理服务类
+ * 职责：处理超级管理员对用户的查询、角色分配、启用/禁用和删除等管理操作
+ */
 @Service
 public class UserManagementService {
 
@@ -22,49 +32,79 @@ public class UserManagementService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * 获取所有用户列表
+     * @return 用户DTO列表
+     */
     @Transactional(readOnly = true)
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream().map(UserDTO::from).toList();
     }
 
+    /**
+     * 根据用户ID获取用户信息
+     * @param userId 用户ID
+     * @return 用户DTO
+     */
     @Transactional(readOnly = true)
     public UserDTO getUserById(String userId) {
         return UserDTO.from(userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId)));
     }
 
+    /**
+     * 为指定用户分配角色
+     * @param userId 用户ID
+     * @param roleName 角色名称字符串
+     * @return 操作结果
+     */
     @Transactional
     public ApiResponse<Void> assignRole(String userId, String roleName) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
+        // 受保护账号不可修改角色
         if (user.isProtected()) {
             throw new CustomRuntimeException(HttpStatus.FORBIDDEN, "Cannot modify roles of a system account");
         }
         try {
             user.setRole(User.Role.valueOf(roleName.toUpperCase()));
         } catch (IllegalArgumentException e) {
+            // 无效的角色名称
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Invalid role: " + roleName);
         }
         userRepository.save(user);
         return ApiResponse.ok("Role assigned successfully");
     }
 
+    /**
+     * 切换用户的启用/禁用状态
+     * @param userId 用户ID
+     * @return 操作结果
+     */
     @Transactional
     public ApiResponse<Void> toggleUserEnabled(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
+        // 受保护账号不可禁用
         if (user.isProtected()) {
             throw new CustomRuntimeException(HttpStatus.FORBIDDEN, "Cannot disable a system account");
         }
+        // 切换启用状态
         user.setEnabled(!user.isEnabled());
         userRepository.save(user);
         return ApiResponse.ok("User " + (user.isEnabled() ? "enabled" : "disabled") + " successfully");
     }
 
+    /**
+     * 删除指定用户
+     * @param userId 用户ID
+     * @return 操作结果
+     */
     @Transactional
     public ApiResponse<Void> deleteUser(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
+        // 受保护账号不可删除
         if (user.isProtected()) {
             throw new CustomRuntimeException(HttpStatus.FORBIDDEN, "Cannot delete a system account");
         }

@@ -13,11 +13,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file AccountInfo.vue
+ * @description 账户信息展示组件，显示用户名、邮箱和余额
+ */
 import { computed } from 'vue'
 import { useAccountStore } from '@/stores/network/accountStore'
 
 const accountStore = useAccountStore()
 
+// 格式化余额显示，保留两位小数并添加千位分隔符
 const formattedBalance = computed(() => {
   return (accountStore.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 })

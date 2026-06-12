@@ -113,6 +113,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file OngoingOrder.vue
+ * @description 购物车/结算页面组件，展示购物车商品、配送信息填写、配送方式选择和下单确认
+ */
 import { computed, onMounted, reactive, ref, watch, type Ref } from 'vue'
 import { useOrderStore } from '@/stores/network/orderStore'
 import { useShoppingCartStore } from '@/stores/shoppingCartStore'
@@ -122,25 +126,34 @@ import type { OngoingOrder } from '@/types/order'
 const orderStore = useOrderStore()
 const shoppingCartStore = useShoppingCartStore()
 const accountStore = useAccountStore()
+// 当前进行中的订单数据
 const ongoingOrder = ref<OngoingOrder | null>(null)
+// 可用的配送方式列表
 const deliveryMethods = ref<string[]>([])
+// 可用的支付方式列表
 const paymentMethods = ref<string[]>([])
 
+// 配送坐标（经纬度）
 const deliveryCoordinates = reactive({
   latitude: '',
   longitude: ''
 })
 
+// 当前选中的配送方式
 const selectedDeliveryMethod = ref('')
+// 当前选中的支付方式
 const selectedPaymentMethod = ref('')
+// 订单是否已确认下单
 const isConfirmedOrder = ref(false)
 
+// 组件挂载时初始化订单和配送/支付方式
 onMounted(() => {
   updateOngoingOrder()
   getDeliveryMethods()
   getPaymentMethods()
 })
 
+// 监听购物车商品数量变化，更新订单数据
 watch(
   () => shoppingCartStore.productAmount,
   (newItemsState: number) => {
@@ -150,38 +163,48 @@ watch(
   }
 )
 
+// 获取可用的配送方式列表
 async function getDeliveryMethods() {
   deliveryMethods.value = await orderStore.getAvailableDeliveryMethods()
 }
 
+// 配送方式加载后默认选中第一个
 watch(deliveryMethods as Ref, (newMethods: string[]) => {
   if (newMethods.length > 0) {
     selectedDeliveryMethod.value = newMethods[0]
   }
 })
 
+// 获取可用的支付方式列表
 async function getPaymentMethods() {
   paymentMethods.value = await orderStore.getAvailablePaymentMethods()
 }
 
+// 支付方式加载后默认选中第一个
 watch(paymentMethods as Ref, (newMethods: string[]) => {
   if (newMethods.length > 0) {
     selectedPaymentMethod.value = newMethods[0]
   }
 })
 
+// 更新当前进行中的订单数据
 async function updateOngoingOrder() {
   ongoingOrder.value = await orderStore.getOngoingOrder()
 }
 
+// 向购物车添加商品
 function addProduct(productId: string) {
   shoppingCartStore.addProductId(productId)
 }
 
+// 从购物车移除商品
 function removeProduct(productId: string) {
   shoppingCartStore.removeProductId(productId)
 }
 
+/**
+ * 确认下单操作，提交订单信息
+ */
 async function placeOrder() {
   const address = `${deliveryCoordinates.latitude},${deliveryCoordinates.longitude}`
   await orderStore.placeOrder(address, selectedDeliveryMethod.value, selectedPaymentMethod.value)
@@ -189,17 +212,25 @@ async function placeOrder() {
   isConfirmedOrder.value = true
 }
 
+/**
+ * 获取用户地理位置坐标
+ */
 function getGeoLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(showPosition)
   }
 }
 
+/**
+ * 地理位置获取成功回调，更新配送坐标
+ * @param {any} position - 浏览器返回的地理位置对象
+ */
 function showPosition(position: any) {
   deliveryCoordinates.latitude = position.coords.latitude
   deliveryCoordinates.longitude = position.coords.longitude
 }
 
+// 清除已确认订单状态，返回购物状态
 function clearConfirmedOrder() {
   isConfirmedOrder.value = false
 }

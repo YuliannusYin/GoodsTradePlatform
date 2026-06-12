@@ -30,15 +30,22 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file FavoritesView.vue
+ * @description 收藏视图，展示用户收藏的商品列表，支持取消收藏和跳转商品详情
+ */
 import { onMounted, ref } from 'vue'
 import type { Favorite } from '@/types/favorite'
 import { useFavoriteStore } from '@/stores/network/favoriteStore'
 import { useRouter } from 'vue-router'
 
-const favoriteStore = useFavoriteStore()
+const favoriteStore = useFavoriteStore() // 收藏状态管理实例
 const router = useRouter()
-const favorites = ref<Favorite[]>([])
+const favorites = ref<Favorite[]>([])    // 收藏列表数据
 
+/**
+ * 加载用户收藏列表
+ */
 async function loadFavorites() {
   try {
     favorites.value = await favoriteStore.getUserFavorites()
@@ -47,18 +54,28 @@ async function loadFavorites() {
   }
 }
 
+/**
+ * 取消收藏指定商品
+ * @param {string} productId - 商品ID
+ */
 async function removeFavorite(productId: string) {
   try {
     await favoriteStore.removeFavorite(productId)
+    // 从本地列表中移除已取消收藏的商品
     favorites.value = favorites.value.filter(f => f.productId !== productId)
   } catch (error) {
     console.error('Failed to remove favorite:', error)
   }
 }
 
+/**
+ * 跳转到商品详情页
+ * @param {string} productId - 商品ID
+ */
 function goToProduct(productId: string) {
   router.push({ name: 'productView', params: { productId } })
 }
 
+// 组件挂载时加载收藏列表
 onMounted(loadFavorites)
 </script>

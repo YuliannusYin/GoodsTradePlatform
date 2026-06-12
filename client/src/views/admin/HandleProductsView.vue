@@ -22,25 +22,35 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file HandleProductsView.vue
+ * @description 商品管理视图，提供添加、编辑、删除商品的标签页导航及子路由展示
+ */
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-const isOnAddProductRoute = ref(false)
-const isOnEditProductRoute = ref(false)
-const isOnDeleteProductRoute = ref(false)
+// 各标签页的高亮状态
+const isOnAddProductRoute = ref(false)    // 是否处于添加商品路由
+const isOnEditProductRoute = ref(false)   // 是否处于编辑商品路由
+const isOnDeleteProductRoute = ref(false) // 是否处于删除商品路由
 
+/**
+ * 根据当前路由名称更新标签页的高亮状态
+ */
 function assignHighlightedButton() {
   isOnAddProductRoute.value = ['AddProduct'].includes(route.name as string)
   isOnEditProductRoute.value = ['EditProduct'].includes(route.name as string)
   isOnDeleteProductRoute.value = ['DeleteProduct'].includes(route.name as string)
 }
 
+// 组件挂载时初始化高亮状态
 onMounted(() => {
   assignHighlightedButton()
 })
 
+// 路由变化时更新高亮状态
 watch(() => route.name, () => {
   assignHighlightedButton()
 })

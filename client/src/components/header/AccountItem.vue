@@ -22,22 +22,30 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file AccountItem.vue
+ * @description 已登录用户的账户图标组件，悬停显示编辑信息、我的订单和退出登录菜单
+ */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '@/stores/network/accountStore'
 
 const accountStore = useAccountStore()
 const router = useRouter()
+// 控制弹出菜单是否可见
 const isShowingPopup = ref(false)
 
+// 鼠标悬停时显示弹出菜单
 function showPopup() {
   isShowingPopup.value = true
 }
 
+// 鼠标离开时隐藏弹出菜单
 function hidePopup() {
   isShowingPopup.value = false
 }
 
+// 退出登录并跳转到首页
 function handleLogout() {
   accountStore.logout()
   router.push('/')

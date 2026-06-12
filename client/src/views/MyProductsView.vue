@@ -142,19 +142,24 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file MyProductsView.vue
+ * @description 我的商品视图，展示用户已发布的商品列表，支持编辑、重新提交、删除操作
+ */
 import { onMounted, ref } from 'vue'
 import { useProductStore } from '@/stores/network/productStore'
 import type { Product, CreateProductDto } from '@/types/product'
 import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS, PRODUCT_STATUSES, PRODUCT_STATUS_COLORS } from '@/types/product'
 
 const productStore = useProductStore()
-const products = ref<Product[]>([])
-const loading = ref(false)
-const error = ref<string | null>(null)
+const products = ref<Product[]>([])       // 用户已发布的商品列表
+const loading = ref(false)                 // 加载状态
+const error = ref<string | null>(null)     // 错误信息
 
-const showEditDialog = ref(false)
-const editingProductId = ref<string | null>(null)
-const editForm = ref<CreateProductDto>({
+// 编辑对话框相关状态
+const showEditDialog = ref(false)              // 是否显示编辑对话框
+const editingProductId = ref<string | null>(null) // 正在编辑的商品ID
+const editForm = ref<CreateProductDto>({       // 编辑表单数据
   name: '',
   description: '',
   imageUrls: [],
@@ -164,10 +169,13 @@ const editForm = ref<CreateProductDto>({
   condition: 'NEW',
   source: 'USER'
 })
-const editImageUrlsText = ref('')
-const submitting = ref(false)
-const dialogError = ref('')
+const editImageUrlsText = ref('')  // 图片链接文本（每行一个）
+const submitting = ref(false)       // 提交中状态
+const dialogError = ref('')         // 对话框错误信息
 
+/**
+ * 加载当前用户发布的商品列表
+ */
 async function loadProducts() {
   loading.value = true
   error.value = null
@@ -180,6 +188,10 @@ async function loadProducts() {
   }
 }
 
+/**
+ * 打开编辑对话框，填充商品当前信息
+ * @param {Product} product - 待编辑的商品
+ */
 function openEditDialog(product: Product) {
   editingProductId.value = product.id
   editForm.value = {
@@ -192,26 +204,33 @@ function openEditDialog(product: Product) {
     condition: product.condition,
     source: product.source || 'USER'
   }
+  // 将图片URL数组转为换行分隔的文本
   editImageUrlsText.value = product.imageUrls.join('\n')
   dialogError.value = ''
   showEditDialog.value = true
 }
 
+// 关闭编辑对话框并重置状态
 function closeEditDialog() {
   showEditDialog.value = false
   editingProductId.value = null
   dialogError.value = ''
 }
 
+/**
+ * 提交编辑后的商品信息
+ */
 async function handleEditSubmit() {
   if (!editingProductId.value) return
   submitting.value = true
   dialogError.value = ''
   try {
+    // 将换行分隔的图片文本转为数组
     editForm.value.imageUrls = editImageUrlsText.value
       .split('\n')
       .map(url => url.trim())
       .filter(url => url.length > 0)
+    // 若无图片则使用占位图
     if (editForm.value.imageUrls.length === 0) {
       editForm.value.imageUrls = ['https://via.placeholder.com/300x300?text=No+Image']
     }
@@ -225,6 +244,10 @@ async function handleEditSubmit() {
   }
 }
 
+/**
+ * 重新提交被拒绝的商品，使其重新进入审核流程
+ * @param {Product} product - 待重新提交的商品
+ */
 async function handleResubmit(product: Product) {
   if (!confirm(`确定重新提交商品「${product.name}」吗？提交后将重新进入审核流程。`)) return
   try {
@@ -245,6 +268,10 @@ async function handleResubmit(product: Product) {
   }
 }
 
+/**
+ * 删除商品（不可撤销）
+ * @param {Product} product - 待删除的商品
+ */
 async function handleDelete(product: Product) {
   if (!confirm(`确定删除商品「${product.name}」吗？此操作不可撤销。`)) return
   try {
@@ -255,6 +282,7 @@ async function handleDelete(product: Product) {
   }
 }
 
+// 组件挂载时加载商品列表
 onMounted(() => {
   loadProducts()
 })

@@ -8,4 +8,8 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file SocialsIcons.vue
+ * @description 社交媒体图标组件，展示 Facebook、X(Twitter)、Instagram、LinkedIn 链接
+ */
 </script>

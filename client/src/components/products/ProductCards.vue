@@ -8,6 +8,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ProductCards.vue
+ * @description 商品卡片列表组件，有商品时展示卡片网格，无商品时显示加载占位卡片
+ */
 import type { Product } from '@/types/product'
 import PlaceholderCards from './PlaceholderCards.vue'
 import ProductCard from './ProductCard.vue'

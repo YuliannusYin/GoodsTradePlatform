@@ -14,6 +14,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ShoppingCartItem.vue
+ * @description 购物车图标组件，显示购物车中的商品数量角标
+ */
 import { computed } from 'vue'
 import { useShoppingCartStore } from '@/stores/shoppingCartStore'
 
@@ -22,5 +26,6 @@ withDefaults(defineProps<{
 }>(), {})
 
 const shoppingCartStore = useShoppingCartStore()
+// 计算购物车中的商品总数量
 const itemsCount = computed(() => shoppingCartStore.getTotalItemsCount())
 </script>

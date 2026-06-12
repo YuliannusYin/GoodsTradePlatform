@@ -13,4 +13,8 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file LoginOrSignupPopup.vue
+ * @description 登录/注册弹出菜单组件，提供登录按钮和注册链接入口
+ */
 </script>

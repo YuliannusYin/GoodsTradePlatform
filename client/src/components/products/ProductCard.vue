@@ -73,6 +73,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ProductCard.vue
+ * @description 商品卡片组件，支持商品详情视图和列表卡片视图两种模式，包含收藏和加入购物车功能
+ */
 import { ref, onMounted } from 'vue'
 import type { Product } from '@/types/product'
 import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from '@/types/product'
@@ -92,8 +96,10 @@ const router = useRouter()
 const favoriteStore = useFavoriteStore()
 const accountStore = useAccountStore()
 const shoppingCartStore = useShoppingCartStore()
+// 当前商品是否已收藏
 const isFavorited = ref(false)
 
+// 组件挂载时检查当前用户是否已收藏该商品
 onMounted(async () => {
   if (accountStore.isAuthenticated) {
     try {
@@ -104,24 +110,36 @@ onMounted(async () => {
   }
 })
 
+/**
+ * 跳转到商品详情页面
+ * @param {string} productId - 商品ID
+ */
 function showProductView(productId: string) {
   router.push({ name: 'productView', params: { productId } })
 }
 
+// 将商品添加到购物车
 function addToCart(productId: string) {
   shoppingCartStore.addProductId(productId)
 }
 
+/**
+ * 切换商品收藏状态
+ * 未登录用户跳转到登录页面，已登录用户切换收藏/取消收藏
+ */
 async function toggleFavorite() {
   if (!accountStore.isAuthenticated) {
+    // 未登录时跳转到登录页
     router.push('/login')
     return
   }
   try {
     if (isFavorited.value) {
+      // 已收藏则取消收藏
       await favoriteStore.removeFavorite(props.product.id)
       isFavorited.value = false
     } else {
+      // 未收藏则添加收藏
       await favoriteStore.addFavorite(props.product.id)
       isFavorited.value = true
     }
@@ -130,10 +148,20 @@ async function toggleFavorite() {
   }
 }
 
+/**
+ * 获取商品分类的中文标签
+ * @param {string} category - 分类标识
+ * @returns {string} 分类中文名称
+ */
 function getCategoryLabel(category: string): string {
   return PRODUCT_CATEGORIES[category] || category
 }
 
+/**
+ * 获取商品成色的中文标签
+ * @param {string} condition - 成色标识
+ * @returns {string} 成色中文名称
+ */
 function getConditionLabel(condition: string): string {
   return PRODUCT_CONDITIONS[condition] || condition
 }

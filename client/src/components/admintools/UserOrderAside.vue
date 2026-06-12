@@ -72,6 +72,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file UserOrderAside.vue
+ * @description 用户订单侧边栏组件，管理员可在此发货或修改预计送达时间
+ */
 import { onMounted, ref, watch } from 'vue'
 import type { UserOrder } from '@/types/order'
 import ConfirmDialogue from '../ConfirmDialogue.vue'
@@ -84,12 +88,20 @@ const props = defineProps<{
   onClose: () => void
 }>()
 
+// 下单日期部分
 const receivedDate = ref('')
+// 下单时间部分
 const receivedTime = ref('')
+// 选中的预计送达日期
 const selectedDeliveryDate = ref('')
+// 选中的预计送达时间
 const selectedDeliveryTime = ref('')
+// 确认对话框是否可见
 const isConfirmationVisible = ref(false)
 
+/**
+ * 解析下单时间字符串，拆分为日期和时间
+ */
 function parseReceived() {
   if (props.order?.received) {
     const received = props.order.received
@@ -98,39 +110,53 @@ function parseReceived() {
   }
 }
 
+/**
+ * 解析预计送达时间字符串，拆分为日期和时间
+ */
 function parseExpectedDelivery() {
   if (props.order?.expectedDelivery) {
     const expectedDelivery = props.order.expectedDelivery
     selectedDeliveryDate.value = expectedDelivery.split('T')[0]
     selectedDeliveryTime.value = expectedDelivery.split('T')[1].slice(0, 5)
   } else {
+    // 无预计送达时间时清空
     selectedDeliveryDate.value = ''
     selectedDeliveryTime.value = ''
   }
 }
 
+// 组件挂载时解析时间数据
 onMounted(() => {
   parseReceived()
   parseExpectedDelivery()
 })
 
+// 监听订单变化，重新解析时间数据
 watch(() => props.order, () => {
   parseReceived()
   parseExpectedDelivery()
 })
 
+// 显示确认对话框
 function openConfirmation() {
   isConfirmationVisible.value = true
 }
 
+// 关闭确认对话框
 function closeConfirmation() {
   isConfirmationVisible.value = false
 }
 
+/**
+ * 发货操作，将订单状态改为已发货并设置预计送达时间
+ */
 async function sendOrder() {
   props.onSend(props.order?.id || '', `${selectedDeliveryDate.value}T${selectedDeliveryTime.value}:00`)
 }
 
+/**
+ * 修改预计送达时间
+ */
 async function changeExpectedDelivery() {
   props.onUpdate(props.order?.id || '', `${selectedDeliveryDate.value}T${selectedDeliveryTime.value}:00`)
 }

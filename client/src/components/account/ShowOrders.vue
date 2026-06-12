@@ -25,13 +25,19 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ShowOrders.vue
+ * @description 用户订单列表展示组件，加载并显示当前用户的所有已下单订单
+ */
 import { onMounted, ref } from 'vue'
 import { useOrderStore } from '@/stores/network/orderStore'
 import type { PlacedOrder } from '@/types/order'
 
 const orderStore = useOrderStore()
+// 用户已下单的订单列表
 const orders = ref<PlacedOrder[]>([])
 
+// 组件挂载时获取用户已下单的订单数据
 onMounted(async () => {
   orders.value = await orderStore.getPlacedOrders()
 })

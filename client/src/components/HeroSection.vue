@@ -17,6 +17,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file HeroSection.vue
+ * @description 首页英雄区域组件，展示平台标题、宣传语和探索入口按钮
+ */
 </script>
 
 <style scoped>

@@ -6,6 +6,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file SmallViewTitle.vue
+ * @description 小型视图标题组件，可配置标题文本、是否显示下划线和额外样式类
+ */
 withDefaults(defineProps<{
   text: string
   hasUnderline?: boolean

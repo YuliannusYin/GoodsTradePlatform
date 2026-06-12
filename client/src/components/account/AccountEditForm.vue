@@ -53,6 +53,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file AccountEditForm.vue
+ * @description 账户信息编辑表单组件，支持修改用户名、邮箱、密码及删除账户操作
+ */
 import { ref, computed } from 'vue'
 import { useAccountStore } from '@/stores/network/accountStore'
 import { useRouter } from 'vue-router'
@@ -65,12 +69,18 @@ const props = defineProps<{
 const accountStore = useAccountStore()
 const router = useRouter()
 
+// 新值输入（用户名/邮箱/新密码）
 const newValue = ref('')
+// 当前密码（修改密码时需要验证）
 const currentPassword = ref('')
+// 操作响应消息
 const responseMessage = ref<string | null>(null)
+// 响应消息颜色类名
 const responseMessageColor = ref('')
+// 确认对话框是否可见
 const isConfirmationVisible = ref(false)
 
+// 根据编辑类型计算表单标题
 const title = computed(() => {
   switch (props.editType) {
     case 'username': return '修改用户名'
@@ -80,6 +90,7 @@ const title = computed(() => {
   }
 })
 
+// 根据编辑类型计算确认对话框标题
 const confirmHeader = computed(() => {
   switch (props.editType) {
     case 'username': return '确认修改用户名'
@@ -89,6 +100,7 @@ const confirmHeader = computed(() => {
   }
 })
 
+// 根据编辑类型计算确认对话框提示文本
 const confirmText = computed(() => {
   switch (props.editType) {
     case 'username': return '确定要修改用户名吗？'
@@ -98,32 +110,44 @@ const confirmText = computed(() => {
   }
 })
 
+// 显示确认对话框
 function openConfirmation() {
   isConfirmationVisible.value = true
 }
 
+// 关闭确认对话框
 function closeConfirmation() {
   isConfirmationVisible.value = false
 }
 
+// 提交表单时打开确认对话框
 async function handleSubmit() {
   openConfirmation()
 }
 
+/**
+ * 确认操作处理函数
+ * @param {string} password - 可选的确认密码
+ * 根据编辑类型调用对应的账户操作接口，成功显示绿色提示，失败显示红色错误信息
+ */
 async function handleConfirm(password?: string) {
   try {
     let response: any
     switch (props.editType) {
       case 'username':
+        // 修改用户名
         response = await accountStore.changeUsername(newValue.value)
         break
       case 'email':
+        // 修改邮箱
         response = await accountStore.changeEmail(newValue.value)
         break
       case 'password':
+        // 修改密码，需提供当前密码和新密码
         response = await accountStore.changePassword(currentPassword.value, newValue.value)
         break
       case 'delete':
+        // 删除账户，成功后延迟跳转到首页
         response = await accountStore.deleteAccount()
         if (response) {
           setTimeout(() => {
@@ -132,11 +156,13 @@ async function handleConfirm(password?: string) {
         }
         break
     }
+    // 操作成功时显示绿色提示
     if (response !== undefined && response !== null) {
       responseMessage.value = '操作成功'
       responseMessageColor.value = 'text-green-700'
     }
   } catch (error: any) {
+    // 操作失败时显示红色错误信息
     responseMessage.value = error?.message || error?.response?.data?.message || '操作失败'
     responseMessageColor.value = 'text-red-700'
   }

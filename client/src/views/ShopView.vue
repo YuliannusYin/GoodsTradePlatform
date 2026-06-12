@@ -27,6 +27,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ShopView.vue
+ * @description 商城视图，提供商品分类筛选、搜索功能及商品列表展示
+ */
 import { onMounted, ref, watch } from 'vue'
 import ProductCards from '@/components/products/ProductCards.vue'
 import { useProductStore } from '@/stores/network/productStore'
@@ -35,34 +39,63 @@ import { PRODUCT_CATEGORIES } from '@/types/product'
 import { useRoute } from 'vue-router'
 
 const productStore = useProductStore()
-const products = ref<Product[]>([])
-const selectedCategory = ref('')
+const products = ref<Product[]>([])       // 商品列表数据
+const selectedCategory = ref('')           // 当前选中的分类，空字符串表示全部
 const route = useRoute()
 
+// 获取所有商品
 async function getAllProducts() {
   products.value = await productStore.getAllProducts()
 }
 
+/**
+ * 根据搜索条件获取筛选后的商品
+ * @param {string} query - 搜索关键词
+ * @param {any} filter - 筛选条件
+ * @param {string} [category] - 商品分类
+ */
 async function getSearchedProducts(query: string, filter: any, category?: string) {
   products.value = await productStore.getSearchedProducts(query, filter, category)
 }
 
+/**
+ * 判断搜索关键词是否为空
+ * @param {string} query - 搜索关键词
+ * @returns {boolean} 是否为空
+ */
 function isEmpty(query: string): boolean {
   return query === ''
 }
 
+/**
+ * 判断筛选条件是否为空
+ * @param {any} filter - 筛选条件
+ * @returns {boolean} 是否无筛选条件
+ */
 function hasNoFilter(filter: any): boolean {
   return filter === null
 }
 
+/**
+ * 统一搜索处理：无搜索条件时获取全部商品，否则按条件搜索
+ * @param {string} query - 搜索关键词
+ * @param {any} filter - 筛选条件
+ * @param {string} [category] - 商品分类
+ */
 async function handleSearch(query: string, filter: any, category?: string) {
   if (isEmpty(query) && hasNoFilter(filter) && !category) {
+    // 无搜索条件时加载全部商品
     getAllProducts()
   } else {
+    // 有搜索条件时按条件搜索
     getSearchedProducts(query, filter, category)
   }
 }
 
+/**
+ * 选择商品分类并触发搜索
+ * @param {string} category - 选中的分类，空字符串表示全部
+ */
 function selectCategory(category: string) {
   selectedCategory.value = category
   const query = (route.query.query as string) || ''
@@ -70,11 +103,13 @@ function selectCategory(category: string) {
   handleSearch(query, filter, category || undefined)
 }
 
+// 组件挂载时根据URL参数初始化搜索
 onMounted(async () => {
   const query = route.query.query as string
   const filter = route.query.filter as string
   const category = route.query.category as string
 
+  // 从URL参数恢复分类选择
   if (category) {
     selectedCategory.value = category
   }
@@ -83,16 +118,19 @@ onMounted(async () => {
   const hasNoFilter = filter == undefined
 
   if (hasNoSearchQuery || hasNoFilter) {
+    // 无搜索参数时，根据分类加载商品
     if (category) {
       handleSearch('', 'none', category)
     } else {
       getAllProducts()
     }
   } else {
+    // 有搜索参数时按条件搜索
     handleSearch(query, filter, category || undefined)
   }
 })
 
+// 监听路由查询参数变化，重新执行搜索
 watch(
   () => ({
     query: route.query.query as string,
@@ -101,6 +139,7 @@ watch(
   }),
   (newQuery) => {
     const { query, filter, category } = newQuery
+    // 路由参数中有分类时更新选中状态
     if (category) {
       selectedCategory.value = category
     }

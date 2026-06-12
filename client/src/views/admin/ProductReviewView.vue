@@ -152,17 +152,22 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file ProductReviewView.vue
+ * @description 商品审核视图，管理员可按状态标签页查看商品列表，执行通过、拒绝、禁用、启用等审核操作
+ */
 import { ref, onMounted } from 'vue'
 import { useAdminToolsStore } from '@/stores/network/adminToolsStore'
 import type { Product } from '@/types/product'
 import { PRODUCT_STATUSES, PRODUCT_STATUS_COLORS, PRODUCT_CATEGORIES } from '@/types/product'
 
 const adminStore = useAdminToolsStore()
-const products = ref<Product[]>([])
-const loading = ref(false)
-const error = ref<string | null>(null)
-const activeTab = ref('PENDING')
+const products = ref<Product[]>([])       // 当前标签页下的商品列表
+const loading = ref(false)                 // 加载状态
+const error = ref<string | null>(null)     // 错误信息
+const activeTab = ref('PENDING')           // 当前激活的标签页，默认待审核
 
+// 标签页配置：各审核状态及对应中文标签
 const tabs = [
   { value: 'PENDING', label: '待审核' },
   { value: 'APPROVED', label: '已通过' },
@@ -170,6 +175,7 @@ const tabs = [
   { value: 'DISABLED', label: '已禁用' }
 ]
 
+// 各标签页对应的商品数量
 const tabCounts = ref<Record<string, number>>({
   PENDING: 0,
   APPROVED: 0,
@@ -177,12 +183,16 @@ const tabCounts = ref<Record<string, number>>({
   DISABLED: 0
 })
 
-const showRejectDialog = ref(false)
-const rejectProduct = ref<Product | null>(null)
-const rejectReason = ref('')
-const submitting = ref(false)
-const dialogError = ref('')
+// 拒绝对话框相关状态
+const showRejectDialog = ref(false)          // 是否显示拒绝对话框
+const rejectProduct = ref<Product | null>(null) // 待拒绝的商品
+const rejectReason = ref('')                  // 拒绝原因
+const submitting = ref(false)                 // 提交中状态
+const dialogError = ref('')                   // 对话框错误信息
 
+/**
+ * 加载当前标签页状态下的商品列表
+ */
 async function loadProducts() {
   loading.value = true
   error.value = null
@@ -195,9 +205,13 @@ async function loadProducts() {
   }
 }
 
+/**
+ * 加载各标签页的商品数量统计
+ */
 async function loadTabCounts() {
   try {
     const counts = { ...tabCounts.value }
+    // 并发请求各状态的商品数量
     await Promise.all(
       tabs.map(async (tab) => {
         try {
@@ -210,15 +224,23 @@ async function loadTabCounts() {
     )
     tabCounts.value = counts
   } catch {
-    // silently fail
+    // 静默失败，不影响主流程
   }
 }
 
+/**
+ * 切换标签页并重新加载商品列表
+ * @param {string} tab - 目标标签页的状态值
+ */
 function switchTab(tab: string) {
   activeTab.value = tab
   loadProducts()
 }
 
+/**
+ * 审核通过商品
+ * @param {Product} product - 待通过的商品
+ */
 async function handleApprove(product: Product) {
   if (!confirm(`确定通过商品「${product.name}」吗？`)) return
   try {
@@ -230,6 +252,10 @@ async function handleApprove(product: Product) {
   }
 }
 
+/**
+ * 打开拒绝对话框
+ * @param {Product} product - 待拒绝的商品
+ */
 function openRejectDialog(product: Product) {
   rejectProduct.value = product
   rejectReason.value = ''
@@ -237,12 +263,16 @@ function openRejectDialog(product: Product) {
   showRejectDialog.value = true
 }
 
+// 关闭拒绝对话框并重置状态
 function closeRejectDialog() {
   showRejectDialog.value = false
   rejectProduct.value = null
   dialogError.value = ''
 }
 
+/**
+ * 确认拒绝商品，提交拒绝原因
+ */
 async function handleReject() {
   if (!rejectProduct.value || !rejectReason.value.trim()) return
   submitting.value = true
@@ -259,6 +289,10 @@ async function handleReject() {
   }
 }
 
+/**
+ * 禁用已通过的商品
+ * @param {Product} product - 待禁用的商品
+ */
 async function handleDisable(product: Product) {
   if (!confirm(`确定禁用商品「${product.name}」吗？`)) return
   try {
@@ -270,6 +304,10 @@ async function handleDisable(product: Product) {
   }
 }
 
+/**
+ * 重新启用已禁用的商品
+ * @param {Product} product - 待启用的商品
+ */
 async function handleEnable(product: Product) {
   if (!confirm(`确定重新启用商品「${product.name}」吗？`)) return
   try {
@@ -281,6 +319,7 @@ async function handleEnable(product: Product) {
   }
 }
 
+// 组件挂载时加载商品列表和标签页数量
 onMounted(() => {
   loadProducts()
   loadTabCounts()

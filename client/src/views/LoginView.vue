@@ -28,22 +28,30 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @file LoginView.vue
+ * @description 登录视图，提供邮箱和密码输入表单，处理用户登录逻辑
+ */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '@/stores/network/accountStore'
 
 const router = useRouter()
-const accountStore = useAccountStore()
-const email = ref('')
-const password = ref('')
-const errorMessage = ref('')
+const accountStore = useAccountStore()   // 账户状态管理实例
+const email = ref('')                     // 用户邮箱
+const password = ref('')                  // 用户密码
+const errorMessage = ref('')              // 登录错误信息
 
+/**
+ * 处理用户登录，成功后跳转首页
+ */
 async function handleLogin() {
   try {
     errorMessage.value = ''
     await accountStore.login(email.value, password.value)
-    router.push('/')
+    router.push('/') // 登录成功后跳转首页
   } catch (error: any) {
+    // 显示登录失败的错误信息
     errorMessage.value = error?.message || error?.response?.data?.message || '登录失败'
   }
 }
