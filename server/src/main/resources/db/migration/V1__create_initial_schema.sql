@@ -69,28 +69,28 @@ CREATE TABLE reviews (
 
 -- RBAC tables
 CREATE TABLE roles (
-    id          VARCHAR(36)    PRIMARY KEY,
+    id          VARCHAR(50)    PRIMARY KEY,
     name        VARCHAR(50)    NOT NULL UNIQUE,
     description VARCHAR(255),
     created_at  TIMESTAMP      NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE permissions (
-    id          VARCHAR(36)    PRIMARY KEY,
+    id          VARCHAR(50)    PRIMARY KEY,
     name        VARCHAR(80)    NOT NULL UNIQUE,
     description VARCHAR(255),
     module      VARCHAR(50)    NOT NULL
 );
 
 CREATE TABLE role_permissions (
-    role_id       VARCHAR(36) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    permission_id VARCHAR(36) NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+    role_id       VARCHAR(50) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id VARCHAR(50) NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
     PRIMARY KEY (role_id, permission_id)
 );
 
 CREATE TABLE user_roles (
     user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    role_id VARCHAR(36) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    role_id VARCHAR(50) NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, role_id)
 );
 
