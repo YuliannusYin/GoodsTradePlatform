@@ -108,6 +108,7 @@ public class OrderService {
         }
     }
 
+    @Transactional
     public List<PlacedOrderDTO> getUserOrders(String userId) {
         return findOrdersByUserId(userId).stream()
                 .map(PlacedOrderDTO::new)

@@ -7,15 +7,13 @@ export const useOrderStore = defineStore('orderStore', () => {
 
   const API = {
     placeOrder: async (
-      latitude: string,
-      longitude: string,
+      address: string,
       deliveryMethod: string,
       paymentMethod: string
     ) => {
       const response = await callPost('/orders/place', {
         productIds: shoppingCartStore.methods.getAllProductIds(),
-        latitude: latitude,
-        longitude: longitude,
+        address: address,
         deliveryMethod: deliveryMethod,
         paymentMethod: paymentMethod
       })

@@ -36,7 +36,8 @@ public class PlacedOrderDTO {
         this.status = order.getStatus();
         this.received = order.getReceived();
         this.expectedDelivery = order.getExpectedDelivery();
-        this.items = order.getItems();
+        // Force initialization of lazy-loaded items collection within transaction
+        this.items = new java.util.ArrayList<>(order.getItems());
     }
 
 }

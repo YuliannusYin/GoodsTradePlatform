@@ -47,7 +47,7 @@ public class Order {
     @Column(name = "expected_delivery")
     private LocalDateTime expectedDelivery;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnoreProperties({"sellingProducts"})
     User user;

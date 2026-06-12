@@ -203,9 +203,9 @@ export default defineComponent({
     }
 
     async function placeOrder() {
+      const address = `${deliveryCoordinates.latitude},${deliveryCoordinates.longitude}`
       await orderStore.API.placeOrder(
-        deliveryCoordinates.latitude,
-        deliveryCoordinates.longitude,
+        address,
         selectedDeliveryMethod.value,
         selectedPaymentMethod.value)
       ongoingOrder.value = null

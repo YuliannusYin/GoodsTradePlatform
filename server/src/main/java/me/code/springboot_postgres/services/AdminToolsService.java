@@ -46,12 +46,14 @@ public class AdminToolsService {
         userRepository.deleteById(userId);
     }
 
+    @Transactional
     public List<UserOrderDTO> getAllUsersOrders() {
         return findAllUsersOrders().stream()
                 .map(order -> new UserOrderDTO(order, order.getUser().getEmail()))
                 .toList();
     }
 
+    @Transactional
     public List<UserOrderDTO> getAllUsersOrders(String status) {
         if (isValidOrderStatus(status)) {
             return findAllUsersOrders(status).stream()
