@@ -18,7 +18,7 @@ spring:
     baseline-on-migrate: true
 
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET:please-change-this-to-a-secure-random-secret-key-in-production}
   expiration-ms: ${JWT_EXPIRATION_MS:3600000}
 
 cors:
