@@ -29,7 +29,26 @@ export const useAdminToolsStore = defineStore('adminToolsStore', () => {
       await callPatch(`/admin_tools/order/expected_delivery`, {
         orderId: orderId,
         newExpectedDelivery: newExpectedDelivery
-      })
+      }),
+
+    // Product Review APIs
+    getPendingProducts: async (): Promise<Product[]> =>
+      await callGet('/admin_tools/product/pending'),
+
+    getProductsByStatus: async (status: string): Promise<Product[]> =>
+      await callGet(`/admin_tools/product/status/${status}`),
+
+    approveProduct: async (productId: string): Promise<Product> =>
+      await callPatch(`/admin_tools/product/approve/${productId}`, {}),
+
+    rejectProduct: async (productId: string, rejectReason: string): Promise<Product> =>
+      await callPatch(`/admin_tools/product/reject/${productId}`, { rejectReason }),
+
+    disableProduct: async (productId: string): Promise<Product> =>
+      await callPatch(`/admin_tools/product/disable/${productId}`, {}),
+
+    enableProduct: async (productId: string): Promise<Product> =>
+      await callPatch(`/admin_tools/product/enable/${productId}`, {})
   }
 
   return {

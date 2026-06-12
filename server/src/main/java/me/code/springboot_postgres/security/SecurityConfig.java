@@ -1,9 +1,8 @@
 package me.code.springboot_postgres.security;
 
-import me.code.springboot_postgres.models.entities.User;
-import me.code.springboot_postgres.repositories.UserRepository;
 import me.code.springboot_postgres.services.UserAccountService;
 import me.code.springboot_postgres.services.RegistrationValidationService;
+import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -44,11 +43,16 @@ public class SecurityConfig {
             REVIEWS_PATH + "/product/**",
     };
 
-    private static final String[] ADMIN_URLS = {
-            API_PATH + "/admin_tools/**"
+    // SUPER_ADMIN only: role management
+    private static final String[] SUPER_ADMIN_URLS = {
+            API_PATH + "/admin/roles/**"
     };
 
-    private static final String ADMIN_ROLE = User.Role.ADMIN.toString();
+    // ADMIN + SUPER_ADMIN: product & order management
+    private static final String[] ADMIN_URLS = {
+            API_PATH + "/admin_tools/**",
+            API_PATH + "/admin/users/**"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity security, UserAccountService userAccountService, JwtTokenUtil jwtTokenUtil) throws Exception {
@@ -56,7 +60,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(new JwtValidationFilter(jwtTokenUtil, userAccountService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(ADMIN_URLS).hasAuthority(ADMIN_ROLE)
+                        .requestMatchers(SUPER_ADMIN_URLS).hasAuthority("ROLE_READ")
+                        .requestMatchers(ADMIN_URLS).hasAuthority("PRODUCT_READ_ALL")
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .anyRequest().authenticated());
         return security.build();

@@ -18,6 +18,10 @@ import CheckoutView from '@/views/CheckoutView.vue'
 import UsersOrdersTable from '@/components/admintools/UsersOrdersTable.vue'
 import PublishProductView from '@/views/PublishProductView.vue'
 import FavoritesView from '@/views/FavoritesView.vue'
+import RoleManagementView from '@/views/admin/RoleManagementView.vue'
+import UserManagementView from '@/views/admin/UserManagementView.vue'
+import ProductReviewView from '@/views/admin/ProductReviewView.vue'
+import MyProductsView from '@/views/MyProductsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -73,6 +77,11 @@ const router = createRouter({
           path: 'orders',
           name: 'ShowAccountOrdersView',
           component: ShowAccountOrdersView
+        },
+        {
+          path: 'my-products',
+          name: 'MyProductsView',
+          component: MyProductsView
         }
       ]
     },
@@ -173,6 +182,28 @@ const router = createRouter({
               component: UsersOrdersTable
             }
           ]
+        },
+        {
+          path: 'roles',
+          name: 'RoleManagementView',
+          component: RoleManagementView,
+          beforeEnter: (to, from, next) => {
+            if (useAuthenticationStore().states.isSuperAdmin) {
+              next()
+            } else {
+              next('/admin_tools')
+            }
+          }
+        },
+        {
+          path: 'users',
+          name: 'UserManagementView',
+          component: UserManagementView
+        },
+        {
+          path: 'reviews',
+          name: 'ProductReviewView',
+          component: ProductReviewView
         }
       ]
     },

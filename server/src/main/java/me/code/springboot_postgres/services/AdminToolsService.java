@@ -150,6 +150,8 @@ public class AdminToolsService {
                     category,
                     condition,
                     dto.source() != null ? dto.source() : "PLATFORM");
+            // Admin-created products are auto-approved
+            product.setStatus(Product.Status.APPROVED);
             return productRepository.save(product);
         } catch (Exception exception) {
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not create product");
@@ -174,6 +176,8 @@ public class AdminToolsService {
                     "USER");
 
             product.setSeller(user);
+            // User-created products need review
+            product.setStatus(Product.Status.PENDING);
             return productRepository.save(product);
         } catch (Exception exception) {
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Could not create product");
@@ -212,6 +216,60 @@ public class AdminToolsService {
             return new Success(HttpStatus.OK, "The product was edited successfully");
 
         } else throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Failed to edit the product");
+    }
+
+    // ==================== Product Review ====================
+
+    public List<Product> getPendingProducts() {
+        return productRepository.findByStatus(Product.Status.PENDING);
+    }
+
+    public List<Product> getProductsByStatus(String status) {
+        Product.Status statusEnum = Product.Status.valueOf(status.toUpperCase());
+        return productRepository.findByStatus(statusEnum);
+    }
+
+    @Transactional
+    public Success approveProduct(String productId) {
+        Product product = loadProductById(productId);
+        if (product.getStatus() != Product.Status.PENDING) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Only pending products can be approved");
+        }
+        product.setStatus(Product.Status.APPROVED);
+        product.setRejectReason(null);
+        productRepository.save(product);
+        return new Success(HttpStatus.OK, "Product approved successfully");
+    }
+
+    @Transactional
+    public Success rejectProduct(String productId, String rejectReason) {
+        Product product = loadProductById(productId);
+        if (product.getStatus() != Product.Status.PENDING) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Only pending products can be rejected");
+        }
+        product.setStatus(Product.Status.REJECTED);
+        product.setRejectReason(rejectReason);
+        productRepository.save(product);
+        return new Success(HttpStatus.OK, "Product rejected successfully");
+    }
+
+    @Transactional
+    public Success disableProduct(String productId) {
+        Product product = loadProductById(productId);
+        product.setStatus(Product.Status.DISABLED);
+        productRepository.save(product);
+        return new Success(HttpStatus.OK, "Product disabled successfully");
+    }
+
+    @Transactional
+    public Success enableProduct(String productId) {
+        Product product = loadProductById(productId);
+        if (product.getStatus() == Product.Status.DISABLED) {
+            product.setStatus(Product.Status.APPROVED);
+            productRepository.save(product);
+            return new Success(HttpStatus.OK, "Product re-enabled successfully");
+        }
+        throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Only disabled products can be re-enabled");
     }
 
     public Product loadProductById(String productId) {

@@ -15,6 +15,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserAccountService implements UserDetailsService {
 
@@ -35,7 +38,7 @@ public class UserAccountService implements UserDetailsService {
         checkForValidationErrors(dto.email(), dto.username(), dto.password());
         try {
             String encryptedPassword = passwordEncoder.encode(dto.password());
-            User newUser = new User(dto.email(), dto.username(), encryptedPassword, User.Role.USER);
+            User newUser = new User(dto.email(), dto.username(), encryptedPassword, User.LegacyRole.USER);
             userRepository.save(newUser);
 
             return new Success(
@@ -57,10 +60,14 @@ public class UserAccountService implements UserDetailsService {
 
     public Success getUserDetails(User user) {
         try {
+            List<String> roleNames = user.getRoles().stream()
+                    .map(role -> role.getName())
+                    .collect(Collectors.toList());
+
             return new UserDetailsSuccess(HttpStatus.OK,
                     "User details were successfully retrieved",
                     user.getEmail(), user.getUsername(),
-                    user.getBalance(), user.isProtected());
+                    user.getBalance(), user.isProtected(), roleNames);
 
         } catch (Exception exception) {
             throw new CustomRuntimeException(

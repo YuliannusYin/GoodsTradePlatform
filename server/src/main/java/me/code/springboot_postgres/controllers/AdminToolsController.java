@@ -3,6 +3,7 @@ package me.code.springboot_postgres.controllers;
 import me.code.springboot_postgres.dtos.requests.AddProductDTO;
 import me.code.springboot_postgres.dtos.requests.ChangeExpectedDeliveryDTO;
 import me.code.springboot_postgres.dtos.requests.EditedProductDTO;
+import me.code.springboot_postgres.dtos.requests.ProductReviewDTO;
 import me.code.springboot_postgres.dtos.requests.SendOrderDTO;
 import me.code.springboot_postgres.dtos.responses.entities.UserOrderDTO;
 import me.code.springboot_postgres.dtos.responses.success.Success;
@@ -24,6 +25,8 @@ public class AdminToolsController {
         this.adminToolsService = adminToolsService;
     }
 
+    // ==================== Product Management ====================
+
     @PostMapping("/product/add")
     public ResponseEntity<Product> addProduct(@RequestBody AddProductDTO dto) {
         var result = adminToolsService.addProduct(dto);
@@ -41,6 +44,40 @@ public class AdminToolsController {
         var result = adminToolsService.deleteProduct(productId);
         return result.toResponseEntity();
     }
+
+    // ==================== Product Review ====================
+
+    @GetMapping("/product/pending")
+    public ResponseEntity<List<Product>> getPendingProducts() {
+        return ResponseEntity.ok(adminToolsService.getPendingProducts());
+    }
+
+    @GetMapping("/product/status/{status}")
+    public ResponseEntity<List<Product>> getProductsByStatus(@PathVariable String status) {
+        return ResponseEntity.ok(adminToolsService.getProductsByStatus(status));
+    }
+
+    @PatchMapping("/product/approve/{productId}")
+    public ResponseEntity<Success> approveProduct(@PathVariable String productId) {
+        return adminToolsService.approveProduct(productId).toResponseEntity();
+    }
+
+    @PatchMapping("/product/reject/{productId}")
+    public ResponseEntity<Success> rejectProduct(@PathVariable String productId, @RequestBody ProductReviewDTO dto) {
+        return adminToolsService.rejectProduct(productId, dto.rejectReason()).toResponseEntity();
+    }
+
+    @PatchMapping("/product/disable/{productId}")
+    public ResponseEntity<Success> disableProduct(@PathVariable String productId) {
+        return adminToolsService.disableProduct(productId).toResponseEntity();
+    }
+
+    @PatchMapping("/product/enable/{productId}")
+    public ResponseEntity<Success> enableProduct(@PathVariable String productId) {
+        return adminToolsService.enableProduct(productId).toResponseEntity();
+    }
+
+    // ==================== Order Management ====================
 
     @GetMapping("/order/all")
     public ResponseEntity<List<UserOrderDTO>> getAllUsersOrders() {

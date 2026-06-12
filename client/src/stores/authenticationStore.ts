@@ -1,19 +1,33 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { LoginResponseSuccess } from './network/connectionStore'
 import navigationProvider from '../router/navigationProvider'
 
-function getStoredUserRole(): string | null {
-  return sessionStorage.getItem('userRole')
+function getStoredUserRoles(): string[] {
+  const stored = sessionStorage.getItem('userRoles')
+  if (stored) {
+    try {
+      return JSON.parse(stored)
+    } catch {
+      return []
+    }
+  }
+  return []
 }
 
 export const useAuthenticationStore = defineStore('authenticationStore', () => {
   const storedToken = sessionStorage.getItem('jwtToken')
-  const storedRole = getStoredUserRole()
+  const storedRoles = getStoredUserRoles()
 
   const states = {
     isAuthenticated: ref<boolean>(!!storedToken),
-    isAdmin: ref<boolean>(storedRole === 'ADMIN')
+    roles: ref<string[]>(storedRoles),
+    isAdmin: computed<boolean>(() =>
+      states.roles.value.includes('SUPER_ADMIN') || states.roles.value.includes('ADMIN')
+    ),
+    isSuperAdmin: computed<boolean>(() =>
+      states.roles.value.includes('SUPER_ADMIN')
+    )
   }
 
   const methods = {
@@ -22,12 +36,12 @@ export const useAuthenticationStore = defineStore('authenticationStore', () => {
         storeJwtToken(response.token)
         states.isAuthenticated.value = true
 
-        if (response.userRole === 'ADMIN') {
-          states.isAdmin.value = true
+        if (response.userRoles && Array.isArray(response.userRoles)) {
+          states.roles.value = response.userRoles
         } else {
-          states.isAdmin.value = false
+          states.roles.value = []
         }
-        storeUserRole(response.userRole)
+        storeUserRoles(states.roles.value)
 
         navigationProvider.navigateOnCondition(
           states.isAuthenticated.value,
@@ -39,7 +53,7 @@ export const useAuthenticationStore = defineStore('authenticationStore', () => {
 
     handleRevokeAuthentication: () => {
       clearJwtToken()
-      clearUserRole()
+      clearUserRoles()
       revokeAuthentication()
       navigationProvider.navigate('home')
     },
@@ -51,23 +65,23 @@ export const useAuthenticationStore = defineStore('authenticationStore', () => {
 
   function revokeAuthentication() {
     states.isAuthenticated.value = false
-    states.isAdmin.value = false
+    states.roles.value = []
   }
 
   function storeJwtToken(token: string) {
     sessionStorage.setItem('jwtToken', token)
   }
 
-  function storeUserRole(role: string) {
-    sessionStorage.setItem('userRole', role)
+  function storeUserRoles(roles: string[]) {
+    sessionStorage.setItem('userRoles', JSON.stringify(roles))
   }
 
   function clearJwtToken() {
     sessionStorage.removeItem('jwtToken')
   }
 
-  function clearUserRole() {
-    sessionStorage.removeItem('userRole')
+  function clearUserRoles() {
+    sessionStorage.removeItem('userRoles')
   }
 
   return {

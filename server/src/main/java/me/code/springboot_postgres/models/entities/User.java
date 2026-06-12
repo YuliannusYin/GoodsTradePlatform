@@ -10,8 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @Getter
@@ -34,9 +34,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    /**
+     * Legacy role field - kept for backward compatibility during migration.
+     * New code should use the `roles` ManyToMany relationship instead.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private Role role;
+    private LegacyRole legacyRole;
 
     private String avatarUrl;
 
@@ -49,29 +53,92 @@ public class User implements UserDetails {
     @Column(name = "is_protected", nullable = false)
     private boolean isProtected = false;
 
+    @Column(name = "is_enabled", nullable = false)
+    private boolean isEnabled = true;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @JsonIgnoreProperties({"permissions"})
+    private Set<Role> roles = new HashSet<>();
+
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"seller"})
     private List<Product> sellingProducts;
 
-    public User(String email, String username, String password, Role role) {
+    public User(String email, String username, String password, LegacyRole legacyRole) {
         this.email = email;
         this.username = username;
         this.password = password;
-        this.role = role;
+        this.legacyRole = legacyRole;
     }
 
-    public User(String email, String username, String password, Role role, double balance, boolean isProtected) {
+    public User(String email, String username, String password, LegacyRole legacyRole, double balance, boolean isProtected) {
         this.email = email;
         this.username = username;
         this.password = password;
-        this.role = role;
+        this.legacyRole = legacyRole;
         this.balance = balance;
         this.isProtected = isProtected;
     }
 
+    /**
+     * Returns authorities based on RBAC permissions from all assigned roles.
+     * Each permission name becomes a GrantedAuthority.
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.toString()));
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : roles) {
+            // Add role name as authority (e.g., "ROLE_SUPER_ADMIN")
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+            // Add each permission as authority (e.g., "PRODUCT_READ_ALL")
+            for (Permission permission : role.getPermissions()) {
+                authorities.add(new SimpleGrantedAuthority(permission.getName()));
+            }
+        }
+        return authorities;
+    }
+
+    /**
+     * Get all permission names from all assigned roles.
+     */
+    public Set<String> getPermissionNames() {
+        return roles.stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(Permission::getName)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Check if user has a specific permission.
+     */
+    public boolean hasPermission(String permissionName) {
+        return getPermissionNames().contains(permissionName);
+    }
+
+    /**
+     * Check if user has any of the given roles by name.
+     */
+    public boolean hasRole(String roleName) {
+        return roles.stream().anyMatch(r -> r.getName().equals(roleName));
+    }
+
+    /**
+     * Check if user is a super admin.
+     */
+    public boolean isSuperAdmin() {
+        return hasRole("SUPER_ADMIN");
+    }
+
+    /**
+     * Check if user is an admin (any level).
+     */
+    public boolean isAdmin() {
+        return hasRole("SUPER_ADMIN") || hasRole("ADMIN");
     }
 
     @Override
@@ -91,15 +158,20 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 
     @Override
     public String toString() {
-        return "User{id='" + id + ", email='" + email + ", username='" + username + ", role=" + role + "}";
+        return "User{id='" + id + ", email='" + email + ", username='" + username + ", roles=" +
+                roles.stream().map(Role::getName).collect(Collectors.joining(",")) + "}";
     }
 
-    public enum Role {
+    /**
+     * Legacy role enum - kept for backward compatibility with the DB column.
+     * Maps: ADMIN -> SUPER_ADMIN or ADMIN in RBAC, USER -> USER in RBAC.
+     */
+    public enum LegacyRole {
         USER, ADMIN;
 
         @Override

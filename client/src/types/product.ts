@@ -1,3 +1,5 @@
+export type ProductStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISABLED'
+
 export interface Product {
   id: string
   name: string
@@ -8,6 +10,8 @@ export interface Product {
   category: string
   condition: string
   source: string
+  status: ProductStatus
+  rejectReason: string | null
   seller?: {
     id: string
     username: string
@@ -52,4 +56,18 @@ export const PRODUCT_CONDITIONS: Record<string, string> = {
   LIKE_NEW: '几乎全新',
   GOOD: '良好',
   FAIR: '一般'
+}
+
+export const PRODUCT_STATUSES: Record<string, string> = {
+  PENDING: '待审核',
+  APPROVED: '已通过',
+  REJECTED: '已拒绝',
+  DISABLED: '已禁用'
+}
+
+export const PRODUCT_STATUS_COLORS: Record<string, string> = {
+  PENDING: 'bg-yellow-100 text-yellow-800',
+  APPROVED: 'bg-green-100 text-green-800',
+  REJECTED: 'bg-red-100 text-red-800',
+  DISABLED: 'bg-gray-100 text-gray-800'
 }

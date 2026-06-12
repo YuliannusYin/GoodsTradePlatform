@@ -24,12 +24,18 @@ public class ProductService {
     }
 
     public List<Product> getProducts() {
-        return productRepository.findAll();
+        // Public listing only shows approved products
+        return productRepository.findByStatus(Product.Status.APPROVED);
     }
 
     public Product getProduct(String productId) {
         try {
-            return loadProductById(productId);
+            Product product = loadProductById(productId);
+            // Public view only shows approved products
+            if (product.getStatus() != Product.Status.APPROVED) {
+                throw new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find requested product");
+            }
+            return product;
         } catch (Exception exception) {
             throw new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find requested product");
         }
@@ -37,7 +43,10 @@ public class ProductService {
 
     public List<Product> getFeaturedProducts() {
         int productAmount = 4;
-        return productRepository.findTopByQuantityDesc(productAmount);
+        return productRepository.findTopByQuantityDesc(productAmount).stream()
+                .filter(p -> p.getStatus() == Product.Status.APPROVED)
+                .limit(productAmount)
+                .toList();
     }
 
     public List<Product> getSearchedProducts(String query, String filter) {
@@ -45,14 +54,18 @@ public class ProductService {
     }
 
     public List<Product> getSearchedProducts(String query, String filter, String category) {
+        List<Product> results;
         if (category != null && !category.isBlank() && !category.equalsIgnoreCase("all")) {
-            return getSearchedProductsWithCategory(query, filter, category);
-        }
-        if (isBlankSearchQuery(query)) {
-            return loadAllProductsWithFilter(filter);
+            results = getSearchedProductsWithCategory(query, filter, category);
+        } else if (isBlankSearchQuery(query)) {
+            results = loadAllProductsWithFilter(filter);
         } else {
-            return loadSearchedProductsWithFilter(query, filter);
+            results = loadSearchedProductsWithFilter(query, filter);
         }
+        // Only return approved products in public search
+        return results.stream()
+                .filter(p -> p.getStatus() == Product.Status.APPROVED)
+                .toList();
     }
 
     private List<Product> getSearchedProductsWithCategory(String query, String filter, String categoryStr) {
@@ -102,7 +115,9 @@ public class ProductService {
 
     public List<Product> getProductsByCategory(String categoryStr) {
         Product.Category category = Product.Category.valueOf(categoryStr);
-        return productRepository.findByCategory(category);
+        return productRepository.findByCategory(category).stream()
+                .filter(p -> p.getStatus() == Product.Status.APPROVED)
+                .toList();
     }
 
     public List<Product> getProductsBySellerId(String userId) {

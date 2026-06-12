@@ -53,7 +53,14 @@ public class Product {
     @Column(length = 20)
     private String source;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Status status = Status.APPROVED;
+
+    @Column(name = "reject_reason", columnDefinition = "TEXT")
+    private String rejectReason;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "seller_id")
     @JsonIgnoreProperties({"sellingProducts"})
     private User seller;
@@ -75,5 +82,9 @@ public class Product {
 
     public enum Category {
         ANIME_FIGURE, POSTER, KEYCHAIN, BADGE, PILLOW, STAND, CLOTHING, ALBUM, ACCESSORY, OTHER
+    }
+
+    public enum Status {
+        PENDING, APPROVED, REJECTED, DISABLED
     }
 }

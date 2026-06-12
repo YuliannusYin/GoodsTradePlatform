@@ -42,4 +42,8 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findSearchedProductsByCategoryOrderedByHighestPrice(@Param("query") String query, @Param("category") Product.Category category);
 
     List<Product> findBySellerId(String sellerId);
+
+    List<Product> findByStatus(Product.Status status);
+
+    List<Product> findByStatusAndSellerId(Product.Status status, String sellerId);
 }

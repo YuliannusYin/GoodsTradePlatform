@@ -1,6 +1,8 @@
 package me.code.springboot_postgres.config;
 
+import me.code.springboot_postgres.models.entities.Role;
 import me.code.springboot_postgres.models.entities.User;
+import me.code.springboot_postgres.repositories.RoleRepository;
 import me.code.springboot_postgres.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -26,35 +29,39 @@ public class DataInitializer implements CommandLineRunner {
     private static final String TEST_USER_PASSWORD = "Test@2024";
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) {
-        ensureUser(SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, User.Role.ADMIN, 0.0, true);
-        ensureUser(MERCHANT_EMAIL, MERCHANT_PASSWORD, User.Role.USER, 0.0, true);
-        ensureUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, User.Role.USER, 10_000_000.0, true);
+        ensureUser(SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, User.LegacyRole.ADMIN, 0.0, true, "SUPER_ADMIN");
+        ensureUser(MERCHANT_EMAIL, MERCHANT_PASSWORD, User.LegacyRole.USER, 0.0, true, "USER");
+        ensureUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, User.LegacyRole.USER, 10_000_000.0, true, "USER");
     }
 
-    private void ensureUser(String email, String rawPassword, User.Role role,
-                             double balance, boolean isProtected) {
+    private void ensureUser(String email, String rawPassword, User.LegacyRole legacyRole,
+                             double balance, boolean isProtected, String rbacRoleName) {
         Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isEmpty()) {
             // User not in DB (shouldn't happen if V2 ran), create it
             String encoded = passwordEncoder.encode(rawPassword);
-            User user = new User(email, email.split("@")[0], encoded, role, balance, isProtected);
+            User user = new User(email, email.split("@")[0], encoded, legacyRole, balance, isProtected);
+            assignRbacRole(user, rbacRoleName);
             userRepository.save(user);
-            log.info("Created built-in user: {} ({})", email, role);
+            log.info("Created built-in user: {} ({})", email, rbacRoleName);
             return;
         }
 
         User user = existing.get();
         fixPlaceholderPassword(user, rawPassword);
-        ensureFields(user, role, balance, isProtected);
+        ensureFields(user, legacyRole, balance, isProtected);
+        ensureRbacRole(user, rbacRoleName);
     }
 
     private void fixPlaceholderPassword(User user, String rawPassword) {
@@ -76,11 +83,11 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void ensureFields(User user, User.Role role, double balance, boolean isProtected) {
+    private void ensureFields(User user, User.LegacyRole legacyRole, double balance, boolean isProtected) {
         boolean needsUpdate = false;
 
-        if (user.getRole() != role) {
-            user.setRole(role);
+        if (user.getLegacyRole() != legacyRole) {
+            user.setLegacyRole(legacyRole);
             needsUpdate = true;
         }
         if (user.isProtected() != isProtected) {
@@ -96,5 +103,21 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(user);
             log.info("Updated built-in user fields: {}", user.getEmail());
         }
+    }
+
+    private void ensureRbacRole(User user, String rbacRoleName) {
+        boolean hasRole = user.getRoles().stream()
+                .anyMatch(r -> r.getName().equals(rbacRoleName));
+        if (!hasRole) {
+            assignRbacRole(user, rbacRoleName);
+            userRepository.save(user);
+            log.info("Assigned RBAC role {} to user: {}", rbacRoleName, user.getEmail());
+        }
+    }
+
+    private void assignRbacRole(User user, String rbacRoleName) {
+        roleRepository.findByName(rbacRoleName).ifPresent(role ->
+                user.setRoles(Set.of(role))
+        );
     }
 }

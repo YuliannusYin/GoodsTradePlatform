@@ -8,6 +8,9 @@
         <router-link :to="{ name: 'ShowAccountOrdersView' }" class="text-blue-700 hover:text-blue-500">
           查看我的订单
         </router-link>
+        <router-link :to="{ name: 'MyProductsView' }" class="text-blue-700 hover:text-blue-500">
+          我的商品
+        </router-link>
       </div>
     </div>
     <RouterView class="p-4" />

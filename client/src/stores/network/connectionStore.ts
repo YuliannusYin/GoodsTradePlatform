@@ -6,7 +6,7 @@ import { useAccountStore } from './accountStore'
 
 export interface LoginResponseSuccess {
   success: boolean
-  userRole: string
+  userRoles: string[]
   token: string
 }
 

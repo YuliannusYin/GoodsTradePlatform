@@ -15,6 +15,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("api/account")
 public class LoginController {
@@ -38,10 +41,14 @@ public class LoginController {
         User user = authenticateUser(dto);
         String token = generateTokenForUser(user);
 
+        List<String> roleNames = user.getRoles().stream()
+                .map(role -> role.getName())
+                .collect(Collectors.toList());
+
         return new AuthenticationSuccess(
                 HttpStatus.OK,
                 "Login successful",
-                user.getRole().toString(),
+                roleNames,
                 token)
                 .toResponseEntity();
     }
