@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import me.code.springboot_postgres.dtos.responses.success.Success;
 import org.springframework.http.HttpStatus;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class UserDetailsSuccess extends Success {
@@ -15,7 +16,7 @@ public class UserDetailsSuccess extends Success {
     private String username;
 
     @JsonProperty("balance")
-    private double balance;
+    private BigDecimal balance;
 
     @JsonProperty("isProtected")
     private boolean isProtected;
@@ -24,7 +25,7 @@ public class UserDetailsSuccess extends Success {
     private List<String> roles;
 
     public UserDetailsSuccess(HttpStatus status, String message, String email, String username,
-                               double balance, boolean isProtected, List<String> roles) {
+                               BigDecimal balance, boolean isProtected, List<String> roles) {
         super(status, message);
         this.email = email;
         this.username = username;

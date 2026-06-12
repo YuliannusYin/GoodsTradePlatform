@@ -84,7 +84,7 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void ensureFields(User user, User.LegacyRole legacyRole, double balance, boolean isProtected) {
+    private void ensureFields(User user, User.LegacyRole legacyRole, BigDecimal balance, boolean isProtected) {
         boolean needsUpdate = false;
 
         if (user.getLegacyRole() != legacyRole) {
