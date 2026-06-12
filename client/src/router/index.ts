@@ -198,12 +198,26 @@ const router = createRouter({
         {
           path: 'users',
           name: 'UserManagementView',
-          component: UserManagementView
+          component: UserManagementView,
+          beforeEnter: (to, from, next) => {
+            if (useAuthenticationStore().states.isAdmin) {
+              next()
+            } else {
+              next('/admin_tools')
+            }
+          }
         },
         {
           path: 'reviews',
           name: 'ProductReviewView',
-          component: ProductReviewView
+          component: ProductReviewView,
+          beforeEnter: (to, from, next) => {
+            if (useAuthenticationStore().states.isAdmin) {
+              next()
+            } else {
+              next('/admin_tools')
+            }
+          }
         }
       ]
     },

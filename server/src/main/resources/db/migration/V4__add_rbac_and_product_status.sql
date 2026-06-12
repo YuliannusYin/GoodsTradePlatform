@@ -130,4 +130,4 @@ SELECT id, 'r-00000000-0000-0000-0000-000000000003'
 FROM users WHERE role = 'USER';
 
 -- Set all existing products to APPROVED status (they were created by admin)
-UPDATE products SET status = 'APPROVED' WHERE status = 'APPROVED';
+UPDATE products SET status = 'APPROVED';

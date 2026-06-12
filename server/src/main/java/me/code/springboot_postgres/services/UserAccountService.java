@@ -24,14 +24,17 @@ public class UserAccountService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RegistrationValidationService credentialsValidator;
+    private final me.code.springboot_postgres.repositories.RoleRepository roleRepository;
 
     @Autowired
     public UserAccountService(UserRepository userRepository,
                               PasswordEncoder passwordEncoder,
-                              RegistrationValidationService credentialsValidator) {
+                              RegistrationValidationService credentialsValidator,
+                              me.code.springboot_postgres.repositories.RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.credentialsValidator = credentialsValidator;
+        this.roleRepository = roleRepository;
     }
 
     public Success submitRegistration(CreateUserDTO dto) {
@@ -39,6 +42,13 @@ public class UserAccountService implements UserDetailsService {
         try {
             String encryptedPassword = passwordEncoder.encode(dto.password());
             User newUser = new User(dto.email(), dto.username(), encryptedPassword, User.LegacyRole.USER);
+
+            // Assign default USER role from RBAC system
+            me.code.springboot_postgres.models.entities.Role defaultRole = roleRepository.findByName("USER")
+                    .orElseThrow(() -> new CustomRuntimeException(
+                            HttpStatus.INTERNAL_SERVER_ERROR, "Default USER role not found"));
+            newUser.setRoles(java.util.Set.of(defaultRole));
+
             userRepository.save(newUser);
 
             return new Success(
