@@ -206,10 +206,15 @@ function removeProduct(productId: string) {
  * 确认下单操作，提交订单信息
  */
 async function placeOrder() {
-  const address = `${deliveryCoordinates.latitude},${deliveryCoordinates.longitude}`
-  await orderStore.placeOrder(address, selectedDeliveryMethod.value, selectedPaymentMethod.value)
-  ongoingOrder.value = null
-  isConfirmedOrder.value = true
+  try {
+    const address = `${deliveryCoordinates.latitude},${deliveryCoordinates.longitude}`
+    await orderStore.placeOrder(address, selectedDeliveryMethod.value, selectedPaymentMethod.value)
+    ongoingOrder.value = null
+    isConfirmedOrder.value = true
+  } catch (error: any) {
+    // 下单失败时显示错误提示，不改变页面状态
+    alert(error?.message || '下单失败，请重试')
+  }
 }
 
 /**

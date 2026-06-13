@@ -118,14 +118,18 @@ const router = createRouter({
       }
     },
     {
-      // 发布商品页面路由，需要登录后才能访问
+      // 发布商品页面路由，需要商户/管理员角色才能访问
       path: '/publish',
       name: 'publishProduct',
       component: PublishProductView,
       beforeEnter: (to, from, next) => {
-        if (useAccountStore().isAuthenticated) {
-          // 已登录，允许进入
+        const accountStore = useAccountStore()
+        if (accountStore.isAuthenticated && (accountStore.isMerchant() || accountStore.isAdmin())) {
+          // 已登录且为商户或管理员，允许进入
           next()
+        } else if (accountStore.isAuthenticated) {
+          // 已登录但非商户/管理员，重定向到账户页
+          next('/account')
         } else {
           // 未登录，重定向到登录页
           next('/login')

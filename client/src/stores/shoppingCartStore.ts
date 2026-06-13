@@ -64,6 +64,8 @@ export const useShoppingCartStore = defineStore('shoppingCart', () => {
   function removeProductId(productId: string): void {
     // 查找商品ID在列表中的索引位置
     const index = productIds.value.indexOf(productId)
+    // 商品ID不存在时跳过，防止splice(-1)误删最后一个元素
+    if (index === -1) return
     productIds.value.splice(index, 1)
     productAmount.value--
     // 移除后立即持久化到sessionStorage

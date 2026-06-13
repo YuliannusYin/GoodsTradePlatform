@@ -39,11 +39,11 @@
               </span>
             </td>
             <td class="px-4 py-3">
-              <span :class="user.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+              <span :class="user.isEnabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
                 class="text-xs px-2 py-0.5 rounded">
-                {{ user.enabled ? '启用' : '禁用' }}
+                {{ user.isEnabled ? '启用' : '禁用' }}
               </span>
-              <span v-if="user.protected"
+              <span v-if="user.isProtected"
                 class="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded ml-1">受保护</span>
             </td>
             <td class="px-4 py-3">
@@ -52,13 +52,13 @@
                   class="text-blue-600 hover:text-blue-800 text-xs" title="分配角色">
                   <i class="fas fa-user-tag"></i> 角色
                 </button>
-                <button v-if="!user.protected" @click="handleToggleEnabled(user)"
+                <button v-if="!user.isProtected" @click="handleToggleEnabled(user)"
                   class="text-yellow-600 hover:text-yellow-800 text-xs"
-                  :title="user.enabled ? '禁用用户' : '启用用户'">
-                  <i :class="user.enabled ? 'fas fa-ban' : 'fas fa-check-circle'"></i>
-                  {{ user.enabled ? '禁用' : '启用' }}
+                  :title="user.isEnabled ? '禁用用户' : '启用用户'">
+                  <i :class="user.isEnabled ? 'fas fa-ban' : 'fas fa-check-circle'"></i>
+                  {{ user.isEnabled ? '禁用' : '启用' }}
                 </button>
-                <button v-if="!user.protected" @click="handleDeleteUser(user)"
+                <button v-if="!user.isProtected" @click="handleDeleteUser(user)"
                   class="text-red-600 hover:text-red-800 text-xs" title="删除用户">
                   <i class="fas fa-trash"></i> 删除
                 </button>
@@ -117,18 +117,20 @@
  */
 import { ref, onMounted } from 'vue'
 import { useAdminToolsStore } from '@/stores/network/adminToolsStore'
-import { callGet, callPatch, callDelete } from '@/stores/network/requests'
+import { callGet, callPut, callPatch, callDelete } from '@/stores/network/requests'
 
 /**
- * 管理员用户信息接口
+ * 管理员用户信息接口，字段名需与后端UserDTO的JSON属性名一致
  */
 interface AdminUser {
   id: string
   email: string
   username: string
   role: string
-  enabled: boolean
-  protected: boolean
+  /** 后端UserDTO中isProtected序列化为isProtected */
+  isProtected: boolean
+  /** 后端UserDTO中isEnabled序列化为isEnabled */
+  isEnabled: boolean
 }
 
 const adminStore = useAdminToolsStore()
@@ -153,7 +155,7 @@ async function loadData() {
   loading.value = true
   error.value = null
   try {
-    users.value = await callGet<AdminUser[]>('/admin_tools/users/all')
+    users.value = await callGet<AdminUser[]>('/api/admin/users/all')
   } catch (e: any) {
     error.value = '加载数据失败'
   } finally {
@@ -187,7 +189,8 @@ async function handleAssignRole() {
   submitting.value = true
   dialogError.value = ''
   try {
-    await callPatch(`/api/admin_tools/users/${selectedUser.value.id}/role?role=${selectedRole.value}`, {})
+    // 后端UserManagementController使用PUT方法分配角色
+    await callPut(`/api/admin/users/${selectedUser.value.id}/role`, { role: selectedRole.value })
     closeRoleDialog()
     await loadData()
   } catch (e: any) {
@@ -202,10 +205,10 @@ async function handleAssignRole() {
  * @param {AdminUser} user - 待操作的用户
  */
 async function handleToggleEnabled(user: AdminUser) {
-  const action = user.enabled ? '禁用' : '启用'
+  const action = user.isEnabled ? '禁用' : '启用'
   if (!confirm(`确定${action}用户「${user.username}」吗？`)) return
   try {
-    await callPatch(`/api/admin_tools/users/${user.id}/toggle-enabled`, {})
+    await callPatch(`/api/admin/users/${user.id}/toggle-enabled`, {})
     await loadData()
   } catch (e: any) {
     error.value = e?.message || '操作失败'
@@ -219,7 +222,7 @@ async function handleToggleEnabled(user: AdminUser) {
 async function handleDeleteUser(user: AdminUser) {
   if (!confirm(`确定删除用户「${user.username}」吗？此操作不可撤销。`)) return
   try {
-    await callDelete(`/api/admin_tools/users/${user.id}`)
+    await callDelete(`/api/admin/users/${user.id}`)
     await loadData()
   } catch (e: any) {
     error.value = e?.message || '删除失败'
