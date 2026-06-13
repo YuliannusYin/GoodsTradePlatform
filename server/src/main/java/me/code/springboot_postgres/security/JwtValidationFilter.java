@@ -63,9 +63,11 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 令牌无效则返回401错误
+        // 令牌无效时清除认证上下文并继续过滤器链，由SecurityConfig的权限配置决定是否放行
+        // 这样公开URL（如/api/account/login）即使携带无效令牌也能正常访问
         if (!jwtTokenUtil.isValidToken(token)) {
-            sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "The provided token is not valid");
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
             return;
         }
 

@@ -26,11 +26,12 @@ const pinia = createPinia()
 app.use(pinia)
 
 // 在应用挂载前恢复用户会话，确保页面刷新后登录状态不丢失
+// 使用async/await等待会话恢复完成，避免令牌过期导致的"假登录"状态
 const accountStore = useAccountStore()
-accountStore.restoreSession()
+accountStore.restoreSession().then(() => {
+  // 注册路由插件
+  app.use(router)
 
-// 注册路由插件
-app.use(router)
-
-// 将应用挂载到 HTML 中 id 为 app 的 DOM 元素
-app.mount('#app')
+  // 将应用挂载到 HTML 中 id 为 app 的 DOM 元素
+  app.mount('#app')
+})

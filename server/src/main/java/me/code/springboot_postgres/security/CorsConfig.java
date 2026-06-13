@@ -15,6 +15,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -35,8 +36,12 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // 设置允许的来源模式
-        config.setAllowedOriginPatterns(List.of(allowedOrigins.split(",")));
+        // 设置允许的来源模式，split后trim去除空格，避免逗号后带空格导致匹配失败
+        config.setAllowedOriginPatterns(
+                Arrays.stream(allowedOrigins.split(","))
+                        .map(String::trim)
+                        .toList()
+        );
         // 设置允许的HTTP方法
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // 允许所有请求头
@@ -62,7 +67,11 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns(allowedOrigins.split(","))
+                        .allowedOriginPatterns(
+                                Arrays.stream(allowedOrigins.split(","))
+                                        .map(String::trim)
+                                        .toArray(String[]::new)
+                        )
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

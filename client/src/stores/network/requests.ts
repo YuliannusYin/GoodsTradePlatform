@@ -43,7 +43,11 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // 401未授权：清除本地令牌并跳转到登录页
       sessionStorage.removeItem('jwtToken')
+      sessionStorage.removeItem('userRole')
       router.push('/login')
+    } else if (error.response?.status === 403) {
+      // 403禁止访问：权限不足，提示用户
+      console.error('权限不足，无法访问该资源')
     }
     throw error
   }

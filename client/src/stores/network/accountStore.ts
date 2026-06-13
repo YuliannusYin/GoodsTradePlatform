@@ -87,23 +87,30 @@ export const useAccountStore = defineStore('accountStore', () => {
 
   /**
    * 从sessionStorage恢复用户会话状态
-   * 在页面刷新后调用，避免用户需要重新登录
+   * 在页面刷新后调用，验证令牌有效性后再恢复认证状态
    */
-  function restoreSession() {
+  async function restoreSession() {
     const token = sessionStorage.getItem('jwtToken')
     const role = sessionStorage.getItem('userRole')
     if (token && role) {
-      // 令牌和角色均存在时恢复认证状态
+      // 先临时设置令牌和角色，以便fetchUserDetails请求能携带认证头
       jwtToken.value = token
       userRole.value = role
-      isAuthenticated.value = true
-      // 恢复后异步拉取最新用户详情
-      fetchUserDetails()
+      try {
+        // 验证令牌有效性：尝试拉取用户详情，失败则说明令牌已过期
+        await fetchUserDetails()
+        // 拉取成功，确认认证状态
+        isAuthenticated.value = true
+      } catch (e) {
+        // 令牌无效或过期，清除登录状态，避免"假登录"
+        logout()
+      }
     }
   }
 
   /**
    * 拉取当前用户的详细信息并更新状态
+   * 认证失败（401）时抛出异常，供restoreSession判断令牌有效性
    */
   async function fetchUserDetails() {
     try {
@@ -114,8 +121,12 @@ export const useAccountStore = defineStore('accountStore', () => {
       isProtected.value = response.isProtected || false
       // 优先使用接口返回的角色信息
       userRole.value = response.role || userRole.value
-    } catch (e) {
-      // 拉取失败时静默忽略，不中断用户操作
+    } catch (e: any) {
+      // 401表示令牌无效或过期，向上抛出以便restoreSession处理
+      if (e?.response?.status === 401) {
+        throw e
+      }
+      // 其他错误（如网络波动）静默忽略，不中断用户操作
     }
   }
 
