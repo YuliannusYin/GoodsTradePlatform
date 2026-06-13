@@ -8,8 +8,15 @@
             <div v-for="item in ongoingOrder?.items" :key="item.product.id">
               <li class="mb-1 py-2 border-b w-full flex justify-between items-center">
                 <div class="flex items-center">
-                  <img :src="item.product.imageUrls?.[0]" alt="商品图片"
-                    class="max-w-[4rem] sm:max-w-[5rem] inline-block mr-5" />
+                  <img v-if="item.product.imageUrls && item.product.imageUrls.length > 0"
+                    :src="item.product.imageUrls[0]" alt="商品图片"
+                    class="max-w-[4rem] sm:max-w-[5rem] inline-block mr-5"
+                    @error="(e: Event) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22 viewBox=%220 0 80 80%22><rect fill=%22%23f3f4f6%22 width=%2280%22 height=%2280%22/><text x=%2240%22 y=%2245%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2210%22>无图</text></svg>') }" />
+                  <div v-else class="max-w-[4rem] sm:max-w-[5rem] h-[4rem] sm:h-[5rem] bg-gray-100 inline-block mr-5 rounded flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                    </svg>
+                  </div>
                   <div>
                     <span class="font-bold">{{ item.product.name }}</span>
                     <br />

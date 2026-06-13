@@ -22,7 +22,8 @@
         <div class="flex-shrink-0">
           <img v-if="product.imageUrls && product.imageUrls.length > 0"
             :src="product.imageUrls[0]" :alt="product.name"
-            class="w-24 h-24 object-contain rounded-lg border" />
+            class="w-24 h-24 object-contain rounded-lg border"
+            @error="(e: Event) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 96 96%22><rect fill=%22%23f3f4f6%22 width=%2296%22 height=%2296%22/><text x=%2248%22 y=%2252%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2212%22>无图</text></svg>') }" />
           <div v-else class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
             <i class="fas fa-image text-gray-300 text-2xl"></i>
           </div>

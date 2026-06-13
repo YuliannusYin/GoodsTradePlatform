@@ -4,7 +4,13 @@
       <div class="w-full md:w-1/2">
         <img v-if="product.imageUrls && product.imageUrls.length > 0"
           :src="product.imageUrls[0]" :alt="product.name"
-          class="w-full h-[20rem] object-contain rounded-xl">
+          class="w-full h-[20rem] object-contain rounded-xl"
+          @error="handleImageError">
+        <div v-else class="w-full h-[20rem] bg-gray-100 rounded-xl flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+          </svg>
+        </div>
       </div>
       <div class="flex flex-col justify-start items-start space-y-3 w-full md:w-1/2">
         <div class="flex items-center gap-2">
@@ -44,7 +50,14 @@
       <img v-if="product.imageUrls && product.imageUrls.length > 0"
         :src="product.imageUrls[0]" :alt="product.name"
         class="mb-3 h-[12rem] w-full object-contain cursor-pointer rounded-lg"
+        @click="showProductView(product.id)"
+        @error="handleImageError">
+      <div v-else class="mb-3 h-[12rem] w-full bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer"
         @click="showProductView(product.id)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+        </svg>
+      </div>
       <button @click.stop="toggleFavorite" class="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm transition-colors"
         :class="isFavorited ? 'text-accent-500' : 'text-gray-400 hover:text-accent-400'">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :fill="isFavorited ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -146,6 +159,16 @@ async function toggleFavorite() {
   } catch (error) {
     console.error('Failed to toggle favorite:', error)
   }
+}
+
+/**
+ * 图片加载失败时，替换为占位图SVG
+ * @param {Event} event - 图片加载错误事件
+ */
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement
+  // 使用内联SVG作为占位图，避免再次触发网络请求
+  img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#f3f4f6" width="200" height="200"/><g transform="translate(50,40)"><path fill="#d1d5db" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" transform="scale(4)"/></g><text x="100" y="160" text-anchor="middle" fill="#9ca3af" font-size="14">图片加载失败</text></svg>')
 }
 
 /**

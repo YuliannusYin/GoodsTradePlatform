@@ -37,7 +37,10 @@
           <SmallViewTitle class="mb-3" text="商品列表" additionalClass="text-base" />
           <ul v-for="item in props.order.items" :key="item.product.id">
             <li class="my-1">
-              <img :src="item.product.imageUrls?.[0]" class="w-8 h-8 mr-2 hidden sm:inline-block" />
+              <img v-if="item.product.imageUrls && item.product.imageUrls.length > 0"
+                :src="item.product.imageUrls[0]" class="w-8 h-8 mr-2 hidden sm:inline-block"
+                @error="(e: Event) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22><rect fill=%22%23f3f4f6%22 width=%2232%22 height=%2232%22/></svg>') }" />
+              <div v-else class="w-8 h-8 bg-gray-100 mr-2 hidden sm:inline-block rounded"></div>
               <span class="font-bold text-xs">{{ item.product.name }}</span>
               <span v-if="item.amount > 1" class="font-semibold text-blue-700"> x {{ item.amount }}</span>
               <div class="border border-t-1 w-full my-2"></div>
