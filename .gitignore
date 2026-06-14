@@ -20,7 +20,7 @@ Desktop.ini
 
 .trae/
 
-docs/
+devlogs/
 
 # Environment & Secrets
 .env
