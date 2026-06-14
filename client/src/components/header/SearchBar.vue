@@ -16,7 +16,7 @@
         <label>
           <input type="checkbox" :checked="filters.lowestPrice" @change="() => handleFilterChange('lowest_price')"
             class="form-checkbox h-4 w-4" />
-          Lowest price
+          最低价
         </label>
         <label>
           <input type="checkbox" :checked="filters.highestPrice" @change="() => handleFilterChange('highest_price')"
@@ -40,15 +40,12 @@ const props = withDefaults(defineProps<{
   additionalClass?: string
   placeholder?: string
   hasCloseSearchEnabled?: boolean
-  query?: string
-  filter?: string
 }>(), {
   placeholder: '搜索商品',
   hasCloseSearchEnabled: false
 })
 
 const emit = defineEmits<{
-  search: [query: string, filter: string | null]
   onClose: [value: boolean]
 }>()
 
@@ -88,13 +85,9 @@ function hideDropdown() {
 }
 
 /**
- * 执行搜索操作，触发搜索事件并跳转到商城页面
+ * 执行搜索操作，跳转到商城页面
  */
 function handleSearch() {
-  emit('search',
-    searchInput.value || '',
-    filters.lowestPrice ? 'lowest_price' : filters.highestPrice ? 'highest_price' : null
-  )
   const queryParameters = {
     query: searchInput.value,
     filter: filters.lowestPrice ? 'lowest_price' : filters.highestPrice ? 'highest_price' : null

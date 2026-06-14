@@ -11,9 +11,9 @@
       </svg>
     </div>
     <div class="space-y-5">
-      <h3 class="text-l font-semibold">{{ product.name === '' ? "Title" : product.name }}</h3>
-      <p>{{ product.description === '' ? "Description" : product.description }}</p>
-      <div class="text-l font-semibold text-black">Price: {{ product.price }} :-</div>
+      <h3 class="text-l font-semibold">{{ product.name === '' ? "商品名称" : product.name }}</h3>
+      <p>{{ product.description === '' ? "商品描述" : product.description }}</p>
+      <div class="text-l font-semibold text-black">价格: {{ product.price }}元</div>
     </div>
   </div>
 </template>
@@ -24,8 +24,9 @@
  * @description 商品预览组件，在管理后台表单旁展示商品的图片、名称、描述和价格
  */
 import SmallViewTitle from './SmallViewTitle.vue'
+import type { Product } from '@/types/product'
 
 defineProps<{
-  product: any
+  product: Product
 }>()
 </script>

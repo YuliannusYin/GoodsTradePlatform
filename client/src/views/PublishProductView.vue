@@ -130,7 +130,7 @@ async function loadMyProducts() {
   try {
     myProducts.value = await productStore.getMyProducts()
   } catch (error) {
-    console.error('Failed to load my products:', error)
+    // 错误已由拦截器处理
   }
 }
 
@@ -175,7 +175,7 @@ async function handleSubmit() {
     }
     imageUrlsText.value = ''
     await loadMyProducts()
-  } catch (error: any) {
+  } catch (error: unknown) {
     errorMessage.value = '发布失败，请重试'
   } finally {
     isSubmitting.value = false

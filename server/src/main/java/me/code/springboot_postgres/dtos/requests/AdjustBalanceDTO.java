@@ -6,6 +6,8 @@
  */
 package me.code.springboot_postgres.dtos.requests;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -14,6 +16,6 @@ import java.math.BigDecimal;
  */
 public record AdjustBalanceDTO(
     /** 用户ID */
-    String userId,
+    @NotBlank String userId,
     /** 调整金额（正数为充值，负数为扣减） */
-    BigDecimal amount) {}
+    @NotNull BigDecimal amount) {}

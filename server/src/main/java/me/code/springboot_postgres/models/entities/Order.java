@@ -25,7 +25,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "orders")
+@Table(name = "orders",
+        indexes = {
+            @Index(name = "idx_orders_status", columnList = "status")
+        })
 public class Order {
 
     // 订单唯一标识

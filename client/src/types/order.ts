@@ -1,11 +1,9 @@
 /**
  * @file order.ts
- * @description 定义订单相关的数据类型，包括订单项、订单状态、配送方式及支付方式
+ * @description 定义订单相关的数据类型，包括订单项、配送方式等
  * @input 无
- * @output Order, OngoingOrder, PlacedOrder, UserOrder, OrderStatus 等类型及常量
+ * @output OrderItem, OrderItemProduct, AddressInfo, PlacedOrder, UserOrder 等类型及常量
  */
-
-import type { UnavailableProduct } from './product'
 
 /**
  * 订单项中的商品信息
@@ -47,42 +45,6 @@ export interface AddressInfo {
   region: string
   /** 详细地址 */
   detailAddress: string
-}
-
-/**
- * 通用订单数据结构
- */
-export interface Order {
-  /** 订单 ID */
-  id: string
-  /** 订单总价 */
-  price: number
-  /** 订单状态 */
-  status: string
-  /** 支付方式 */
-  paymentMethod: string
-  /** 配送方式 */
-  deliveryMethod: string
-  /** 收货地址 */
-  address: string
-  /** 下单时间 */
-  received: string
-  /** 预计送达时间，可能为空 */
-  expectedDelivery: string | null
-  /** 订单商品列表 */
-  items: OrderItem[]
-}
-
-/**
- * 进行中的订单（购物车结算时使用），包含不可用商品信息
- */
-export interface OngoingOrder {
-  /** 订单商品列表 */
-  items: OrderItem[]
-  /** 订单总价 */
-  totalPrice: number
-  /** 不可用商品列表（库存不足等） */
-  unavailableProducts?: UnavailableProduct[]
 }
 
 /**
@@ -175,9 +137,4 @@ export function orderStatusToString(status: OrderStatus): string {
 export const DELIVERY_METHODS: Record<string, string> = {
   STANDARD_DELIVERY: '普通快递',
   EXPRESS_DELIVERY: '加急快递'
-}
-
-/** 支付方式映射：英文键 -> 中文显示名 */
-export const PAYMENT_METHODS: Record<string, string> = {
-  ACCOUNT_BALANCE: '账户余额'
 }

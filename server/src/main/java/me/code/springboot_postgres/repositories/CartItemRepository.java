@@ -32,4 +32,8 @@ public interface CartItemRepository extends JpaRepository<CartItem, String> {
     // 根据用户ID和商品ID删除指定购物车项（移除单个商品）
     @Transactional
     void deleteByUserIdAndProductId(String userId, String productId);
+
+    // 根据商品ID删除所有关联的购物车项（商品删除前清理）
+    @Transactional
+    void deleteByProductId(String productId);
 }

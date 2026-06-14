@@ -8,12 +8,14 @@ package me.code.springboot_postgres.services;
 
 import me.code.springboot_postgres.dtos.requests.MergeCartDTO;
 import me.code.springboot_postgres.dtos.responses.CartDTO;
+import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import me.code.springboot_postgres.models.entities.CartItem;
 import me.code.springboot_postgres.models.entities.Product;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.repositories.CartItemRepository;
 import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,7 +98,7 @@ public class CartService {
         } else {
             // 查找购物车项并更新数量
             CartItem item = cartItemRepository.findByUserIdAndProductId(userId, productId)
-                    .orElseThrow(() -> new RuntimeException("Cart item not found"));
+                    .orElseThrow(() -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Cart item not found"));
             item.setQuantity(quantity);
             cartItemRepository.save(item);
         }
@@ -137,11 +139,16 @@ public class CartService {
         User user = userRepository.findById(userId).orElseThrow();
 
         for (MergeCartDTO.CartItemEntry entry : items) {
-            // 加载商品实体，不存在则跳过该条目
+            // 数量验证：跳过数量小于等于0的条目
+            if (entry.quantity() <= 0) {
+                continue;
+            }
+
+            // 加载商品实体，仅捕获业务异常（商品不存在）时跳过该条目
             Product product;
             try {
                 product = productService.loadProductById(entry.productId());
-            } catch (RuntimeException e) {
+            } catch (CustomRuntimeException e) {
                 // 商品不存在时跳过，继续处理其他条目
                 continue;
             }

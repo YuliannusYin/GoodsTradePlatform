@@ -6,6 +6,8 @@
  */
 package me.code.springboot_postgres.dtos.requests;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import me.code.springboot_postgres.models.entities.Order;
 
 /**
@@ -14,15 +16,15 @@ import me.code.springboot_postgres.models.entities.Order;
  */
 public record PlaceOrderDTO(
         /** 商品ID数组 */
-        String[] productIds,
+        @NotEmpty String[] productIds,
         /** 收货人姓名 */
-        String receiverName,
+        @NotBlank String receiverName,
         /** 联系电话 */
-        String receiverPhone,
+        @NotBlank String receiverPhone,
         /** 省/市/区 */
-        String region,
+        @NotBlank String region,
         /** 详细地址 */
-        String detailAddress,
+        @NotBlank String detailAddress,
         /** 配送方式 */
-        Order.DeliveryMethod deliveryMethod) {
+        @NotBlank Order.DeliveryMethod deliveryMethod) {
 }

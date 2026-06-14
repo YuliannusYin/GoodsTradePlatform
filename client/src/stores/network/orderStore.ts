@@ -9,8 +9,23 @@ import { callPost, callGet } from './requests'
 import { useShoppingCartStore } from '../shoppingCartStore'
 
 /**
+ * 从购物车构建商品ID数组（将数量展开为重复的productId）
+ * @returns {string[]} 展开后的商品ID数组
+ */
+function buildProductIdsFromCart(): string[] {
+  const shoppingCartStore = useShoppingCartStore()
+  const productIds: string[] = []
+  for (const item of shoppingCartStore.getAllItems()) {
+    for (let i = 0; i < item.quantity; i++) {
+      productIds.push(item.productId)
+    }
+  }
+  return productIds
+}
+
+/**
  * 订单状态管理Store
- * 职责：封装订单相关的API调用，包括下单、查询订单和获取配送方式
+ * 职责：封装订单相关的API调用，包括下单和查询订单
  */
 export const useOrderStore = defineStore('orderStore', () => {
   /**
@@ -31,13 +46,8 @@ export const useOrderStore = defineStore('orderStore', () => {
     deliveryMethod: string
   ) {
     const shoppingCartStore = useShoppingCartStore()
-    // 构建商品ID数组（包含数量，同一商品ID重复出现）
-    const productIds: string[] = []
-    for (const item of shoppingCartStore.getAllItems()) {
-      for (let i = 0; i < item.quantity; i++) {
-        productIds.push(item.productId)
-      }
-    }
+    // 使用共享函数构建商品ID数组
+    const productIds = buildProductIdsFromCart()
     const response = await callPost('/api/orders/place', {
       productIds,
       receiverName,
@@ -58,14 +68,8 @@ export const useOrderStore = defineStore('orderStore', () => {
    * @returns 进行中订单的详情
    */
   async function getOngoingOrder() {
-    const shoppingCartStore = useShoppingCartStore()
-    // 构建商品ID数组（同一商品ID按数量重复出现），与placeOrder保持一致
-    const productIds: string[] = []
-    for (const item of shoppingCartStore.getAllItems()) {
-      for (let i = 0; i < item.quantity; i++) {
-        productIds.push(item.productId)
-      }
-    }
+    // 使用共享函数构建商品ID数组
+    const productIds = buildProductIdsFromCart()
     return callPost('/api/orders/ongoing', {
       productIds
     })
@@ -79,16 +83,7 @@ export const useOrderStore = defineStore('orderStore', () => {
     return callGet('/api/orders/all')
   }
 
-  /**
-   * 获取可用的配送方式列表
-   * @returns 配送方式列表
-   */
-  async function getAvailableDeliveryMethods() {
-    return callGet('/api/orders/delivery/methods')
-  }
-
   return {
-    placeOrder, getOngoingOrder, getPlacedOrders,
-    getAvailableDeliveryMethods
+    placeOrder, getOngoingOrder, getPlacedOrders
   }
 })

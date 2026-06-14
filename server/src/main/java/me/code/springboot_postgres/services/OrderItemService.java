@@ -33,7 +33,7 @@ public class OrderItemService {
 
         for (var product : products) {
             // 添加或更新订单项（相同商品合并数量）
-            AddOrUpdateOrderItems(product, items);
+            addOrUpdateOrderItems(product, items);
         }
         return items;
     }
@@ -43,7 +43,7 @@ public class OrderItemService {
      * @param product 商品
      * @param items 订单项列表
      */
-    private void AddOrUpdateOrderItems(Product product, List<OrderItem> items) {
+    private void addOrUpdateOrderItems(Product product, List<OrderItem> items) {
         for (var item : items) {
             // 商品已存在于订单项中，数量加1
             if (isMatchingProduct(product, item)) {
@@ -78,12 +78,12 @@ public class OrderItemService {
 
     /**
      * 添加新的订单项（数量为1）
+     * 构造函数已自动计算 price = 单价 × 数量，无需再次设置
      * @param product 商品
      * @param items 订单项列表
      */
     private void addNewOrderItem(Product product, List<OrderItem> items) {
         var newDetail = new OrderItem(product, 1);
-        newDetail.setPrice(product.getPrice());
         items.add(newDetail);
     }
 

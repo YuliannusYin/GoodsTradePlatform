@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -102,7 +103,11 @@ public class ProductService {
 
         // 添加分类过滤条件
         if (category != null && !category.isBlank() && !category.equalsIgnoreCase("all")) {
-            spec = spec.and(ProductSpecifications.hasCategory(Product.Category.valueOf(category)));
+            try {
+                spec = spec.and(ProductSpecifications.hasCategory(Product.Category.valueOf(category)));
+            } catch (IllegalArgumentException e) {
+                throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "无效的商品分类: " + category);
+            }
         }
 
         // 添加名称搜索条件
@@ -206,12 +211,12 @@ public class ProductService {
     }
 
     /**
-     * 根据ID数组批量加载商品
+     * 根据ID数组批量加载商品（使用批量查询避免N+1问题）
      * @param productIds 商品ID数组
      * @return 商品实体列表
      */
     @Transactional(readOnly = true)
     public List<Product> loadProductsById(String[] productIds) {
-        return Stream.of(productIds).map(this::loadProductById).toList();
+        return productRepository.findAllById(Arrays.asList(productIds));
     }
 }

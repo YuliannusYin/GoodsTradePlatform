@@ -1,16 +1,16 @@
 /**
  * @file reviewStore.ts
- * @description 评价状态管理，提供商品评价查询、评分查询、添加评价和删除评价操作
- * @input 商品ID、评价DTO、评价ID
+ * @description 评价状态管理，提供商品评价查询、评分查询和添加评价操作
+ * @input 商品ID、评价DTO
  * @output 评价列表、商品评分、评价操作结果
  */
 import { defineStore } from 'pinia'
 import type { Review, ProductRating, CreateReviewDto } from '@/types/review'
-import { callGet, callPost, callDelete } from './requests'
+import { callGet, callPost } from './requests'
 
 /**
  * 评价状态管理Store
- * 职责：封装商品评价相关的API调用，包括查询评价、评分、添加和删除评价
+ * 职责：封装商品评价相关的API调用，包括查询评价、评分和添加评价
  */
 export const useReviewStore = defineStore('reviewStore', () => {
   /**
@@ -40,16 +40,7 @@ export const useReviewStore = defineStore('reviewStore', () => {
     return callPost('/api/reviews/add', dto)
   }
 
-  /**
-   * 删除指定评价
-   * @param {string} reviewId - 评价ID
-   * @returns {Promise<void>} 无返回值
-   */
-  async function deleteReview(reviewId: string): Promise<void> {
-    return callDelete(`/api/reviews/${reviewId}`)
-  }
-
   return {
-    getProductReviews, getProductRating, addReview, deleteReview
+    getProductReviews, getProductRating, addReview
   }
 })

@@ -51,10 +51,10 @@ async function getAllProducts() {
 /**
  * 根据搜索条件获取筛选后的商品
  * @param {string} query - 搜索关键词
- * @param {any} filter - 筛选条件
+ * @param {string} filter - 筛选条件
  * @param {string} [category] - 商品分类
  */
-async function getSearchedProducts(query: string, filter: any, category?: string) {
+async function getSearchedProducts(query: string, filter: string, category?: string) {
   products.value = await productStore.getSearchedProducts(query, filter, category)
 }
 
@@ -69,20 +69,20 @@ function isEmpty(query: string): boolean {
 
 /**
  * 判断筛选条件是否为空
- * @param {any} filter - 筛选条件
+ * @param {string} filter - 筛选条件
  * @returns {boolean} 是否无筛选条件
  */
-function hasNoFilter(filter: any): boolean {
+function hasNoFilter(filter: string | null): boolean {
   return filter === null
 }
 
 /**
  * 统一搜索处理：无搜索条件时获取全部商品，否则按条件搜索
  * @param {string} query - 搜索关键词
- * @param {any} filter - 筛选条件
+ * @param {string | null} filter - 筛选条件
  * @param {string} [category] - 商品分类
  */
-async function handleSearch(query: string, filter: any, category?: string) {
+async function handleSearch(query: string, filter: string | null, category?: string) {
   if (isEmpty(query) && hasNoFilter(filter) && !category) {
     // 无搜索条件时加载全部商品
     getAllProducts()

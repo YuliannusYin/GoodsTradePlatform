@@ -6,6 +6,9 @@
  */
 package me.code.springboot_postgres.dtos.requests;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
 /**
  * 添加购物车请求DTO
  * 职责：封装添加商品到购物车时前端提交的请求数据
@@ -14,7 +17,7 @@ package me.code.springboot_postgres.dtos.requests;
  * @param quantity  商品数量
  */
 public record AddToCartDTO(
-        String productId,
-        int quantity
+        @NotBlank String productId,
+        @Min(1) int quantity
 ) {
 }

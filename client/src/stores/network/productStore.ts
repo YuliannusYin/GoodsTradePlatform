@@ -49,25 +49,6 @@ export const useProductStore = defineStore('productStore', () => {
   }
 
   /**
-   * 根据分类获取商品列表
-   * @param {string} category - 商品分类名称
-   * @returns {Promise<Product[]>} 该分类下的商品列表
-   */
-  async function getProductsByCategory(category: string): Promise<Product[]> {
-    return callGet(`/api/products/category/${category}`)
-  }
-
-  // 获取所有商品分类列表
-  async function getCategories(): Promise<string[]> {
-    return callGet('/api/products/categories')
-  }
-
-  // 获取所有商品条件（如全新/二手）列表
-  async function getConditions(): Promise<string[]> {
-    return callGet('/api/products/conditions')
-  }
-
-  /**
    * 商户添加自有商品
    * @param {CreateProductDto} dto - 商品创建数据
    * @returns {Promise<Product>} 新创建的商品
@@ -102,7 +83,6 @@ export const useProductStore = defineStore('productStore', () => {
 
   return {
     getAllProducts, getProduct, getSearchedProducts, getFeaturedProducts,
-    getProductsByCategory, getCategories, getConditions,
     addMyProduct, getMyProducts, editMyProduct, deleteMyProduct
   }
 })

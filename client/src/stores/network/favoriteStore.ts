@@ -21,9 +21,9 @@ export const useFavoriteStore = defineStore('favoriteStore', () => {
   /**
    * 添加商品到收藏
    * @param {string} productId - 要收藏的商品ID
-   * @returns {Promise<any>} 操作结果
+   * @returns {Promise<void>} 操作结果
    */
-  async function addFavorite(productId: string): Promise<any> {
+  async function addFavorite(productId: string): Promise<void> {
     // 商品ID进行URL编码，防止特殊字符导致请求异常
     return callPost(`/api/favorites/add?productId=${encodeURIComponent(productId)}`)
   }
@@ -31,9 +31,9 @@ export const useFavoriteStore = defineStore('favoriteStore', () => {
   /**
    * 从收藏中移除商品
    * @param {string} productId - 要移除收藏的商品ID
-   * @returns {Promise<any>} 操作结果
+   * @returns {Promise<void>} 操作结果
    */
-  async function removeFavorite(productId: string): Promise<any> {
+  async function removeFavorite(productId: string): Promise<void> {
     return callDelete(`/api/favorites/remove/${productId}`)
   }
 

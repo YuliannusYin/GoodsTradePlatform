@@ -27,7 +27,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "products")
+@Table(name = "products",
+        indexes = {
+            @Index(name = "idx_products_seller_id", columnList = "seller_id"),
+            @Index(name = "idx_products_status", columnList = "status")
+        })
 public class Product {
 
     // 商品唯一标识

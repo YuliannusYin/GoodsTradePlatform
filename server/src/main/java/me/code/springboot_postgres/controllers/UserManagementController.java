@@ -6,7 +6,9 @@
  */
 package me.code.springboot_postgres.controllers;
 
+import jakarta.validation.Valid;
 import me.code.springboot_postgres.dtos.requests.AdjustBalanceDTO;
+import me.code.springboot_postgres.dtos.requests.AssignRoleDTO;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
 import me.code.springboot_postgres.dtos.responses.UserDTO;
 import me.code.springboot_postgres.services.UserManagementService;
@@ -15,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用户管理控制器
@@ -54,12 +55,12 @@ public class UserManagementController {
     /**
      * 为指定用户分配角色
      * @param userId 用户ID
-     * @param body 请求体，包含role字段
+     * @param dto 请求体，包含role字段
      * @return 操作结果
      */
     @PutMapping("/{userId}/role")
-    public ResponseEntity<ApiResponse<Void>> assignRole(@PathVariable String userId, @RequestBody Map<String, String> body) {
-        return userManagementService.assignRole(userId, body.get("role")).toResponseEntity();
+    public ResponseEntity<ApiResponse<Void>> assignRole(@PathVariable String userId, @Valid @RequestBody AssignRoleDTO dto) {
+        return userManagementService.assignRole(userId, dto.role()).toResponseEntity();
     }
 
     /**
@@ -88,7 +89,7 @@ public class UserManagementController {
      * @return 操作结果
      */
     @PutMapping("/balance")
-    public ResponseEntity<ApiResponse<Void>> adjustBalance(@RequestBody AdjustBalanceDTO dto) {
+    public ResponseEntity<ApiResponse<Void>> adjustBalance(@Valid @RequestBody AdjustBalanceDTO dto) {
         return userManagementService.adjustBalance(dto.userId(), dto.amount()).toResponseEntity();
     }
 }

@@ -6,6 +6,7 @@
  */
 package me.code.springboot_postgres.controllers;
 
+import jakarta.validation.Valid;
 import me.code.springboot_postgres.dtos.requests.OrderDeliveryDTO;
 import me.code.springboot_postgres.dtos.requests.ProductDTO;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
@@ -37,7 +38,7 @@ public class AdminToolsController {
      * @return 创建的商品信息
      */
     @PostMapping("/product/add")
-    public ResponseEntity<ApiResponse<me.code.springboot_postgres.dtos.responses.ProductDTO>> addProduct(@RequestBody ProductDTO dto) {
+    public ResponseEntity<ApiResponse<me.code.springboot_postgres.dtos.responses.ProductDTO>> addProduct(@Valid @RequestBody ProductDTO dto) {
         return ApiResponse.ok("Product added", adminToolsService.addProduct(dto)).toResponseEntity();
     }
 
@@ -48,7 +49,7 @@ public class AdminToolsController {
      * @return 操作结果
      */
     @PutMapping("/product/edit/{productId}")
-    public ResponseEntity<ApiResponse<Void>> editProduct(@PathVariable String productId, @RequestBody ProductDTO dto) {
+    public ResponseEntity<ApiResponse<Void>> editProduct(@PathVariable String productId, @Valid @RequestBody ProductDTO dto) {
         return adminToolsService.editProduct(productId, dto).toResponseEntity();
     }
 
@@ -138,7 +139,7 @@ public class AdminToolsController {
      */
     @GetMapping("/order/all/{status}")
     public ResponseEntity<ApiResponse<List<UserOrderDTO>>> getAllUsersOrders(@PathVariable String status) {
-        return ApiResponse.ok("Orders by status retrieved", adminToolsService.getAllUsersOrders(status)).toResponseEntity();
+        return ApiResponse.ok("按状态筛选订单获取成功", adminToolsService.getAllUsersOrders(status)).toResponseEntity();
     }
 
     /**

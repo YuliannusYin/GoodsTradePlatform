@@ -6,6 +6,7 @@
  */
 package me.code.springboot_postgres.controllers;
 
+import jakarta.validation.Valid;
 import me.code.springboot_postgres.dtos.requests.AddToCartDTO;
 import me.code.springboot_postgres.dtos.requests.MergeCartDTO;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
@@ -51,7 +52,7 @@ public class CartController {
      */
     @PostMapping("/items")
     public ResponseEntity<ApiResponse<CartDTO>> addItem(@AuthenticationPrincipal User user,
-                                                        @RequestBody AddToCartDTO addToCartDTO) {
+                                                        @Valid @RequestBody AddToCartDTO addToCartDTO) {
         CartDTO cart = cartService.addItem(user.getId(), addToCartDTO.productId(), addToCartDTO.quantity());
         return ApiResponse.ok("商品已添加到购物车", cart).toResponseEntity();
     }
@@ -105,7 +106,7 @@ public class CartController {
      */
     @PostMapping("/merge")
     public ResponseEntity<ApiResponse<CartDTO>> mergeCart(@AuthenticationPrincipal User user,
-                                                          @RequestBody MergeCartDTO mergeCartDTO) {
+                                                          @Valid @RequestBody MergeCartDTO mergeCartDTO) {
         CartDTO cart = cartService.mergeCart(user.getId(), mergeCartDTO.items());
         return ApiResponse.ok("购物车合并成功", cart).toResponseEntity();
     }

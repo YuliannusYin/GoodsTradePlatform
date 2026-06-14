@@ -79,7 +79,7 @@
 import { onMounted, ref } from 'vue'
 import type { Product } from '@/types/product'
 import type { Review, ProductRating } from '@/types/review'
-import { useShoppingCartStore } from '@/stores/shoppingCartStore'
+
 import { useProductStore } from '@/stores/network/productStore'
 import { useReviewStore } from '@/stores/network/reviewStore'
 import { useAccountStore } from '@/stores/network/accountStore'
@@ -87,7 +87,6 @@ import { useRoute } from 'vue-router'
 import ProductCard from '@/components/products/ProductCard.vue'
 
 const route = useRoute()
-const shoppingCartStore = useShoppingCartStore() // 购物车状态管理
 const productStore = useProductStore()           // 商品状态管理
 const reviewStore = useReviewStore()             // 评价状态管理
 const accountStore = useAccountStore()           // 账户状态管理
@@ -115,7 +114,7 @@ async function loadReviews(productId: string) {
     reviews.value = await reviewStore.getProductReviews(productId)
     productRating.value = await reviewStore.getProductRating(productId)
   } catch (error) {
-    console.error('Failed to load reviews:', error)
+    // 错误已由拦截器处理
   }
 }
 
@@ -135,16 +134,8 @@ async function submitReview() {
     newComment.value = ''
     await loadReviews(product.value.id)
   } catch (error) {
-    console.error('Failed to submit review:', error)
+    // 错误已由拦截器处理
   }
-}
-
-/**
- * 将商品添加到购物车
- * @param {string} productId - 商品ID
- */
-function addToCart(productId: string) {
-  shoppingCartStore.addItem(productId)
 }
 
 // 组件挂载时加载商品数据

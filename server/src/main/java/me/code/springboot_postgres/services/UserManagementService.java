@@ -10,6 +10,9 @@ import me.code.springboot_postgres.dtos.responses.ApiResponse;
 import me.code.springboot_postgres.dtos.responses.UserDTO;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import me.code.springboot_postgres.models.entities.User;
+import me.code.springboot_postgres.repositories.CartItemRepository;
+import me.code.springboot_postgres.repositories.FavoriteRepository;
+import me.code.springboot_postgres.repositories.ReviewRepository;
 import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,10 +30,19 @@ import java.util.List;
 public class UserManagementService {
 
     private final UserRepository userRepository;
+    private final CartItemRepository cartItemRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
-    public UserManagementService(UserRepository userRepository) {
+    public UserManagementService(UserRepository userRepository,
+                                 CartItemRepository cartItemRepository,
+                                 FavoriteRepository favoriteRepository,
+                                 ReviewRepository reviewRepository) {
         this.userRepository = userRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     /**
@@ -101,6 +113,7 @@ public class UserManagementService {
 
     /**
      * 删除指定用户
+     * 删除前清理该用户的购物车项、收藏记录和评价记录，订单保留用于业务记录
      * @param userId 用户ID
      * @return 操作结果
      */
@@ -113,6 +126,13 @@ public class UserManagementService {
         if (user.isProtected()) {
             throw new CustomRuntimeException(HttpStatus.FORBIDDEN, "Cannot delete a system account");
         }
+        // 清理用户关联的购物车项，避免外键约束冲突
+        cartItemRepository.deleteByUserId(userId);
+        // 清理用户关联的收藏记录，避免外键约束冲突
+        favoriteRepository.deleteByUserId(userId);
+        // 清理用户关联的评价记录，避免外键约束冲突
+        reviewRepository.deleteByUserId(userId);
+        // 注意：不删除订单记录，保留用于业务记录
         userRepository.delete(user);
         return ApiResponse.ok("User deleted successfully");
     }

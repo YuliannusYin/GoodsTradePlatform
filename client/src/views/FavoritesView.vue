@@ -50,7 +50,7 @@ async function loadFavorites() {
   try {
     favorites.value = await favoriteStore.getUserFavorites()
   } catch (error) {
-    console.error('Failed to load favorites:', error)
+    // 错误已由拦截器处理
   }
 }
 
@@ -64,7 +64,7 @@ async function removeFavorite(productId: string) {
     // 从本地列表中移除已取消收藏的商品
     favorites.value = favorites.value.filter(f => f.productId !== productId)
   } catch (error) {
-    console.error('Failed to remove favorite:', error)
+    // 错误已由拦截器处理
   }
 }
 

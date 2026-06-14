@@ -122,9 +122,9 @@ public class User implements UserDetails {
     @Override
     public boolean isAccountNonExpired() { return true; }
 
-    // 账户未锁定，始终返回true
+    // 账户未锁定，与启用状态一致
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() { return isEnabled; }
 
     // 凭据未过期，始终返回true
     @Override
@@ -136,7 +136,7 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return "User{id='" + id + ", email='" + email + ", username='" + username + ", role=" + role + "}";
+        return "User{id='" + id + "', email='" + email + "', username='" + username + "', role=" + role + "}";
     }
 
     /**

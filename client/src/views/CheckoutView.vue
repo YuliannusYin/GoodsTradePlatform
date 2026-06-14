@@ -217,12 +217,13 @@ async function loadOngoingOrder() {
   isLoading.value = true
   loadError.value = ''
   try {
-    const response = await orderStore.getOngoingOrder() as any
+    const response = await orderStore.getOngoingOrder() as { items?: OrderItem[] }
     if (response) {
       orderItems.value = response.items || []
     }
-  } catch (e: any) {
-    loadError.value = e?.message || '加载订单信息失败，请重试'
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : '加载订单信息失败，请重试'
+    loadError.value = message
   } finally {
     isLoading.value = false
   }
@@ -300,7 +301,7 @@ async function executePlaceOrder() {
       address.value.region,
       address.value.detailAddress,
       deliveryMethod.value
-    ) as any
+    ) as { id?: string; orderId?: string }
 
     if (response) {
       // 下单成功，更新成功状态
@@ -311,9 +312,10 @@ async function executePlaceOrder() {
       await accountStore.fetchUserDetails()
       placedRemainingBalance.value = accountStore.balance ?? 0
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     // 下单失败提示
-    alert(e?.message || '下单失败，请重试')
+    const message = e instanceof Error ? e.message : '下单失败，请重试'
+    alert(message)
   } finally {
     isSubmitting.value = false
     showConfirmDialog.value = false

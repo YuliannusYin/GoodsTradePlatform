@@ -6,6 +6,9 @@
  */
 package me.code.springboot_postgres.dtos.requests;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -15,7 +18,7 @@ import java.util.List;
  * @param items 本地购物车商品条目列表
  */
 public record MergeCartDTO(
-        List<CartItemEntry> items
+        @NotEmpty List<@Valid CartItemEntry> items
 ) {
     /**
      * 购物车商品条目
@@ -25,8 +28,8 @@ public record MergeCartDTO(
      * @param quantity  商品数量
      */
     public record CartItemEntry(
-            String productId,
-            int quantity
+            @NotNull String productId,
+            @NotNull @jakarta.validation.constraints.Min(1) Integer quantity
     ) {
     }
 }

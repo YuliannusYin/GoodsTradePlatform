@@ -10,6 +10,7 @@ import me.code.springboot_postgres.models.entities.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,4 +40,12 @@ public interface ReviewRepository extends JpaRepository<Review, String> {
 
     // 根据用户ID和商品ID查询评价（用于判断是否已评价）
     Optional<Review> findByUserIdAndProductId(String userId, String productId);
+
+    // 根据用户ID删除所有评价记录（用户删除前清理）
+    @Transactional
+    void deleteByUserId(String userId);
+
+    // 根据商品ID删除所有评价记录（商品删除前清理）
+    @Transactional
+    void deleteByProductId(String productId);
 }

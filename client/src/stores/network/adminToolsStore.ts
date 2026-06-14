@@ -80,11 +80,6 @@ export const useAdminToolsStore = defineStore('adminToolsStore', () => {
     })
   }
 
-  // 获取待审核商品列表
-  async function getPendingProducts(): Promise<Product[]> {
-    return callGet('/api/admin_tools/product/pending')
-  }
-
   /**
    * 根据商品审核状态获取商品列表
    * @param {string} status - 商品状态筛选条件
@@ -136,7 +131,7 @@ export const useAdminToolsStore = defineStore('adminToolsStore', () => {
     addProduct, editProduct, deleteProduct,
     getAllOrders, getAllOrdersWithStatus,
     sendOrder, changeExpectedDelivery,
-    getPendingProducts, getProductsByStatus,
+    getProductsByStatus,
     approveProduct, rejectProduct, disableProduct, enableProduct
   }
 })

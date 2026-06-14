@@ -116,7 +116,6 @@
  * @description 用户管理视图，管理员可查看用户列表、分配角色、启用/禁用用户、删除用户
  */
 import { ref, onMounted } from 'vue'
-import { useAdminToolsStore } from '@/stores/network/adminToolsStore'
 import { callGet, callPut, callPatch, callDelete } from '@/stores/network/requests'
 
 /**
@@ -133,7 +132,6 @@ interface AdminUser {
   isEnabled: boolean
 }
 
-const adminStore = useAdminToolsStore()
 const users = ref<AdminUser[]>([])       // 用户列表数据
 const loading = ref(false)                // 加载状态
 const error = ref<string | null>(null)    // 错误信息

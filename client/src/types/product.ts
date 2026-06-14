@@ -2,7 +2,7 @@
  * @file product.ts
  * @description 定义商品相关的数据类型，包括商品信息、商品状态、分类、成色等常量映射
  * @input 无
- * @output Product, UnavailableProduct, CreateProductDto, EditProductDto 等类型及商品常量
+ * @output Product, UnavailableProduct, CreateProductDto 等类型及商品常量
  */
 
 /** 商品审核状态类型：待审核、已通过、已拒绝、已禁用 */
@@ -78,9 +78,6 @@ export interface CreateProductDto {
   /** 商品来源 */
   source: string
 }
-
-/** 编辑商品的数据传输对象，所有字段均为可选 */
-export type EditProductDto = Partial<CreateProductDto>
 
 /** 商品分类映射：英文键 -> 中文显示名 */
 export const PRODUCT_CATEGORIES: Record<string, string> = {

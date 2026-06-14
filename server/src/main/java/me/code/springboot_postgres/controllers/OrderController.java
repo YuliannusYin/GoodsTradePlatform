@@ -6,6 +6,7 @@
  */
 package me.code.springboot_postgres.controllers;
 
+import jakarta.validation.Valid;
 import me.code.springboot_postgres.dtos.requests.PlaceOrderDTO;
 import me.code.springboot_postgres.dtos.responses.*;
 import me.code.springboot_postgres.models.entities.Order;
@@ -39,7 +40,7 @@ public class OrderController {
      */
     @PostMapping("/ongoing")
     public ResponseEntity<ApiResponse<OngoingOrderDTO>> getOngoingOrder(@RequestBody String[] productIds) {
-        return ApiResponse.ok("Ongoing order retrieved", orderService.getOngoingOrder(productIds)).toResponseEntity();
+        return ApiResponse.ok("订单预览获取成功", orderService.getOngoingOrder(productIds)).toResponseEntity();
     }
 
     /**
@@ -49,7 +50,7 @@ public class OrderController {
      * @return 操作结果
      */
     @PostMapping("/place")
-    public ResponseEntity<ApiResponse<Void>> placeOrder(@AuthenticationPrincipal User user, @RequestBody PlaceOrderDTO dto) {
+    public ResponseEntity<ApiResponse<Void>> placeOrder(@AuthenticationPrincipal User user, @Valid @RequestBody PlaceOrderDTO dto) {
         return orderService.placeOrder(user, dto.productIds(),
                 dto.receiverName(), dto.receiverPhone(), dto.region(), dto.detailAddress(),
                 dto.deliveryMethod()).toResponseEntity();
@@ -80,6 +81,6 @@ public class OrderController {
      */
     @GetMapping("/payment/methods")
     public ResponseEntity<ApiResponse<List<Order.PaymentMethod>>> getAvailablePaymentMethods() {
-        return ApiResponse.ok("Payment methods retrieved", orderService.getAvailablePaymentMethods()).toResponseEntity();
+        return ApiResponse.ok("支付方式获取成功", orderService.getAvailablePaymentMethods()).toResponseEntity();
     }
 }

@@ -23,7 +23,10 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @Entity
 @Table(name = "cart_items",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}),
+        indexes = {
+            @Index(name = "idx_cart_items_user_id", columnList = "user_id")
+        })
 public class CartItem {
 
     // 购物车项唯一标识

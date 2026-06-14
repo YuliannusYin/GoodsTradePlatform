@@ -47,7 +47,7 @@ apiClient.interceptors.response.use(
       router.push('/login')
     } else if (error.response?.status === 403) {
       // 403禁止访问：权限不足，提示用户
-      console.error('权限不足，无法访问该资源')
+      // 错误已由拦截器处理
     }
     throw error
   }
@@ -65,30 +65,30 @@ export async function callGet<T = any>(endpoint: string): Promise<T> {
 /**
  * 发送POST请求
  * @param {string} endpoint - API端点路径
- * @param {any} data - 请求体数据
+ * @param {unknown} data - 请求体数据
  * @returns {Promise<T>} 响应数据
  */
-export async function callPost<T = any>(endpoint: string, data?: any): Promise<T> {
+export async function callPost<T = any>(endpoint: string, data?: unknown): Promise<T> {
   return apiClient.post(endpoint, data)
 }
 
 /**
  * 发送PUT请求
  * @param {string} endpoint - API端点路径
- * @param {any} data - 请求体数据
+ * @param {unknown} data - 请求体数据
  * @returns {Promise<T>} 响应数据
  */
-export async function callPut<T = any>(endpoint: string, data?: any): Promise<T> {
+export async function callPut<T = any>(endpoint: string, data?: unknown): Promise<T> {
   return apiClient.put(endpoint, data)
 }
 
 /**
  * 发送PATCH请求
  * @param {string} endpoint - API端点路径
- * @param {any} data - 请求体数据
+ * @param {unknown} data - 请求体数据
  * @returns {Promise<T>} 响应数据
  */
-export async function callPatch<T = any>(endpoint: string, data?: any): Promise<T> {
+export async function callPatch<T = any>(endpoint: string, data?: unknown): Promise<T> {
   return apiClient.patch(endpoint, data)
 }
 

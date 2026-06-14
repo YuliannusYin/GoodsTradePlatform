@@ -8,6 +8,7 @@ package me.code.springboot_postgres.repositories;
 
 import me.code.springboot_postgres.models.entities.Favorite;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,4 +30,12 @@ public interface FavoriteRepository extends JpaRepository<Favorite, String> {
 
     // 统计指定用户的收藏数量
     int countByUserId(String userId);
+
+    // 根据用户ID删除所有收藏记录（用户删除前清理）
+    @Transactional
+    void deleteByUserId(String userId);
+
+    // 根据商品ID删除所有收藏记录（商品删除前清理）
+    @Transactional
+    void deleteByProductId(String productId);
 }

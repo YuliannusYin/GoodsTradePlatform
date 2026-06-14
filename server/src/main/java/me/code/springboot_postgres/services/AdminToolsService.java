@@ -13,8 +13,11 @@ import me.code.springboot_postgres.dtos.responses.UserOrderDTO;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import me.code.springboot_postgres.models.entities.Order;
 import me.code.springboot_postgres.models.entities.Product;
+import me.code.springboot_postgres.repositories.CartItemRepository;
+import me.code.springboot_postgres.repositories.FavoriteRepository;
 import me.code.springboot_postgres.repositories.OrderRepository;
 import me.code.springboot_postgres.repositories.ProductRepository;
+import me.code.springboot_postgres.repositories.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,13 +34,26 @@ import java.util.Locale;
 @Service
 public class AdminToolsService {
 
+    // 日期时间格式化器
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
+
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final ProductService productService;
+    private final CartItemRepository cartItemRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
-    public AdminToolsService(OrderRepository orderRepository, ProductRepository productRepository) {
+    public AdminToolsService(OrderRepository orderRepository, ProductRepository productRepository,
+                             ProductService productService, CartItemRepository cartItemRepository,
+                             FavoriteRepository favoriteRepository, ReviewRepository reviewRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.productService = productService;
+        this.cartItemRepository = cartItemRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     /**
@@ -90,8 +106,7 @@ public class AdminToolsService {
     public ApiResponse<Void> sendOrder(String orderId, String dateAndTime) {
         Order order = findOrder(orderId);
         // 解析日期时间字符串
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
-        LocalDateTime expectedDelivery = LocalDateTime.parse(dateAndTime, formatter);
+        LocalDateTime expectedDelivery = LocalDateTime.parse(dateAndTime, DATE_TIME_FORMATTER);
         // 更新订单状态为已发货
         order.setStatus(Order.Status.SHIPPED);
         order.setExpectedDelivery(expectedDelivery);
@@ -108,8 +123,7 @@ public class AdminToolsService {
     @Transactional
     public ApiResponse<Void> changeExpectedDelivery(String orderId, String newDateAndTime) {
         Order order = findOrder(orderId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
-        LocalDateTime newExpectedDelivery = LocalDateTime.parse(newDateAndTime, formatter);
+        LocalDateTime newExpectedDelivery = LocalDateTime.parse(newDateAndTime, DATE_TIME_FORMATTER);
         order.setExpectedDelivery(newExpectedDelivery);
         orderRepository.save(order);
         return ApiResponse.ok("Successfully updated expected delivery");
@@ -152,6 +166,7 @@ public class AdminToolsService {
 
     /**
      * 删除指定商品
+     * 删除前清理该商品关联的购物车项、收藏记录和评价记录，订单项保留用于业务记录
      * @param productId 商品ID
      * @return 操作结果
      */
@@ -161,6 +176,13 @@ public class AdminToolsService {
         if (!productRepository.existsById(productId)) {
             throw new CustomRuntimeException(HttpStatus.NOT_FOUND, "Product not found with id: " + productId);
         }
+        // 清理商品关联的购物车项，避免外键约束冲突
+        cartItemRepository.deleteByProductId(productId);
+        // 清理商品关联的收藏记录，避免外键约束冲突
+        favoriteRepository.deleteByProductId(productId);
+        // 清理商品关联的评价记录，避免外键约束冲突
+        reviewRepository.deleteByProductId(productId);
+        // 注意：不删除订单项记录，保留用于业务记录
         productRepository.deleteById(productId);
         return ApiResponse.ok("The product was deleted successfully");
     }
@@ -173,7 +195,7 @@ public class AdminToolsService {
      */
     @Transactional
     public ApiResponse<Void> editProduct(String productId, ProductDTO dto) {
-        Product product = loadProductById(productId);
+        Product product = productService.loadProductById(productId);
         product.setName(dto.name());
         product.setDescription(dto.description());
         product.setImageUrls(dto.imageUrls());
@@ -206,7 +228,12 @@ public class AdminToolsService {
      */
     @Transactional(readOnly = true)
     public List<me.code.springboot_postgres.dtos.responses.ProductDTO> getProductsByStatus(String status) {
-        Product.Status statusEnum = Product.Status.valueOf(status.toUpperCase());
+        Product.Status statusEnum;
+        try {
+            statusEnum = Product.Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "无效的商品状态: " + status);
+        }
         return productRepository.findByStatus(statusEnum).stream()
                 .map(me.code.springboot_postgres.dtos.responses.ProductDTO::from).toList();
     }
@@ -218,7 +245,7 @@ public class AdminToolsService {
      */
     @Transactional
     public ApiResponse<Void> approveProduct(String productId) {
-        Product product = loadProductById(productId);
+        Product product = productService.loadProductById(productId);
         // 只有待审核的商品才能通过
         if (product.getStatus() != Product.Status.PENDING) {
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Only pending products can be approved");
@@ -237,7 +264,7 @@ public class AdminToolsService {
      */
     @Transactional
     public ApiResponse<Void> rejectProduct(String productId, String rejectReason) {
-        Product product = loadProductById(productId);
+        Product product = productService.loadProductById(productId);
         // 只有待审核的商品才能驳回
         if (product.getStatus() != Product.Status.PENDING) {
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Only pending products can be rejected");
@@ -255,7 +282,7 @@ public class AdminToolsService {
      */
     @Transactional
     public ApiResponse<Void> disableProduct(String productId) {
-        Product product = loadProductById(productId);
+        Product product = productService.loadProductById(productId);
         product.setStatus(Product.Status.DISABLED);
         productRepository.save(product);
         return ApiResponse.ok("Product disabled successfully");
@@ -268,7 +295,7 @@ public class AdminToolsService {
      */
     @Transactional
     public ApiResponse<Void> enableProduct(String productId) {
-        Product product = loadProductById(productId);
+        Product product = productService.loadProductById(productId);
         // 只有被禁用的商品才能重新启用
         if (product.getStatus() == Product.Status.DISABLED) {
             product.setStatus(Product.Status.APPROVED);
@@ -278,15 +305,4 @@ public class AdminToolsService {
         throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Only disabled products can be re-enabled");
     }
 
-    /**
-     * 根据ID加载商品，不存在则抛出异常
-     * @param productId 商品ID
-     * @return 商品实体
-     */
-    @Transactional(readOnly = true)
-    @SuppressWarnings("null")
-    public Product loadProductById(String productId) {
-        return productRepository.findById(productId).orElseThrow(
-                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Product with id: " + productId + " not found"));
-    }
 }

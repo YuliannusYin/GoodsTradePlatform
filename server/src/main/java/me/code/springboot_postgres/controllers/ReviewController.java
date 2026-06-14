@@ -6,6 +6,7 @@
  */
 package me.code.springboot_postgres.controllers;
 
+import jakarta.validation.Valid;
 import me.code.springboot_postgres.dtos.requests.CreateReviewDTO;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
 import me.code.springboot_postgres.dtos.responses.ProductRatingDTO;
@@ -41,8 +42,8 @@ public class ReviewController {
      * @return 创建的评价信息
      */
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse<ReviewDTO>> addReview(@AuthenticationPrincipal User user, @RequestBody CreateReviewDTO dto) {
-        return ApiResponse.ok("Review added", reviewService.createReview(user, dto)).toResponseEntity();
+    public ResponseEntity<ApiResponse<ReviewDTO>> addReview(@AuthenticationPrincipal User user, @Valid @RequestBody CreateReviewDTO dto) {
+        return ApiResponse.ok("评价添加成功", reviewService.createReview(user, dto)).toResponseEntity();
     }
 
     /**
@@ -72,7 +73,7 @@ public class ReviewController {
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<ReviewDTO>>> getUserReviews(@PathVariable String userId) {
-        return ApiResponse.ok("User reviews retrieved", reviewService.getReviewsByUserId(userId)).toResponseEntity();
+        return ApiResponse.ok("用户评价获取成功", reviewService.getReviewsByUserId(userId)).toResponseEntity();
     }
 
     /**

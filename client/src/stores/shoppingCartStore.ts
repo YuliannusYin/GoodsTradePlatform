@@ -61,9 +61,6 @@ export const useShoppingCartStore = defineStore('shoppingCart', () => {
   // 购物车中的商品种类数
   const totalKinds = computed(() => cartItems.value.size)
 
-  // 购物车中商品ID列表（用于兼容旧接口）
-  const productIds = computed(() => Array.from(cartItems.value.keys()))
-
   /**
    * 向购物车添加商品，若已存在则数量+1
    * @param {string} productId - 要添加的商品ID
@@ -125,24 +122,6 @@ export const useShoppingCartStore = defineStore('shoppingCart', () => {
   }
 
   /**
-   * 获取购物车中指定商品的数量
-   * @param {string} productId - 商品ID
-   * @returns {number} 商品数量，不存在时返回0
-   */
-  function getItemQuantity(productId: string): number {
-    return cartItems.value.get(productId)?.quantity ?? 0
-  }
-
-  /**
-   * 判断购物车中是否包含指定商品
-   * @param {string} productId - 商品ID
-   * @returns {boolean} 是否包含
-   */
-  function hasItem(productId: string): boolean {
-    return cartItems.value.has(productId)
-  }
-
-  /**
    * 获取购物车中所有商品项列表
    * @returns {CartItem[]} 购物车项数组
    */
@@ -160,9 +139,9 @@ export const useShoppingCartStore = defineStore('shoppingCart', () => {
   }
 
   return {
-    cartItems, totalQuantity, totalKinds, productIds,
+    totalQuantity, totalKinds,
     addItem, setItemQuantity, removeItem, clearCart,
-    getItemQuantity, hasItem, getAllItems, restoreFromBackend,
+    getAllItems, restoreFromBackend,
     // 兼容旧属性名
     productAmount: totalQuantity
   }

@@ -157,7 +157,7 @@ async function toggleFavorite() {
       isFavorited.value = true
     }
   } catch (error) {
-    console.error('Failed to toggle favorite:', error)
+    // 错误已由拦截器处理
   }
 }
 

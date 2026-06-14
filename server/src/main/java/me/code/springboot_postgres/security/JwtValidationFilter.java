@@ -92,11 +92,11 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         if (header == null || header.isBlank()) {
             return null;
         }
-        // 去除Bearer前缀提取令牌
+        // 去除Bearer前缀提取令牌，非Bearer格式返回null（符合RFC 6750规范）
         if (header.startsWith(BEARER_PREFIX)) {
             return header.substring(BEARER_PREFIX.length());
         }
-        return header;
+        return null;
     }
 
     /**

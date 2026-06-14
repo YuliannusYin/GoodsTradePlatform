@@ -148,7 +148,7 @@ async function loadFeaturedProducts() {
     // 最多显示5个推荐商品
     featuredProducts.value = products.slice(0, 5)
   } catch (error) {
-    console.error('加载推荐商品失败:', error)
+    // 错误已由拦截器处理
   }
 }
 

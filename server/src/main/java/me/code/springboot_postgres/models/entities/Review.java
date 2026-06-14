@@ -27,7 +27,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "reviews",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}),
+        indexes = {
+            @Index(name = "idx_reviews_product_id", columnList = "product_id"),
+            @Index(name = "idx_reviews_user_id", columnList = "user_id")
+        })
 public class Review {
 
     // 评价唯一标识
