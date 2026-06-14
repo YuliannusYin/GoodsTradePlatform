@@ -91,6 +91,7 @@ public class UserProductService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> deleteOwnProduct(User user, String productId) {
         Product product = loadProductAndVerifyOwnership(user, productId);
         productRepository.delete(product);
@@ -103,6 +104,7 @@ public class UserProductService {
      * @param productId 商品ID
      * @return 商品实体
      */
+    @SuppressWarnings("null")
     private Product loadProductAndVerifyOwnership(User user, String productId) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Product not found with id: " + productId));

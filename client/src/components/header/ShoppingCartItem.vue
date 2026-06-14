@@ -27,5 +27,5 @@ withDefaults(defineProps<{
 
 const shoppingCartStore = useShoppingCartStore()
 // 计算购物车中的商品总数量
-const itemsCount = computed(() => shoppingCartStore.getTotalItemsCount())
+const itemsCount = computed(() => shoppingCartStore.totalQuantity)
 </script>

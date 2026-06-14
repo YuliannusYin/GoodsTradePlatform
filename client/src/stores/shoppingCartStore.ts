@@ -159,55 +159,10 @@ export const useShoppingCartStore = defineStore('shoppingCart', () => {
     persistCartItems(cartItems.value)
   }
 
-  // === 兼容旧接口的方法（逐步废弃） ===
-
-  /**
-   * @deprecated 使用 addItem 代替
-   * 向购物车添加商品ID（兼容旧接口）
-   */
-  async function addProductId(productId: string): Promise<void> {
-    addItem(productId)
-  }
-
-  /**
-   * @deprecated 使用 removeItem 代替
-   * 从购物车移除指定商品ID（兼容旧接口）
-   */
-  function removeProductId(productId: string): void {
-    removeItem(productId)
-  }
-
-  /**
-   * @deprecated 使用 clearCart 代替
-   * 清空购物车中的所有商品（兼容旧接口）
-   */
-  function clearProductIds(): void {
-    clearCart()
-  }
-
-  /**
-   * @deprecated 使用 getAllItems 代替
-   * 获取购物车中所有商品ID列表（兼容旧接口）
-   */
-  function getAllProductIds(): string[] {
-    return Array.from(cartItems.value.keys())
-  }
-
-  /**
-   * @deprecated 使用 totalQuantity 代替
-   * 获取购物车中的商品总数量（兼容旧接口）
-   */
-  function getTotalItemsCount(): number {
-    return totalQuantity.value
-  }
-
   return {
-    // 新接口
     cartItems, totalQuantity, totalKinds, productIds,
     addItem, setItemQuantity, removeItem, clearCart,
     getItemQuantity, hasItem, getAllItems, restoreFromBackend,
-    // 兼容旧接口
-    addProductId, removeProductId, clearProductIds, getAllProductIds, getTotalItemsCount,
     // 兼容旧属性名
     productAmount: totalQuantity
   }

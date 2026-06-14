@@ -102,6 +102,7 @@ public class ReviewService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> deleteReview(User user, String reviewId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Review not found with id: " + reviewId));

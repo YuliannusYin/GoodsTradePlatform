@@ -144,7 +144,7 @@ async function submitReview() {
  * @param {string} productId - 商品ID
  */
 function addToCart(productId: string) {
-  shoppingCartStore.addProductId(productId)
+  shoppingCartStore.addItem(productId)
 }
 
 // 组件挂载时加载商品数据

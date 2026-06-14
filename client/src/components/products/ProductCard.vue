@@ -133,7 +133,7 @@ function showProductView(productId: string) {
 
 // 将商品添加到购物车
 function addToCart(productId: string) {
-  shoppingCartStore.addProductId(productId)
+  shoppingCartStore.addItem(productId)
 }
 
 /**

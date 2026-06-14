@@ -43,6 +43,7 @@ public class ProductService {
      * @return 商品DTO列表
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public List<ProductDTO> getProducts() {
         return productRepository.findAll(ProductSpecifications.hasStatus(Product.Status.APPROVED))
                 .stream().map(ProductDTO::from).toList();
@@ -94,6 +95,7 @@ public class ProductService {
      * @return 搜索结果商品DTO列表
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public List<ProductDTO> getSearchedProducts(String query, String filter, String category) {
         // 基础条件：已审核通过
         Specification<Product> spec = ProductSpecifications.hasStatus(Product.Status.APPROVED);
@@ -120,6 +122,7 @@ public class ProductService {
      * @param filter 排序条件
      * @return 添加排序后的查询条件
      */
+    @SuppressWarnings("null")
     private Specification<Product> applySort(Specification<Product> spec, String filter) {
         return switch (filter) {
             case "lowest_price" -> spec.and(ProductSpecifications.orderByPriceAsc());
@@ -157,6 +160,7 @@ public class ProductService {
      * @return 不可用商品列表（库存不足或商品不存在）
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public List<UnavailableProductDTO> findUnavailableProducts(List<OrderItem> items) {
         return items.stream()
                 .map(item -> {
@@ -195,6 +199,7 @@ public class ProductService {
      * @return 商品实体
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public Product loadProductById(String productId) {
         return productRepository.findById(productId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Product with id: " + productId + " not found"));

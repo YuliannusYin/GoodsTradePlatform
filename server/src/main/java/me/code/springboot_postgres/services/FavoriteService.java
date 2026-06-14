@@ -60,6 +60,7 @@ public class FavoriteService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> removeFavorite(User user, String productId) {
         Favorite favorite = favoriteRepository.findByUserIdAndProductId(user.getId(), productId)
                 .orElseThrow(() -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Favorite not found"));

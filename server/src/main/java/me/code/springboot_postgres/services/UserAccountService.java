@@ -142,6 +142,7 @@ public class UserAccountService implements UserDetailsService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> deleteAccount(User user) {
         checkNotProtected(user, "delete account");
         userRepository.deleteById(user.getId());
@@ -166,6 +167,7 @@ public class UserAccountService implements UserDetailsService {
      * @return 用户实体
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public User loadUserById(String userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find user with id: " + userId));
@@ -190,6 +192,7 @@ public class UserAccountService implements UserDetailsService {
      */
     @Override
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username).orElseThrow(
                 () -> new UsernameNotFoundException("Could not find user with username: " + username));

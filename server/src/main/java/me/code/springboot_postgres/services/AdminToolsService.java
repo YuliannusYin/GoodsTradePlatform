@@ -121,6 +121,7 @@ public class AdminToolsService {
      * @return 订单实体
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public Order findOrder(String orderId) {
         return orderRepository.findById(orderId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Could not find order with id: " + orderId));
@@ -155,6 +156,7 @@ public class AdminToolsService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> deleteProduct(String productId) {
         if (!productRepository.existsById(productId)) {
             throw new CustomRuntimeException(HttpStatus.NOT_FOUND, "Product not found with id: " + productId);
@@ -282,6 +284,7 @@ public class AdminToolsService {
      * @return 商品实体
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public Product loadProductById(String productId) {
         return productRepository.findById(productId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "Product with id: " + productId + " not found"));

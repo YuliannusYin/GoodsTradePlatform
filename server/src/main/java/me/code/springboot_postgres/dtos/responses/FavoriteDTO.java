@@ -9,7 +9,6 @@ package me.code.springboot_postgres.dtos.responses;
 import me.code.springboot_postgres.models.entities.Favorite;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 收藏响应DTO

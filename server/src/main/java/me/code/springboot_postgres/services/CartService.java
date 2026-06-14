@@ -57,6 +57,7 @@ public class CartService {
      * @return 更新后的购物车DTO
      */
     @Transactional
+    @SuppressWarnings("null")
     public CartDTO addItem(String userId, String productId, int quantity) {
         // 加载商品实体，不存在则抛出异常
         Product product = productService.loadProductById(productId);
@@ -130,6 +131,7 @@ public class CartService {
      * @return 合并后的购物车DTO
      */
     @Transactional
+    @SuppressWarnings("null")
     public CartDTO mergeCart(String userId, List<MergeCartDTO.CartItemEntry> items) {
         // 加载用户实体
         User user = userRepository.findById(userId).orElseThrow();

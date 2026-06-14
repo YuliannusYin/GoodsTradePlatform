@@ -48,6 +48,7 @@ public class UserManagementService {
      * @return 用户DTO
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public UserDTO getUserById(String userId) {
         return UserDTO.from(userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId)));
@@ -60,6 +61,7 @@ public class UserManagementService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> assignRole(String userId, String roleName) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
@@ -83,6 +85,7 @@ public class UserManagementService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> toggleUserEnabled(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
@@ -102,6 +105,7 @@ public class UserManagementService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> deleteUser(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
@@ -120,6 +124,7 @@ public class UserManagementService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> adjustBalance(String userId, BigDecimal amount) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));

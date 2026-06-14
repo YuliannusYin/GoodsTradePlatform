@@ -72,7 +72,7 @@ const router = createRouter({
       path: '/account',
       name: 'account',
       component: AccountView,
-      beforeEnter: (to, from, next) => {
+      beforeEnter: (_to, _from, next) => {
         if (useAccountStore().isAuthenticated) {
           // 已登录，允许进入
           next()
@@ -113,7 +113,7 @@ const router = createRouter({
       path: '/checkout',
       name: 'checkout',
       component: CheckoutView,
-      beforeEnter: (to, from, next) => {
+      beforeEnter: (_to, _from, next) => {
         if (useShoppingCartStore().productAmount > 0) {
           // 购物车中有商品，允许进入结算
           next()
@@ -128,7 +128,7 @@ const router = createRouter({
       path: '/publish',
       name: 'publishProduct',
       component: PublishProductView,
-      beforeEnter: (to, from, next) => {
+      beforeEnter: (_to, _from, next) => {
         const accountStore = useAccountStore()
         if (accountStore.isAuthenticated && (accountStore.isMerchant() || accountStore.isAdmin())) {
           // 已登录且为商户或管理员，允许进入
@@ -147,7 +147,7 @@ const router = createRouter({
       path: '/favorites',
       name: 'favorites',
       component: FavoritesView,
-      beforeEnter: (to, from, next) => {
+      beforeEnter: (_to, _from, next) => {
         if (useAccountStore().isAuthenticated) {
           // 已登录，允许进入
           next()
@@ -163,7 +163,7 @@ const router = createRouter({
       name: 'AdminTools',
       redirect: '/admin_tools/products',
       component: AdminToolsView,
-      beforeEnter: (to, from, next) => {
+      beforeEnter: (_to, _from, next) => {
         const accountStore = useAccountStore()
         if (accountStore.isAuthenticated && accountStore.isAdmin()) {
           // 已登录且为管理员，允许进入
@@ -236,7 +236,7 @@ const router = createRouter({
           path: 'users',
           name: 'UserManagementView',
           component: UserManagementView,
-          beforeEnter: (to, from, next) => {
+          beforeEnter: (_to, _from, next) => {
             if (useAccountStore().isAdmin()) {
               // 是管理员，允许进入
               next()
@@ -251,7 +251,7 @@ const router = createRouter({
           path: 'reviews',
           name: 'ProductReviewView',
           component: ProductReviewView,
-          beforeEnter: (to, from, next) => {
+          beforeEnter: (_to, _from, next) => {
             if (useAccountStore().isAdmin()) {
               // 是管理员，允许进入
               next()
