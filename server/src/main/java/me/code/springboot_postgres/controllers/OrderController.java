@@ -43,14 +43,16 @@ public class OrderController {
     }
 
     /**
-     * 提交订单（下单）
+     * 提交订单（下单），使用余额支付
      * @param user 当前认证用户
      * @param dto 下单请求数据
      * @return 操作结果
      */
     @PostMapping("/place")
     public ResponseEntity<ApiResponse<Void>> placeOrder(@AuthenticationPrincipal User user, @RequestBody PlaceOrderDTO dto) {
-        return orderService.placeOrder(user, dto.productIds(), dto.address(), dto.deliveryMethod(), dto.paymentMethod()).toResponseEntity();
+        return orderService.placeOrder(user, dto.productIds(),
+                dto.receiverName(), dto.receiverPhone(), dto.region(), dto.detailAddress(),
+                dto.deliveryMethod()).toResponseEntity();
     }
 
     /**

@@ -2,7 +2,7 @@
  * @file OrderDTO.java
  * @description 订单响应数据传输对象，返回订单的完整信息
  * @input 无（由实体转换构造）
- * @output 订单ID、价格、状态、支付方式、配送方式、地址、时间和订单项列表
+ * @output 订单ID、价格、状态、支付方式、配送方式、收货人信息、时间和订单项列表
  */
 package me.code.springboot_postgres.dtos.responses;
 
@@ -22,7 +22,14 @@ public record OrderDTO(
     String status,
     String paymentMethod,
     String deliveryMethod,
-    String address,
+    /** 收货人姓名 */
+    String receiverName,
+    /** 联系电话 */
+    String receiverPhone,
+    /** 省/市/区 */
+    String region,
+    /** 详细地址 */
+    String detailAddress,
     LocalDateTime received,
     LocalDateTime expectedDelivery,
     List<OrderItemDTO> items
@@ -40,7 +47,10 @@ public record OrderDTO(
             order.getStatus() != null ? order.getStatus().name() : null,
             order.getPaymentMethod() != null ? order.getPaymentMethod().name() : null,
             order.getDeliveryMethod() != null ? order.getDeliveryMethod().name() : null,
-            order.getAddress(),
+            order.getReceiverName(),
+            order.getReceiverPhone(),
+            order.getRegion(),
+            order.getDetailAddress(),
             order.getReceived(),
             order.getExpectedDelivery(),
             // 订单项列表转换，空值安全处理

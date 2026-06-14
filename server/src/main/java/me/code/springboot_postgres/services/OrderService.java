@@ -1,7 +1,7 @@
 /**
  * @file OrderService.java
  * @description 订单服务类，提供下单、查询订单、获取进行中订单和配送/支付方式的业务逻辑
- * @input 用户实体、商品ID数组、地址、配送方式、支付方式
+ * @input 用户实体、商品ID数组、收货人信息、配送方式
  * @output 操作结果、订单DTO列表或进行中订单DTO
  */
 package me.code.springboot_postgres.services;
@@ -45,17 +45,21 @@ public class OrderService {
     }
 
     /**
-     * 提交订单：验证库存、扣减库存、创建订单
+     * 提交订单：验证库存、校验余额、扣减余额、扣减库存、创建订单
+     * 支付方式固定为余额支付
      * @param user 下单用户
      * @param productIds 商品ID数组
-     * @param address 收货地址
+     * @param receiverName 收货人姓名
+     * @param receiverPhone 联系电话
+     * @param region 省/市/区
+     * @param detailAddress 详细地址
      * @param deliveryMethod 配送方式
-     * @param paymentMethod 支付方式
      * @return 操作结果
      */
     @Transactional
-    public ApiResponse<Void> placeOrder(User user, String[] productIds, String address,
-                                        Order.DeliveryMethod deliveryMethod, Order.PaymentMethod paymentMethod) {
+    public ApiResponse<Void> placeOrder(User user, String[] productIds, String receiverName,
+                                        String receiverPhone, String region, String detailAddress,
+                                        Order.DeliveryMethod deliveryMethod) {
         // 加载商品并生成订单项
         List<Product> products = productService.loadProductsById(productIds);
         List<OrderItem> items = orderItemService.generateOrderItems(products);
@@ -68,11 +72,23 @@ public class OrderService {
                     Map.of("unavailableProducts", unavailableProducts));
         }
 
+        // 校验余额是否充足
+        BigDecimal orderPrice = items.stream()
+                .map(OrderItem::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (user.getBalance().compareTo(orderPrice) < 0) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST,
+                    "余额不足，当前余额：" + user.getBalance() + "，订单金额：" + orderPrice);
+        }
+
+        // 扣减用户余额
+        user.setBalance(user.getBalance().subtract(orderPrice));
+
         // 扣减商品库存
         productService.updateProductQuantities(items);
 
         // 创建订单并关联订单项
-        Order order = new Order(user, items, address, deliveryMethod, paymentMethod);
+        Order order = new Order(user, items, receiverName, receiverPhone, region, detailAddress, deliveryMethod);
         items.forEach(item -> item.setOrder(order));
         orderRepository.save(order);
 

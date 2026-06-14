@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -110,5 +111,25 @@ public class UserManagementService {
         }
         userRepository.delete(user);
         return ApiResponse.ok("User deleted successfully");
+    }
+
+    /**
+     * 调整指定用户的余额
+     * @param userId 用户ID
+     * @param amount 调整金额（正数为充值，负数为扣减）
+     * @return 操作结果
+     */
+    @Transactional
+    public ApiResponse<Void> adjustBalance(String userId, BigDecimal amount) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
+        // 校验调整后余额不能为负
+        BigDecimal newBalance = user.getBalance().add(amount);
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "调整后余额不能为负数");
+        }
+        user.setBalance(newBalance);
+        userRepository.save(user);
+        return ApiResponse.ok("余额调整成功，当前余额：" + newBalance);
     }
 }

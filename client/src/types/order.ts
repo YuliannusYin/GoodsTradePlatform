@@ -10,7 +10,7 @@ import type { UnavailableProduct } from './product'
 /**
  * 订单项中的商品信息
  */
-interface OrderItemProduct {
+export interface OrderItemProduct {
   /** 商品 ID */
   id: string
   /** 商品名称 */
@@ -24,7 +24,7 @@ interface OrderItemProduct {
 /**
  * 订单项，表示订单中的单个商品条目
  */
-interface OrderItem {
+export interface OrderItem {
   /** 订单项 ID */
   id: string
   /** 购买数量 */
@@ -33,6 +33,20 @@ interface OrderItem {
   price: number
   /** 关联的商品信息 */
   product: OrderItemProduct
+}
+
+/**
+ * 收货地址信息
+ */
+export interface AddressInfo {
+  /** 收货人姓名 */
+  receiverName: string
+  /** 收货人联系电话 */
+  receiverPhone: string
+  /** 省/市/区 */
+  region: string
+  /** 详细地址 */
+  detailAddress: string
 }
 
 /**
@@ -81,8 +95,14 @@ export interface PlacedOrder {
   price: number
   /** 订单状态 */
   status: string
-  /** 收货地址 */
-  address: string
+  /** 收货人姓名 */
+  receiverName: string
+  /** 收货人联系电话 */
+  receiverPhone: string
+  /** 省/市/区 */
+  region: string
+  /** 详细地址 */
+  detailAddress: string
   /** 配送方式 */
   deliveryMethod: string
   /** 支付方式 */
@@ -159,7 +179,5 @@ export const DELIVERY_METHODS: Record<string, string> = {
 
 /** 支付方式映射：英文键 -> 中文显示名 */
 export const PAYMENT_METHODS: Record<string, string> = {
-  ALIPAY: '支付宝',
-  WECHAT_PAY: '微信支付',
-  CASH_ON_DELIVERY: '货到付款'
+  ACCOUNT_BALANCE: '账户余额'
 }

@@ -22,7 +22,10 @@ public record UserOrderDTO(
     String status,
     String paymentMethod,
     String deliveryMethod,
-    String address,
+    String receiverName,
+    String receiverPhone,
+    String region,
+    String detailAddress,
     LocalDateTime received,
     LocalDateTime expectedDelivery,
     List<OrderDTO.OrderItemDTO> items
@@ -42,7 +45,10 @@ public record UserOrderDTO(
             order.getStatus() != null ? order.getStatus().name() : null,
             order.getPaymentMethod() != null ? order.getPaymentMethod().name() : null,
             order.getDeliveryMethod() != null ? order.getDeliveryMethod().name() : null,
-            order.getAddress(),
+            order.getReceiverName(),
+            order.getReceiverPhone(),
+            order.getRegion(),
+            order.getDetailAddress(),
             order.getReceived(),
             order.getExpectedDelivery(),
             order.getItems() != null ? order.getItems().stream().map(OrderDTO.OrderItemDTO::from).toList() : List.of()

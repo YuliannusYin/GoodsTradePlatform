@@ -103,6 +103,12 @@ const router = createRouter({
       ]
     },
     {
+      // 购物车页面路由
+      path: '/cart',
+      name: 'cart',
+      component: () => import('../views/CartView.vue')
+    },
+    {
       // 结算页面路由，购物车中需有商品才能访问
       path: '/checkout',
       name: 'checkout',

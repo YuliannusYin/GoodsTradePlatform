@@ -6,6 +6,7 @@
  */
 package me.code.springboot_postgres.controllers;
 
+import me.code.springboot_postgres.dtos.requests.AdjustBalanceDTO;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
 import me.code.springboot_postgres.dtos.responses.UserDTO;
 import me.code.springboot_postgres.services.UserManagementService;
@@ -79,5 +80,15 @@ public class UserManagementController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String userId) {
         return userManagementService.deleteUser(userId).toResponseEntity();
+    }
+
+    /**
+     * 调整指定用户的余额（管理员操作）
+     * @param dto 请求体，包含userId和amount字段
+     * @return 操作结果
+     */
+    @PutMapping("/balance")
+    public ResponseEntity<ApiResponse<Void>> adjustBalance(@RequestBody AdjustBalanceDTO dto) {
+        return userManagementService.adjustBalance(dto.userId(), dto.amount()).toResponseEntity();
     }
 }

@@ -1,7 +1,7 @@
 /**
  * @file Order.java
  * @description 订单实体类，表示用户的购买订单
- * @input 用户、订单项列表、地址、配送方式和支付方式
+ * @input 用户、订单项列表、收货人信息、配送方式
  * @output 持久化的订单记录
  */
 package me.code.springboot_postgres.models.entities;
@@ -48,9 +48,21 @@ public class Order {
     @Column(nullable = false, length = 25)
     private PaymentMethod paymentMethod;
 
-    // 收货地址
+    // 收货人姓名
+    @Column(nullable = false, length = 50)
+    private String receiverName;
+
+    // 联系电话
+    @Column(nullable = false, length = 20)
+    private String receiverPhone;
+
+    // 省/市/区
+    @Column(nullable = false, length = 100)
+    private String region;
+
+    // 详细地址
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String address;
+    private String detailAddress;
 
     // 配送方式
     @Enumerated(EnumType.STRING)
@@ -75,20 +87,28 @@ public class Order {
 
     /**
      * 构造订单对象，自动计算总价并设置初始状态
+     * 支付方式固定为余额支付
      * @param user 下单用户
      * @param items 订单项列表
-     * @param address 收货地址
+     * @param receiverName 收货人姓名
+     * @param receiverPhone 联系电话
+     * @param region 省/市/区
+     * @param detailAddress 详细地址
      * @param deliveryMethod 配送方式
-     * @param paymentMethod 支付方式
      */
-    public Order(User user, List<OrderItem> items, String address, DeliveryMethod deliveryMethod, PaymentMethod paymentMethod) {
+    public Order(User user, List<OrderItem> items, String receiverName, String receiverPhone,
+                 String region, String detailAddress, DeliveryMethod deliveryMethod) {
         this.status = Status.PENDING;
         this.user = user;
         this.items = items;
         this.price = getTotalPrice();
-        this.address = address;
+        this.receiverName = receiverName;
+        this.receiverPhone = receiverPhone;
+        this.region = region;
+        this.detailAddress = detailAddress;
         this.deliveryMethod = deliveryMethod;
-        this.paymentMethod = paymentMethod;
+        // 支付方式固定为余额支付
+        this.paymentMethod = PaymentMethod.ACCOUNT_BALANCE;
         this.received = LocalDateTime.now();
         this.expectedDelivery = null;
     }
@@ -119,9 +139,9 @@ public class Order {
     }
 
     /**
-     * 支付方式枚举
+     * 支付方式枚举（仅支持余额支付）
      */
     public enum PaymentMethod {
-        ALIPAY, WECHAT_PAY, CASH_ON_DELIVERY
+        ACCOUNT_BALANCE
     }
 }

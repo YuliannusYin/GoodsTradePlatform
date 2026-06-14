@@ -1,19 +1,22 @@
 /**
  * @file shoppingCartStore.ts
- * @description 购物车状态管理，管理购物车中的商品ID列表及数量，支持sessionStorage持久化
- * @input 无外部入参，内部从sessionStorage读取初始数据
- * @output 暴露购物车商品ID列表、商品数量及增删查清空等操作方法
+ * @description 购物车状态管理，使用Map结构管理商品数量，支持localStorage持久化
+ * @input 无外部入参，内部从localStorage读取初始数据
+ * @output 暴露购物车商品Map、商品数量及增删改查清空等操作方法
  */
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import type { CartItem } from '@/types/cart'
+
+/** localStorage 存储键名 */
+const STORAGE_KEY = 'shopping_cart'
 
 /**
- * 从sessionStorage加载购物车商品ID列表
- * @returns {string[]} 已存储的商品ID数组，解析失败或无数据时返回空数组
+ * 从localStorage加载购物车数据
+ * @returns {CartItem[]} 已存储的购物车项数组，解析失败或无数据时返回空数组
  */
-function loadProductIds(): string[] {
-  // 从sessionStorage中读取已保存的商品ID字符串
-  const stored = sessionStorage.getItem('shoppingCart_productIds')
+function loadCartItems(): CartItem[] {
+  const stored = localStorage.getItem(STORAGE_KEY)
   if (stored) {
     try {
       return JSON.parse(stored)
@@ -26,71 +29,186 @@ function loadProductIds(): string[] {
 }
 
 /**
- * 将商品ID列表持久化到sessionStorage
- * @param {string[]} ids - 需要持久化的商品ID数组
+ * 将购物车数据持久化到localStorage
+ * @param {Map<string, CartItem>} items - 需要持久化的购物车Map
  */
-function persistProductIds(ids: string[]) {
-  sessionStorage.setItem('shoppingCart_productIds', JSON.stringify(ids))
+function persistCartItems(items: Map<string, CartItem>): void {
+  const arr = Array.from(items.values())
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
 }
 
 /**
  * 购物车状态管理Store
- * 职责：管理购物车商品ID列表、商品数量，提供增删查清空操作
+ * 职责：管理购物车商品Map、商品数量，提供增删改查清空操作
  */
 export const useShoppingCartStore = defineStore('shoppingCart', () => {
-  // 初始化时从sessionStorage恢复已保存的商品ID
-  const initialIds = loadProductIds()
-  // 购物车中的商品ID列表
-  const productIds = ref<string[]>(initialIds)
-  // 购物车中的商品数量
-  const productAmount = ref<number>(initialIds.length)
+  // 初始化时从localStorage恢复已保存的购物车数据
+  const initialItems = loadCartItems()
+  // 购物车商品Map，key为商品ID，value为购物车项
+  const cartItems = ref<Map<string, CartItem>>(new Map(
+    initialItems.map(item => [item.productId, item])
+  ))
+
+  // 购物车中所有商品的总数量（每种商品的数量之和）
+  const totalQuantity = computed(() => {
+    let sum = 0
+    for (const item of cartItems.value.values()) {
+      sum += item.quantity
+    }
+    return sum
+  })
+
+  // 购物车中的商品种类数
+  const totalKinds = computed(() => cartItems.value.size)
+
+  // 购物车中商品ID列表（用于兼容旧接口）
+  const productIds = computed(() => Array.from(cartItems.value.keys()))
 
   /**
-   * 向购物车添加商品ID
+   * 向购物车添加商品，若已存在则数量+1
    * @param {string} productId - 要添加的商品ID
-   * @returns {Promise<void>} 无返回值
    */
-  async function addProductId(productId: string): Promise<void> {
-    productIds.value.push(productId)
-    productAmount.value++
-    // 添加后立即持久化到sessionStorage
-    persistProductIds(productIds.value)
+  function addItem(productId: string): void {
+    const existing = cartItems.value.get(productId)
+    if (existing) {
+      // 商品已存在，数量加1
+      existing.quantity++
+    } else {
+      // 商品不存在，新增一条
+      cartItems.value.set(productId, { productId, quantity: 1 })
+    }
+    // 触发响应式更新
+    cartItems.value = new Map(cartItems.value)
+    persistCartItems(cartItems.value)
   }
 
   /**
-   * 从购物车移除指定商品ID
+   * 设置购物车中指定商品的数量
+   * @param {string} productId - 商品ID
+   * @param {number} quantity - 目标数量
+   */
+  function setItemQuantity(productId: string, quantity: number): void {
+    if (quantity <= 0) {
+      // 数量<=0时移除商品
+      removeItem(productId)
+      return
+    }
+    const existing = cartItems.value.get(productId)
+    if (existing) {
+      existing.quantity = quantity
+    } else {
+      cartItems.value.set(productId, { productId, quantity })
+    }
+    // 触发响应式更新
+    cartItems.value = new Map(cartItems.value)
+    persistCartItems(cartItems.value)
+  }
+
+  /**
+   * 从购物车移除指定商品
    * @param {string} productId - 要移除的商品ID
    */
+  function removeItem(productId: string): void {
+    cartItems.value.delete(productId)
+    // 触发响应式更新
+    cartItems.value = new Map(cartItems.value)
+    persistCartItems(cartItems.value)
+  }
+
+  /**
+   * 清空购物车中的所有商品
+   */
+  function clearCart(): void {
+    cartItems.value.clear()
+    cartItems.value = new Map(cartItems.value)
+    localStorage.removeItem(STORAGE_KEY)
+  }
+
+  /**
+   * 获取购物车中指定商品的数量
+   * @param {string} productId - 商品ID
+   * @returns {number} 商品数量，不存在时返回0
+   */
+  function getItemQuantity(productId: string): number {
+    return cartItems.value.get(productId)?.quantity ?? 0
+  }
+
+  /**
+   * 判断购物车中是否包含指定商品
+   * @param {string} productId - 商品ID
+   * @returns {boolean} 是否包含
+   */
+  function hasItem(productId: string): boolean {
+    return cartItems.value.has(productId)
+  }
+
+  /**
+   * 获取购物车中所有商品项列表
+   * @returns {CartItem[]} 购物车项数组
+   */
+  function getAllItems(): CartItem[] {
+    return Array.from(cartItems.value.values())
+  }
+
+  /**
+   * 从后端数据恢复购物车（登录合并后使用）
+   * @param {CartItem[]} items - 后端返回的购物车项列表
+   */
+  function restoreFromBackend(items: CartItem[]): void {
+    cartItems.value = new Map(items.map(item => [item.productId, item]))
+    persistCartItems(cartItems.value)
+  }
+
+  // === 兼容旧接口的方法（逐步废弃） ===
+
+  /**
+   * @deprecated 使用 addItem 代替
+   * 向购物车添加商品ID（兼容旧接口）
+   */
+  async function addProductId(productId: string): Promise<void> {
+    addItem(productId)
+  }
+
+  /**
+   * @deprecated 使用 removeItem 代替
+   * 从购物车移除指定商品ID（兼容旧接口）
+   */
   function removeProductId(productId: string): void {
-    // 查找商品ID在列表中的索引位置
-    const index = productIds.value.indexOf(productId)
-    // 商品ID不存在时跳过，防止splice(-1)误删最后一个元素
-    if (index === -1) return
-    productIds.value.splice(index, 1)
-    productAmount.value--
-    // 移除后立即持久化到sessionStorage
-    persistProductIds(productIds.value)
+    removeItem(productId)
   }
 
-  // 清空购物车中的所有商品
+  /**
+   * @deprecated 使用 clearCart 代替
+   * 清空购物车中的所有商品（兼容旧接口）
+   */
   function clearProductIds(): void {
-    productIds.value = []
-    productAmount.value = 0
-    persistProductIds([])
+    clearCart()
   }
 
-  // 获取购物车中所有商品ID列表
+  /**
+   * @deprecated 使用 getAllItems 代替
+   * 获取购物车中所有商品ID列表（兼容旧接口）
+   */
   function getAllProductIds(): string[] {
-    return productIds.value
+    return Array.from(cartItems.value.keys())
   }
 
-  // 获取购物车中的商品总数量
+  /**
+   * @deprecated 使用 totalQuantity 代替
+   * 获取购物车中的商品总数量（兼容旧接口）
+   */
   function getTotalItemsCount(): number {
-    return productAmount.value
+    return totalQuantity.value
   }
 
   return {
-    productIds, productAmount,
-    addProductId, removeProductId, clearProductIds, getAllProductIds, getTotalItemsCount
+    // 新接口
+    cartItems, totalQuantity, totalKinds, productIds,
+    addItem, setItemQuantity, removeItem, clearCart,
+    getItemQuantity, hasItem, getAllItems, restoreFromBackend,
+    // 兼容旧接口
+    addProductId, removeProductId, clearProductIds, getAllProductIds, getTotalItemsCount,
+    // 兼容旧属性名
+    productAmount: totalQuantity
   }
 })

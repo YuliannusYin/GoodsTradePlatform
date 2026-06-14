@@ -1,6 +1,6 @@
 <template>
   <div :class="[additionalClass]">
-    <RouterLink to="/checkout">
+    <RouterLink to="/cart">
       <div class="relative">
         <i class="fa-solid fa-cart-shopping text-gray-700 hover:text-primary-600"></i>
         <div v-if="itemsCount > 0" class="absolute top-4 ml-[-0.2rem] md:top-3 md:ml-[0.8rem] lg:top-5">
