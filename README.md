@@ -53,170 +53,14 @@
 | 工具库      | Lombok + JetBrains Annotations                                                   |
 | 部署       | Docker + Docker Compose + Nginx                                                  |
 
-## 项目结构
+## 详细文档
 
-```
-eCommerce-Project/
-├── client/                          # 前端项目 (Vue 3 + TypeScript)
-│   ├── public/
-│   │   └── favicon.ico
-│   ├── src/
-│   │   ├── components/              # Vue 组件
-│   │   │   ├── account/             # 账户相关 (AccountEditForm, AccountInfo, ShowOrders)
-│   │   │   ├── admintools/          # 管理员工具 (AdminToolsItem, AdminToolsPopup, ProductForm, UserOrderAside, UsersOrdersTable)
-│   │   │   ├── footer/              # 页脚 (FooterInfo, FooterNavItems, SocialsIcons)
-│   │   │   ├── header/              # 导航栏 (NavBar, SearchBar, AccountItem, LoginItem, ShoppingCartItem)
-│   │   │   ├── products/            # 商品相关 (ProductCard, ProductCards, FeaturedProducts, OngoingOrder, PlaceholderCards)
-│   │   │   ├── ConfirmDialogue.vue  # 确认对话框
-│   │   │   ├── HeroSection.vue      # 首页横幅
-│   │   │   ├── LoadingOverlay.vue   # 加载遮罩
-│   │   │   ├── LoginOrSignupPopup.vue # 登录/注册弹窗
-│   │   │   ├── ProductPreview.vue   # 商品预览
-│   │   │   └── SmallViewTitle.vue   # 小视图标题
-│   │   ├── router/
-│   │   │   └── index.ts             # 路由定义与导航守卫
-│   │   ├── stores/                  # Pinia 状态管理
-│   │   │   ├── network/             # 网络请求相关 Store
-│   │   │   │   ├── accountStore.ts  # 账户与认证状态
-│   │   │   │   ├── adminToolsStore.ts # 管理员工具状态
-│   │   │   │   ├── favoriteStore.ts # 收藏状态
-│   │   │   │   ├── orderStore.ts    # 订单状态
-│   │   │   │   ├── productStore.ts  # 商品状态（含商户商品管理）
-│   │   │   │   ├── reviewStore.ts   # 评价状态
-│   │   │   │   └── requests.ts      # Axios 请求封装（拦截器）
-│   │   │   └── shoppingCartStore.ts # 购物车状态
-│   │   ├── types/                   # TypeScript 类型定义
-│   │   │   ├── api.ts               # 通用 API 响应类型
-│   │   │   ├── favorite.ts          # 收藏类型
-│   │   │   ├── order.ts             # 订单类型
-│   │   │   ├── product.ts           # 商品类型
-│   │   │   ├── review.ts            # 评价类型
-│   │   │   └── user.ts              # 用户类型
-│   │   ├── views/                   # 页面视图
-│   │   │   ├── admin/               # 管理员页面
-│   │   │   │   ├── AdminToolsView.vue     # 管理工具主页
-│   │   │   │   ├── HandleOrdersView.vue   # 订单管理
-│   │   │   │   ├── HandleProductsView.vue # 商品管理
-│   │   │   │   ├── ProductReviewView.vue  # 商品审核
-│   │   │   │   └── UserManagementView.vue # 用户管理
-│   │   │   ├── AccountView.vue            # 账户中心
-│   │   │   ├── CheckoutView.vue           # 结算页
-│   │   │   ├── EditAccountView.vue        # 编辑账户
-│   │   │   ├── FavoritesView.vue          # 我的收藏
-│   │   │   ├── HomeView.vue               # 首页
-│   │   │   ├── LoginView.vue              # 登录
-│   │   │   ├── MyProductsView.vue         # 我的商品（商户）
-│   │   │   ├── ProductView.vue            # 商品详情
-│   │   │   ├── PublishProductView.vue     # 发布商品（商户）
-│   │   │   ├── ShopView.vue               # 商城
-│   │   │   ├── ShowAccountOrdersView.vue  # 我的订单
-│   │   │   └── SignupView.vue             # 注册
-│   │   ├── App.vue                  # 根组件
-│   │   ├── index.css                # 全局样式
-│   │   └── main.ts                  # 应用入口
-│   ├── Dockerfile                   # 前端 Docker 构建 (Node → Nginx)
-│   ├── nginx.conf                   # Nginx 反向代理配置
-│   ├── vite.config.ts               # Vite 配置（含 API 代理）
-│   ├── tailwind.config.js           # Tailwind CSS 配置（自定义主题色）
-│   ├── tsconfig.json                # TypeScript 配置
-│   └── package.json
-├── server/                          # 后端项目 (Spring Boot + PostgreSQL)
-│   ├── src/main/java/me/code/springboot_postgres/
-│   │   ├── config/                  # 配置类
-│   │   │   └── DataInitializer.java # 数据初始化（启动时确保内置用户存在）
-│   │   ├── controllers/             # REST 控制器
-│   │   │   ├── AdminToolsController.java      # 管理员工具（商品/订单管理）
-│   │   │   ├── FavoriteController.java        # 收藏管理
-│   │   │   ├── LoginController.java           # 登录认证
-│   │   │   ├── OrderController.java           # 订单管理
-│   │   │   ├── ProductController.java         # 商品浏览/搜索
-│   │   │   ├── ReviewController.java          # 评价管理
-│   │   │   ├── UserAccountController.java     # 用户账户管理
-│   │   │   ├── UserManagementController.java  # 用户管理（超级管理员）
-│   │   │   └── UserProductController.java     # 商户商品管理
-│   │   ├── dtos/                    # 数据传输对象
-│   │   │   ├── requests/            # 请求 DTO（含 Bean Validation）
-│   │   │   │   ├── ChangeEmailDTO.java
-│   │   │   │   ├── ChangePasswordDTO.java
-│   │   │   │   ├── ChangeUsernameDTO.java
-│   │   │   │   ├── CreateReviewDTO.java
-│   │   │   │   ├── CreateUserDTO.java
-│   │   │   │   ├── OrderDeliveryDTO.java
-│   │   │   │   ├── PlaceOrderDTO.java
-│   │   │   │   ├── ProductDTO.java
-│   │   │   │   └── UserLoginDTO.java
-│   │   │   └── responses/          # 响应 DTO
-│   │   │       ├── ApiResponse.java          # 统一 API 响应包装
-│   │   │       ├── AuthenticationDTO.java    # 认证响应
-│   │   │       ├── FavoriteDTO.java
-│   │   │       ├── OngoingOrderDTO.java
-│   │   │       ├── OrderDTO.java
-│   │   │       ├── ProductDTO.java
-│   │   │       ├── ProductRatingDTO.java
-│   │   │       ├── ReviewDTO.java
-│   │   │       ├── UnavailableProductDTO.java
-│   │   │       ├── UserDTO.java
-│   │   │       ├── UserDetailsDTO.java
-│   │   │       └── UserOrderDTO.java
-│   │   ├── exceptions/              # 全局异常处理
-│   │   │   ├── GlobalExceptionHandler.java   # 全局异常处理器
-│   │   │   └── types/
-│   │   │       └── CustomRuntimeException.java # 自定义运行时异常
-│   │   ├── models/                  # JPA 实体模型
-│   │   │   └── entities/
-│   │   │       ├── User.java        # 用户实体（含 Role 枚举，实现 UserDetails）
-│   │   │       ├── Product.java     # 商品实体（含 Category/Condition/Status 枚举）
-│   │   │       ├── Order.java       # 订单实体（含 Status/DeliveryMethod/PaymentMethod 枚举）
-│   │   │       ├── OrderItem.java   # 订单项实体
-│   │   │       ├── Review.java      # 评价实体
-│   │   │       └── Favorite.java    # 收藏实体
-│   │   ├── repositories/            # Spring Data JPA Repository
-│   │   │   ├── FavoriteRepository.java
-│   │   │   ├── OrderRepository.java
-│   │   │   ├── ProductRepository.java
-│   │   │   ├── ProductSpecifications.java  # 商品动态查询条件构建
-│   │   │   ├── ReviewRepository.java
-│   │   │   └── UserRepository.java
-│   │   ├── security/                # 安全配置
-│   │   │   ├── CorsConfig.java            # CORS 跨域配置
-│   │   │   ├── JwtTokenUtil.java          # JWT 令牌生成与解析
-│   │   │   ├── JwtValidationFilter.java   # JWT 请求验证过滤器
-│   │   │   └── SecurityConfig.java        # 安全过滤链与权限配置
-│   │   ├── services/                # 业务逻辑层
-│   │   │   ├── AdminToolsService.java      # 管理员工具服务
-│   │   │   ├── FavoriteService.java        # 收藏服务
-│   │   │   ├── OrderItemService.java       # 订单项服务
-│   │   │   ├── OrderService.java           # 订单服务
-│   │   │   ├── ProductService.java         # 商品服务
-│   │   │   ├── ReviewService.java          # 评价服务
-│   │   │   ├── UserAccountService.java     # 用户账户服务（含 UserDetailsService）
-│   │   │   ├── UserManagementService.java  # 用户管理服务
-│   │   │   └── UserProductService.java     # 商户商品服务
-│   │   └── Application.java         # Spring Boot 启动类
-│   ├── src/main/resources/
-│   │   └── application.yml          # Spring Boot 配置
-│   ├── src/test/                    # 测试
-│   ├── Dockerfile                   # 后端 Docker 构建 (Maven → JRE)
-│   └── pom.xml
-├── docker-compose.yml               # Docker Compose 编排
-├── .gitignore
-└── README.md
-```
-
-## 数据库设计
-
-共 6 张表，由 JPA 自动建表（`hibernate.ddl-auto=update`）：
-
-| 表名            | 说明                                                                      |
-| ------------- | ----------------------------------------------------------------------- |
-| `users`       | 用户表（含 role 枚举字段、is\_enabled 禁用状态、is\_protected 保护标记、version 乐观锁）        |
-| `products`    | 商品表（含 status 审核状态、reject\_reason 驳回原因、imageUrls JSONB 图片列表、version 乐观锁） |
-| `orders`      | 订单表（含 status/delivery\_method/payment\_method 枚举字段）                     |
-| `order_items` | 订单项表（关联订单和商品）                                                           |
-| `favorites`   | 收藏表（用户与商品的多对多关系）                                                        |
-| `reviews`     | 评价表（含 1-5 星评分和文字评价）                                                     |
-
-> 系统使用 `DataInitializer` 在应用启动时自动确保内置用户（超级管理员、商户、测试用户）存在且字段正确，无需手动执行 SQL 迁移脚本。
+| 文档 | 说明 |
+|------|------|
+| [项目结构](project-structure.md) | 前后端目录结构、文件说明 |
+| [数据库设计](database-design.md) | 表结构、字段说明、索引设计、实体关系图 |
+| [API 接口文档](api-reference.md) | REST API 接口、认证方式、页面路由 |
+| [代码审查报告](docs/code-review-report.md) | 代码质量审查、Bug 修复、重构建议 |
 
 ## 快速开始
 
@@ -236,7 +80,7 @@ git clone https://github.com/YuliannusYin/GoodsTradePlatform
 cd GoodsTradePlatform
 ```
 
-1. **配置环境变量（域名部署时必须）**
+2. **配置环境变量（域名部署时必须）**
 
 如果通过域名访问，需在项目根目录创建 `.env` 文件设置 CORS 允许的来源：
 
@@ -251,13 +95,13 @@ POSTGRES_PASSWORD=你的数据库密码
 
 > **注意**：通过 `http://localhost` 访问时无需额外配置，默认值已包含 localhost。只有通过域名或 IP 访问时才需要设置 `CORS_ALLOWED_ORIGINS`。
 
-1. **一键启动所有服务**
+3. **一键启动所有服务**
 
 ```bash
 docker compose up -d --build
 ```
 
-1. **等待服务启动完成**
+4. **等待服务启动完成**
 
 ```bash
 # 查看服务状态
@@ -267,12 +111,12 @@ docker compose ps
 docker compose logs -f server
 ```
 
-1. **访问应用**
+5. **访问应用**
 
 - 前端页面：<http://localhost>
 - 后端 API：<http://localhost:8080/api>
 
-1. **默认测试账号**
+6. **默认测试账号**
 
 ```
 超级管理员：admin@merchandise.com / Admin@2024（受保护账号，不可改名/改密码/删除）
@@ -280,13 +124,13 @@ docker compose logs -f server
 测试用户：testuser@merchandise.com / Test@2024（受保护账号，余额 $10,000,000）
 ```
 
-1. **停止服务**
+7. **停止服务**
 
 ```bash
 docker compose down
 ```
 
-1. **清除所有数据（包括数据库卷）**
+8. **清除所有数据（包括数据库卷）**
 
 ```bash
 docker compose down -v
@@ -317,7 +161,7 @@ docker run -d \
   postgres:16-alpine
 ```
 
-1. **配置后端数据库连接**
+2. **配置后端数据库连接**
 
 编辑 `server/src/main/resources/application.yml`：
 
@@ -333,14 +177,14 @@ jwt:
   expiration-ms: 3600000
 ```
 
-1. **启动后端**
+3. **启动后端**
 
 ```bash
 cd server
 mvn spring-boot:run
 ```
 
-1. **安装前端依赖并启动**
+4. **安装前端依赖并启动**
 
 ```bash
 cd client
@@ -348,129 +192,10 @@ npm install
 npm run dev
 ```
 
-1. **访问应用**
+5. **访问应用**
 
 - 前端：<http://localhost:5173（Vite> 开发服务器自动代理 `/api` 到后端）
 - 后端：<http://localhost:8080>
-
-## API 接口概览
-
-### 认证相关
-
-| 方法     | 路径                    | 说明     | 认证 |
-| ------ | --------------------- | ------ | -- |
-| POST   | /api/account/register | 用户注册   | 否  |
-| POST   | /api/account/login    | 用户登录   | 否  |
-| POST   | /api/account/confirm  | 验证凭据   | 是  |
-| GET    | /api/account/details  | 获取账户详情 | 是  |
-| PUT    | /api/account/username | 修改用户名  | 是  |
-| PUT    | /api/account/email    | 修改邮箱   | 是  |
-| PUT    | /api/account/password | 修改密码   | 是  |
-| DELETE | /api/account/delete   | 删除账户   | 是  |
-
-### 商品相关
-
-| 方法  | 路径                                | 说明         | 认证 |
-| --- | --------------------------------- | ---------- | -- |
-| GET | /api/products/all                 | 获取所有已审核商品  | 否  |
-| GET | /api/products/featured            | 获取热门商品     | 否  |
-| GET | /api/products/{id}                | 获取商品详情     | 否  |
-| GET | /api/products/search              | 搜索商品（支持分类） | 否  |
-| GET | /api/products/category/{category} | 按分类获取商品    | 否  |
-| GET | /api/products/categories          | 获取分类列表     | 否  |
-| GET | /api/products/conditions          | 获取成色列表     | 否  |
-
-### 用户商品（C2C / 商户）
-
-| 方法     | 路径                              | 说明     | 认证        |
-| ------ | ------------------------------- | ------ | --------- |
-| POST   | /api/user\_products/add         | 商户发布商品 | MERCHANT+ |
-| GET    | /api/user\_products/my          | 获取我的商品 | MERCHANT+ |
-| PUT    | /api/user\_products/edit/{id}   | 编辑我的商品 | MERCHANT+ |
-| DELETE | /api/user\_products/delete/{id} | 删除我的商品 | MERCHANT+ |
-
-### 订单相关
-
-| 方法   | 路径                           | 说明        | 认证 |
-| ---- | ---------------------------- | --------- | -- |
-| POST | /api/orders/ongoing          | 获取进行中订单预览 | 否  |
-| POST | /api/orders/place            | 下单        | 是  |
-| GET  | /api/orders/all              | 获取用户订单    | 是  |
-| GET  | /api/orders/delivery/methods | 获取配送方式    | 否  |
-| GET  | /api/orders/payment/methods  | 获取支付方式    | 否  |
-
-### 评价相关
-
-| 方法     | 路径                               | 说明     | 认证 |
-| ------ | -------------------------------- | ------ | -- |
-| POST   | /api/reviews/add                 | 添加评价   | 是  |
-| GET    | /api/reviews/product/{id}        | 获取商品评价 | 否  |
-| GET    | /api/reviews/product/{id}/rating | 获取商品评分 | 否  |
-| GET    | /api/reviews/user/{id}           | 获取用户评价 | 是  |
-| DELETE | /api/reviews/{id}                | 删除评价   | 是  |
-
-### 收藏相关
-
-| 方法     | 路径                            | 说明      | 认证 |
-| ------ | ----------------------------- | ------- | -- |
-| POST   | /api/favorites/add?productId= | 添加收藏    | 是  |
-| DELETE | /api/favorites/remove/{id}    | 取消收藏    | 是  |
-| GET    | /api/favorites/list           | 获取收藏列表  | 是  |
-| GET    | /api/favorites/check/{id}     | 检查是否已收藏 | 是  |
-
-### 管理员 - 商品管理
-
-| 方法     | 路径                                                  | 说明      | 认证     |
-| ------ | --------------------------------------------------- | ------- | ------ |
-| POST   | /api/admin\_tools/product/add                       | 添加商品    | ADMIN+ |
-| PUT    | /api/admin\_tools/product/edit/{id}                 | 编辑商品    | ADMIN+ |
-| DELETE | /api/admin\_tools/product/delete/{id}               | 删除商品    | ADMIN+ |
-| PATCH  | /api/admin\_tools/product/approve/{id}              | 审核通过    | ADMIN+ |
-| PATCH  | /api/admin\_tools/product/reject/{id}?rejectReason= | 审核驳回    | ADMIN+ |
-| PATCH  | /api/admin\_tools/product/disable/{id}              | 禁用商品    | ADMIN+ |
-| PATCH  | /api/admin\_tools/product/enable/{id}               | 启用商品    | ADMIN+ |
-| GET    | /api/admin\_tools/product/pending                   | 获取待审核商品 | ADMIN+ |
-| GET    | /api/admin\_tools/product/status/{status}           | 按状态查商品  | ADMIN+ |
-
-### 管理员 - 订单管理
-
-| 方法    | 路径                                         | 说明       | 认证     |
-| ----- | ------------------------------------------ | -------- | ------ |
-| GET   | /api/admin\_tools/order/all                | 获取所有订单   | ADMIN+ |
-| GET   | /api/admin\_tools/order/all/{status}       | 按状态查订单   | ADMIN+ |
-| PATCH | /api/admin\_tools/order/send               | 发货       | ADMIN+ |
-| PATCH | /api/admin\_tools/order/expected\_delivery | 修改预计送达时间 | ADMIN+ |
-
-### 管理员 - 用户管理
-
-| 方法     | 路径                                   | 说明      | 认证           |
-| ------ | ------------------------------------ | ------- | ------------ |
-| GET    | /api/admin/users/all                 | 获取用户列表  | SUPER\_ADMIN |
-| GET    | /api/admin/users/{id}                | 获取用户详情  | SUPER\_ADMIN |
-| PUT    | /api/admin/users/{id}/role           | 分配用户角色  | SUPER\_ADMIN |
-| PATCH  | /api/admin/users/{id}/toggle-enabled | 禁用/启用用户 | SUPER\_ADMIN |
-| DELETE | /api/admin/users/{id}                | 删除用户    | SUPER\_ADMIN |
-
-## 页面路由
-
-| 路径                      | 页面                              | 认证         |
-| ----------------------- | ------------------------------- | ---------- |
-| `/`                     | 首页                              | 否          |
-| `/shop`                 | 商城（支持 query/filter/category 参数） | 否          |
-| `/product/:productId`   | 商品详情                            | 否          |
-| `/login`                | 登录                              | 否          |
-| `/signup`               | 注册                              | 否          |
-| `/account`              | 账户中心                            | 是          |
-| `/account/edit`         | 编辑账户                            | 是          |
-| `/account/orders`       | 我的订单                            | 是          |
-| `/account/my-products`  | 我的商品                            | 商户         |
-| `/checkout`             | 结算页                             | 否（需购物车有商品） |
-| `/publish`              | 发布商品                            | 商户         |
-| `/favorites`            | 我的收藏                            | 是          |
-| `/admin_tools/products` | 管理商品                            | 管理员        |
-| `/admin_tools/orders`   | 管理订单                            | 管理员        |
-| `/admin_tools/reviews`  | 商品审核                            | 管理员        |
-| `/admin_tools/users`    | 用户管理                            | 超级管理员      |
 
 ## 环境变量
 
