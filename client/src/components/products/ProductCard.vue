@@ -45,14 +45,14 @@
       </div>
     </div>
   </div>
-  <div v-else class="bg-white p-4 flex flex-col justify-between min-w-max rounded-xl shadow-md card-hover">
-    <div class="relative">
+  <div v-else class="bg-white p-4 flex flex-col justify-between h-full rounded-xl shadow-md card-hover">
+    <div class="relative overflow-hidden rounded-lg mb-3">
       <img v-if="product.imageUrls && product.imageUrls.length > 0"
         :src="product.imageUrls[0]" :alt="product.name"
-        class="mb-3 h-[12rem] w-full object-contain cursor-pointer rounded-lg"
+        class="h-[12rem] w-full object-cover cursor-pointer"
         @click="showProductView(product.id)"
         @error="handleImageError">
-      <div v-else class="mb-3 h-[12rem] w-full bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer"
+      <div v-else class="h-[12rem] w-full bg-gray-100 flex items-center justify-center cursor-pointer"
         @click="showProductView(product.id)">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
