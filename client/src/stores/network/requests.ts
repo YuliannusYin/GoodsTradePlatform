@@ -31,7 +31,7 @@ apiClient.interceptors.response.use(
     if (apiResponse && typeof apiResponse === 'object' && 'success' in apiResponse && 'data' in apiResponse) {
       if (!apiResponse.success) {
         // 业务逻辑失败时，抛出错误信息
-        throw new Error(apiResponse.message || 'Request failed')
+        throw new Error(apiResponse.message || '请求失败')
       }
       // 成功时提取data字段返回
       return apiResponse.data

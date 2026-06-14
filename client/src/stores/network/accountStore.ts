@@ -110,9 +110,9 @@ export const useAccountStore = defineStore('accountStore', () => {
       isProtected.value = response.isProtected || false
       // 优先使用接口返回的角色信息
       sessionStorage.setItem('userRole', response.role || sessionStorage.getItem('userRole') || 'USER')
-    } catch (e: any) {
+    } catch (e: unknown) {
       // 401表示令牌无效或过期，向上抛出以便restoreSession处理
-      if (e?.response?.status === 401) {
+      if (e instanceof Error && 'response' in e && (e as { response?: { status?: number } }).response?.status === 401) {
         throw e
       }
       // 其他错误（如网络波动）静默忽略，不中断用户操作

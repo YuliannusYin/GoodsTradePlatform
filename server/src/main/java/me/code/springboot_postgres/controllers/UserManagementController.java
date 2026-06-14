@@ -1,7 +1,7 @@
 /**
  * @file UserManagementController.java
- * @description 用户管理控制器（超级管理员），提供查询用户、分配角色、启用/禁用用户和删除用户的接口
- * @input 用户ID、角色名称
+ * @description 用户管理控制器（超级管理员），提供查询用户、分配角色、启用/禁用用户、删除用户和调整余额的接口
+ * @input 用户ID、角色名称、调整金额
  * @output 统一API响应包装的用户数据或操作结果
  */
 package me.code.springboot_postgres.controllers;
@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * 用户管理控制器
- * 职责：提供超级管理员对用户的查询、角色分配、启用/禁用和删除操作
+ * 职责：提供超级管理员对用户的查询、角色分配、启用/禁用、删除和余额调整操作
  */
 @RestController
 @RequestMapping("api/admin/users")

@@ -1,7 +1,7 @@
 /**
  * @file UserManagementService.java
- * @description 用户管理服务类（超级管理员），提供查询用户、分配角色、启用/禁用和删除用户的业务逻辑
- * @input 用户ID、角色名称
+ * @description 用户管理服务类（超级管理员），提供查询用户、分配角色、启用/禁用、删除用户和调整余额的业务逻辑
+ * @input 用户ID、角色名称、调整金额
  * @output 用户DTO列表、用户DTO或操作结果
  */
 package me.code.springboot_postgres.services;
@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * 用户管理服务类
- * 职责：处理超级管理员对用户的查询、角色分配、启用/禁用和删除等管理操作
+ * 职责：处理超级管理员对用户的查询、角色分配、启用/禁用、删除和余额调整等管理操作
  */
 @Service
 public class UserManagementService {

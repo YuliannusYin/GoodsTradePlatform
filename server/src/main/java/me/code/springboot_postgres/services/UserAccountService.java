@@ -138,6 +138,7 @@ public class UserAccountService implements UserDetailsService {
 
     /**
      * 删除用户账户
+     * 注意：此方法仅删除用户记录，不清理关联的购物车项、收藏和评价（与管理员删除不同）
      * @param user 当前用户
      * @return 操作结果
      */

@@ -1,6 +1,6 @@
 /**
  * @file AdminToolsController.java
- * @description 管理员工具控制器，提供商品管理（增删改查、审核）和订单管理（查看、发货）的接口
+ * @description 管理员工具控制器，提供商品管理（增删改查、审核、启用/禁用）和订单管理（查看、发货、修改送达时间）的接口
  * @input 商品DTO、订单发货DTO、路径参数等
  * @output 统一API响应包装的结果
  */
@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * 管理员工具控制器
- * 职责：处理管理员对商品的增删改查、审核操作，以及对订单的查看和发货操作
+ * 职责：处理管理员对商品的增删改查、审核、启用/禁用操作，以及对订单的查看、发货和修改送达时间操作
  */
 @RestController
 @RequestMapping("api/admin_tools")

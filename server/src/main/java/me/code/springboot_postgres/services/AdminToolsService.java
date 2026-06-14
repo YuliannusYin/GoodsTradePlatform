@@ -1,7 +1,7 @@
 /**
  * @file AdminToolsService.java
- * @description 管理员工具服务类，提供商品管理（增删改查、审核）和订单管理（查看、发货）的业务逻辑
- * @input 商品DTO、订单ID、状态等参数
+ * @description 管理员工具服务类，提供商品管理（增删改查、审核、启用/禁用）和订单管理（查看、发货、修改送达时间）的业务逻辑
+ * @input 商品DTO、订单ID、状态、日期时间字符串等参数
  * @output 商品DTO列表、用户订单DTO列表或操作结果
  */
 package me.code.springboot_postgres.services;
@@ -99,7 +99,7 @@ public class AdminToolsService {
     /**
      * 发货并设置预计送达时间
      * @param orderId 订单ID
-     * @param dateAndTime 预计送达时间字符串
+     * @param dateAndTime 预计送达时间字符串，格式为 yyyy-MM-dd'T'HH:mm:ss
      * @return 操作结果
      */
     @Transactional
@@ -117,7 +117,7 @@ public class AdminToolsService {
     /**
      * 修改订单的预计送达时间
      * @param orderId 订单ID
-     * @param newDateAndTime 新的预计送达时间字符串
+     * @param newDateAndTime 新的预计送达时间字符串，格式为 yyyy-MM-dd'T'HH:mm:ss
      * @return 操作结果
      */
     @Transactional

@@ -2,7 +2,7 @@
  * @file shoppingCartStore.ts
  * @description 购物车状态管理，使用Map结构管理商品数量，支持localStorage持久化
  * @input 无外部入参，内部从localStorage读取初始数据
- * @output 暴露购物车商品Map、商品数量及增删改查清空等操作方法
+ * @output 暴露购物车总数量、商品种类数及增删改查清空等操作方法
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
@@ -39,7 +39,7 @@ function persistCartItems(items: Map<string, CartItem>): void {
 
 /**
  * 购物车状态管理Store
- * 职责：管理购物车商品Map、商品数量，提供增删改查清空操作
+ * 职责：管理购物车商品Map、总数量和种类数，提供增删改查清空操作
  */
 export const useShoppingCartStore = defineStore('shoppingCart', () => {
   // 初始化时从localStorage恢复已保存的购物车数据

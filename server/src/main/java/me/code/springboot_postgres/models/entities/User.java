@@ -134,6 +134,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { return isEnabled; }
 
+    /**
+     * 用户信息字符串表示，用于日志和调试
+     * @return 包含id、邮箱、用户名和角色的字符串
+     */
     @Override
     public String toString() {
         return "User{id='" + id + "', email='" + email + "', username='" + username + "', role=" + role + "}";
@@ -145,6 +149,10 @@ public class User implements UserDetails {
     public enum Role {
         USER, MERCHANT, ADMIN, SUPER_ADMIN;
 
+        /**
+         * 返回角色名称字符串
+         * @return 角色枚举的name值
+         */
         @Override
         public String toString() { return this.name(); }
     }

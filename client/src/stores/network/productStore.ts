@@ -1,8 +1,8 @@
 /**
  * @file productStore.ts
- * @description 商品状态管理，提供商品的查询、搜索、分类浏览及商户自有商品的增删改操作
+ * @description 商品状态管理，提供商品的查询、搜索及商户自有商品的增删改操作
  * @input 商品ID、搜索关键词、分类名称、商品创建DTO等
- * @output 商品列表、单个商品详情、分类列表、条件列表等
+ * @output 商品列表、单个商品详情等
  */
 import { defineStore } from 'pinia'
 import type { Product, CreateProductDto } from '@/types/product'
