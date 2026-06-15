@@ -31,6 +31,10 @@ services:
       - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-3600000}
       # CORS允许的来源列表，部署时需设置为实际域名（如 https://example.com），多个用逗号分隔
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:5173,https://test.yuliannus2569.rest/}
+      # 内置用户初始密码，生产环境务必通过环境变量覆盖默认值
+      - APP_INIT_ADMIN_PASSWORD=${APP_INIT_ADMIN_PASSWORD:-Admin@2024}
+      - APP_INIT_MERCHANT_PASSWORD=${APP_INIT_MERCHANT_PASSWORD:-Merchant@2024}
+      - APP_INIT_TEST_USER_PASSWORD=${APP_INIT_TEST_USER_PASSWORD:-Test@2024}
     ports:
       - "8080:8080"
     depends_on:

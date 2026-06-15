@@ -19,3 +19,9 @@ jwt:
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost,http://localhost:5173}
+
+app:
+  init:
+    admin-password: ${APP_INIT_ADMIN_PASSWORD:Admin@2024}
+    merchant-password: ${APP_INIT_MERCHANT_PASSWORD:Merchant@2024}
+    test-user-password: ${APP_INIT_TEST_USER_PASSWORD:Test@2024}

@@ -12,6 +12,7 @@ import me.code.springboot_postgres.repositories.ProductRepository;
 import me.code.springboot_postgres.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -31,15 +32,22 @@ public class DataInitializer implements CommandLineRunner {
 
     // 超级管理员账号配置
     private static final String SUPER_ADMIN_EMAIL = "admin@merchandise.com";
-    private static final String SUPER_ADMIN_PASSWORD = "Admin@2024";
 
     // 商户账号配置
     private static final String MERCHANT_EMAIL = "merchant@merchandise.com";
-    private static final String MERCHANT_PASSWORD = "Merchant@2024";
 
     // 测试用户账号配置
     private static final String TEST_USER_EMAIL = "testuser@merchandise.com";
-    private static final String TEST_USER_PASSWORD = "Test@2024";
+
+    // 通过配置注入的密码，支持环境变量覆盖
+    @Value("${app.init.admin-password:Admin@2024}")
+    private String superAdminPassword;
+
+    @Value("${app.init.merchant-password:Merchant@2024}")
+    private String merchantPassword;
+
+    @Value("${app.init.test-user-password:Test@2024}")
+    private String testUserPassword;
 
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
@@ -58,11 +66,11 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         // 确保超级管理员用户存在
-        ensureUser(SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD, User.Role.SUPER_ADMIN, BigDecimal.ZERO, true);
+        ensureUser(SUPER_ADMIN_EMAIL, superAdminPassword, User.Role.SUPER_ADMIN, BigDecimal.ZERO, true);
         // 确保商户用户存在
-        ensureUser(MERCHANT_EMAIL, MERCHANT_PASSWORD, User.Role.MERCHANT, BigDecimal.ZERO, true);
+        ensureUser(MERCHANT_EMAIL, merchantPassword, User.Role.MERCHANT, BigDecimal.ZERO, true);
         // 确保测试用户存在，初始余额为一千万
-        ensureUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, User.Role.USER, new BigDecimal("10000000.00"), true);
+        ensureUser(TEST_USER_EMAIL, testUserPassword, User.Role.USER, new BigDecimal("10000000.00"), true);
 
         // 确保测试商品存在
         ensureTestProducts();
