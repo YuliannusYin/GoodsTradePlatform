@@ -72,17 +72,13 @@ public class OrderService {
                     Map.of("unavailableProducts", unavailableProducts));
         }
 
-        // 校验余额是否充足
+        // 计算订单总价
         BigDecimal orderPrice = items.stream()
                 .map(OrderItem::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (user.getBalance().compareTo(orderPrice) < 0) {
-            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST,
-                    "余额不足，当前余额：" + user.getBalance() + "，订单金额：" + orderPrice);
-        }
 
-        // 扣减用户余额
-        user.setBalance(user.getBalance().subtract(orderPrice));
+        // 扣减用户余额（包含余额不足校验）
+        user.deductBalance(orderPrice);
 
         // 扣减商品库存
         productService.updateProductQuantities(items);

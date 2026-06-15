@@ -10,7 +10,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -107,6 +109,21 @@ public class User implements UserDetails {
         this.role = role;
         this.balance = balance;
         this.isProtected = isProtected;
+    }
+
+    /**
+     * 扣减用户余额，包含负数校验
+     * @param amount 扣减金额（必须为正数）
+     * @throws CustomRuntimeException 余额不足时抛出异常
+     */
+    public void deductBalance(BigDecimal amount) {
+        // 校验扣减后余额不能为负
+        BigDecimal newBalance = this.balance.subtract(amount);
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST,
+                    "余额不足，当前余额：" + this.balance + "，扣减金额：" + amount);
+        }
+        this.balance = newBalance;
     }
 
     /**

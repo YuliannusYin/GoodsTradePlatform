@@ -148,13 +148,14 @@ public class UserManagementService {
     public ApiResponse<Void> adjustBalance(String userId, BigDecimal amount) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
-        // 校验调整后余额不能为负
-        BigDecimal newBalance = user.getBalance().add(amount);
-        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "调整后余额不能为负数");
+        if (amount.compareTo(BigDecimal.ZERO) >= 0) {
+            // 充值：直接增加余额
+            user.setBalance(user.getBalance().add(amount));
+        } else {
+            // 扣减：通过 deductBalance 统一进行负数校验
+            user.deductBalance(amount.negate());
         }
-        user.setBalance(newBalance);
         userRepository.save(user);
-        return ApiResponse.ok("余额调整成功，当前余额：" + newBalance);
+        return ApiResponse.ok("余额调整成功，当前余额：" + user.getBalance());
     }
 }
