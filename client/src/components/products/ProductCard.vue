@@ -1,51 +1,5 @@
 <template>
-  <div v-if="isForProductView" class="flex justify-center">
-    <div class="bg-white p-6 w-full flex flex-col justify-center items-center md:flex-row md:items-start gap-6 rounded-2xl shadow-lg">
-      <div class="w-full md:w-1/2">
-        <img v-if="product.imageUrls && product.imageUrls.length > 0"
-          :src="product.imageUrls[0]" :alt="product.name"
-          class="w-full h-[20rem] object-contain rounded-xl"
-          @error="handleImageError">
-        <div v-else class="w-full h-[20rem] bg-gray-100 rounded-xl flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-          </svg>
-        </div>
-      </div>
-      <div class="flex flex-col justify-start items-start space-y-3 w-full md:w-1/2">
-        <div class="flex items-center gap-2">
-          <span v-if="product.category" class="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full font-medium">
-            {{ getCategoryLabel(product.category) }}
-          </span>
-          <span v-if="product.condition" class="text-xs bg-mint-100 text-mint-700 px-2 py-1 rounded-full font-medium">
-            {{ getConditionLabel(product.condition) }}
-          </span>
-          <span v-if="product.source === 'USER'" class="text-xs bg-accent-100 text-accent-700 px-2 py-1 rounded-full font-medium">
-            个人闲置
-          </span>
-        </div>
-        <h3 class="text-2xl font-bold text-gray-800">{{ product.name }}</h3>
-        <p class="text-gray-600 leading-relaxed">{{ product.description }}</p>
-        <div v-if="product.seller" class="text-sm text-gray-500">
-          卖家：{{ product.seller.username }}
-        </div>
-        <span class="text-2xl font-bold text-accent-600">¥{{ product.price.toFixed(2) }}</span>
-        <div class="flex items-center gap-3">
-          <button @click="addToCart(product.id)"
-            class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            加入购物车
-          </button>
-          <button @click="toggleFavorite" class="p-2 rounded-full transition-colors"
-            :class="isFavorited ? 'text-accent-500' : 'text-gray-400 hover:text-accent-400'">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" :fill="isFavorited ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div v-else class="bg-white p-4 flex flex-col justify-between min-w-max rounded-xl shadow-md card-hover">
+  <div class="bg-white p-4 flex flex-col justify-between min-w-max rounded-xl shadow-md card-hover">
     <div class="relative">
       <img v-if="product.imageUrls && product.imageUrls.length > 0"
         :src="product.imageUrls[0]" :alt="product.name"
@@ -88,9 +42,10 @@
 <script setup lang="ts">
 /**
  * @file ProductCard.vue
- * @description 商品卡片组件，支持商品详情视图和列表卡片视图两种模式，包含收藏和加入购物车功能
+ * @description 商品卡片组件，用于商品列表中的网格卡片展示
+ * 职责单一：仅负责列表卡片视图，收藏状态从 favoriteStore 缓存读取（不单独发起请求）
  */
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import type { Product } from '@/types/product'
 import { PRODUCT_CATEGORIES, PRODUCT_CONDITIONS } from '@/types/product'
 import { useRouter } from 'vue-router'
@@ -98,29 +53,18 @@ import { useFavoriteStore } from '@/stores/network/favoriteStore'
 import { useAccountStore } from '@/stores/network/accountStore'
 import { useShoppingCartStore } from '@/stores/shoppingCartStore'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   product: Product
-  isForProductView?: boolean
-}>(), {
-  isForProductView: false
-})
+}>()
 
 const router = useRouter()
 const favoriteStore = useFavoriteStore()
 const accountStore = useAccountStore()
 const shoppingCartStore = useShoppingCartStore()
-// 当前商品是否已收藏
-const isFavorited = ref(false)
 
-// 组件挂载时检查当前用户是否已收藏该商品
-onMounted(async () => {
-  if (accountStore.isAuthenticated) {
-    try {
-      isFavorited.value = await favoriteStore.isFavorite(props.product.id)
-    } catch {
-      isFavorited.value = false
-    }
-  }
+// 从收藏缓存中计算当前商品是否已收藏，缓存未加载时默认为 false
+const isFavorited = computed(() => {
+  return favoriteStore.favoritesLoaded && favoriteStore.favoriteProductIds.includes(props.product.id)
 })
 
 /**
@@ -150,11 +94,9 @@ async function toggleFavorite() {
     if (isFavorited.value) {
       // 已收藏则取消收藏
       await favoriteStore.removeFavorite(props.product.id)
-      isFavorited.value = false
     } else {
       // 未收藏则添加收藏
       await favoriteStore.addFavorite(props.product.id)
-      isFavorited.value = true
     }
   } catch (error) {
     // 错误已由拦截器处理

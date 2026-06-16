@@ -1,6 +1,6 @@
 <template>
   <section class="max-w-5xl mx-auto px-4 py-6">
-    <ProductCard v-if="product" :product="product" :isForProductView='true' />
+    <ProductDetailCard v-if="product" :product="product" />
 
     <div v-if="product" class="mt-8">
       <div class="bg-white rounded-2xl shadow-md p-6">
@@ -84,7 +84,7 @@ import { useProductStore } from '@/stores/network/productStore'
 import { useReviewStore } from '@/stores/network/reviewStore'
 import { useAccountStore } from '@/stores/network/accountStore'
 import { useRoute } from 'vue-router'
-import ProductCard from '@/components/products/ProductCard.vue'
+import ProductDetailCard from '@/components/products/ProductDetailCard.vue'
 
 const route = useRoute()
 const productStore = useProductStore()           // 商品状态管理
