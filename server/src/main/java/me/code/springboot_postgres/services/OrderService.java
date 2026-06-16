@@ -16,6 +16,7 @@ import me.code.springboot_postgres.models.entities.OrderItem;
 import me.code.springboot_postgres.models.entities.Product;
 import me.code.springboot_postgres.models.entities.User;
 import me.code.springboot_postgres.repositories.OrderRepository;
+import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,12 +37,15 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductService productService;
     private final OrderItemService orderItemService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, ProductService productService, OrderItemService orderItemService) {
+    public OrderService(OrderRepository orderRepository, ProductService productService,
+                        OrderItemService orderItemService, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.orderItemService = orderItemService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -57,9 +61,14 @@ public class OrderService {
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> placeOrder(User user, String[] productIds, String receiverName,
                                         String receiverPhone, String region, String detailAddress,
                                         Order.DeliveryMethod deliveryMethod) {
+        // 重新从数据库加载用户，获取当前事务中的托管实体（避免脱管实体导致持久化异常和余额变更丢失）
+        User managedUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "用户不存在"));
+
         // 加载商品并生成订单项
         List<Product> products = productService.loadProductsById(productIds);
         List<OrderItem> items = orderItemService.generateOrderItems(products);
@@ -77,14 +86,15 @@ public class OrderService {
                 .map(OrderItem::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 扣减用户余额（包含余额不足校验）
-        user.deductBalance(orderPrice);
+        // 扣减用户余额（包含余额不足校验），并持久化余额变更
+        managedUser.deductBalance(orderPrice);
+        userRepository.save(managedUser);
 
         // 扣减商品库存
         productService.updateProductQuantities(items);
 
-        // 创建订单并关联订单项
-        Order order = new Order(user, items, receiverName, receiverPhone, region, detailAddress, deliveryMethod);
+        // 创建订单并关联订单项（使用托管用户实体）
+        Order order = new Order(managedUser, items, receiverName, receiverPhone, region, detailAddress, deliveryMethod);
         items.forEach(item -> item.setOrder(order));
         orderRepository.save(order);
 
