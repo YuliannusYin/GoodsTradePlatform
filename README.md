@@ -57,9 +57,9 @@
 
 | 文档 | 说明 |
 |------|------|
-| [项目结构](project-structure.md) | 前后端目录结构、文件说明 |
-| [数据库设计](database-design.md) | 表结构、字段说明、索引设计、实体关系图 |
-| [API 接口文档](api-reference.md) | REST API 接口、认证方式、页面路由 |
+| [项目结构](docs/project-structure.md) | 前后端目录结构、文件说明 |
+| [数据库设计](docs/database-design.md) | 表结构、字段说明、索引设计、实体关系图 |
+| [API 接口文档](docs/api-reference.md) | REST API 接口、认证方式、页面路由 |
 | [代码审查报告](docs/code-review-report.md) | 代码质量审查、Bug 修复、重构建议 |
 
 ## 快速开始

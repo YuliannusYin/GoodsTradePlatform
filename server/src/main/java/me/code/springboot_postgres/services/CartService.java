@@ -135,8 +135,9 @@ public class CartService {
     @Transactional
     @SuppressWarnings("null")
     public CartDTO mergeCart(String userId, List<MergeCartDTO.CartItemEntry> items) {
-        // 加载用户实体
-        User user = userRepository.findById(userId).orElseThrow();
+        // 加载用户实体，不存在则抛出业务异常（避免无消息的 NoSuchElementException 导致 500）
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "用户不存在"));
 
         for (MergeCartDTO.CartItemEntry entry : items) {
             // 数量验证：跳过数量小于等于0的条目

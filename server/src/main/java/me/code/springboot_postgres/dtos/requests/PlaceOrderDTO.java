@@ -8,6 +8,7 @@ package me.code.springboot_postgres.dtos.requests;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import me.code.springboot_postgres.models.entities.Order;
 
 /**
@@ -25,6 +26,6 @@ public record PlaceOrderDTO(
         @NotBlank String region,
         /** 详细地址 */
         @NotBlank String detailAddress,
-        /** 配送方式 */
-        @NotBlank Order.DeliveryMethod deliveryMethod) {
+        /** 配送方式（枚举类型必须用 @NotNull，@NotBlank 仅适用于 String 类型） */
+        @NotNull Order.DeliveryMethod deliveryMethod) {
 }

@@ -71,23 +71,30 @@ public class UserAccountService implements UserDetailsService {
 
     /**
      * 获取当前用户的账户详情
-     * @param user 当前用户
+     * 重新从数据库加载用户数据，避免脱管实体返回过时信息（如余额已被扣减但未更新）
+     * @param user 当前用户（脱管实体，仅使用其ID）
      * @return 用户详情DTO
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("null")
     public ApiResponse<UserDetailsDTO> getUserDetails(User user) {
+        // 重新加载托管实体，确保数据是最新的
+        User managedUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "用户不存在"));
         UserDetailsDTO dto = new UserDetailsDTO(
-                user.getEmail(), user.getUsername(), user.getBalance(), user.isProtected(), user.getRole().name());
+                managedUser.getEmail(), managedUser.getUsername(), managedUser.getBalance(), managedUser.isProtected(), managedUser.getRole().name());
         return ApiResponse.ok("User details were successfully retrieved", dto);
     }
 
     /**
      * 修改用户名
-     * @param user 当前用户
+     * 重新从数据库加载托管用户实体，避免脱管实体 save() 导致乐观锁冲突或数据覆盖
+     * @param user 当前用户（脱管实体，仅使用其ID）
      * @param dto 修改用户名请求数据
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> changeUsername(User user, ChangeUsernameDTO dto) {
         // 受保护账号不可修改
         checkNotProtected(user, "change username");
@@ -95,44 +102,57 @@ public class UserAccountService implements UserDetailsService {
         if (userRepository.existsByUsername(dto.newUsername())) {
             throw new CustomRuntimeException(HttpStatus.CONFLICT, "An account with the chosen username already exists");
         }
-        user.setUsername(dto.newUsername());
-        userRepository.save(user);
+        // 重新加载托管实体，避免脱管实体的过时 version 字段导致乐观锁冲突
+        User managedUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "用户不存在"));
+        managedUser.setUsername(dto.newUsername());
+        userRepository.save(managedUser);
         return ApiResponse.ok("The username was successfully changed");
     }
 
     /**
      * 修改邮箱
-     * @param user 当前用户
+     * 重新从数据库加载托管用户实体，避免脱管实体 save() 导致乐观锁冲突或数据覆盖
+     * @param user 当前用户（脱管实体，仅使用其ID）
      * @param dto 修改邮箱请求数据
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> changeEmail(User user, ChangeEmailDTO dto) {
         checkNotProtected(user, "change email");
         // 检查新邮箱是否已被占用
         if (userRepository.existsByEmail(dto.newEmail())) {
             throw new CustomRuntimeException(HttpStatus.CONFLICT, "An account with the chosen email already exists");
         }
-        user.setEmail(dto.newEmail());
-        userRepository.save(user);
+        // 重新加载托管实体，避免脱管实体的过时 version 字段导致乐观锁冲突
+        User managedUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "用户不存在"));
+        managedUser.setEmail(dto.newEmail());
+        userRepository.save(managedUser);
         return ApiResponse.ok("The email was successfully changed");
     }
 
     /**
      * 修改密码
-     * @param user 当前用户
+     * 重新从数据库加载托管用户实体，避免脱管实体 save() 导致乐观锁冲突或数据覆盖
+     * @param user 当前用户（脱管实体，仅使用其ID）
      * @param dto 修改密码请求数据
      * @return 操作结果
      */
     @Transactional
+    @SuppressWarnings("null")
     public ApiResponse<Void> changePassword(User user, ChangePasswordDTO dto) {
         checkNotProtected(user, "change password");
+        // 重新加载托管实体，避免脱管实体的过时 version 字段导致乐观锁冲突
+        User managedUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "用户不存在"));
         // 验证当前密码是否正确
-        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(dto.currentPassword(), managedUser.getPassword())) {
             throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
         }
-        user.setPassword(passwordEncoder.encode(dto.newPassword()));
-        userRepository.save(user);
+        managedUser.setPassword(passwordEncoder.encode(dto.newPassword()));
+        userRepository.save(managedUser);
         return ApiResponse.ok("The password was successfully changed");
     }
 

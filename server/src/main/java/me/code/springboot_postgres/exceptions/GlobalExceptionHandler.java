@@ -6,6 +6,7 @@
  */
 package me.code.springboot_postgres.exceptions;
 
+import jakarta.persistence.EntityNotFoundException;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
 import org.slf4j.Logger;
@@ -107,6 +108,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException exception) {
         ApiResponse<Void> response = new ApiResponse<>(HttpStatus.CONFLICT, "数据已被其他请求修改，请重试", null);
         return response.toResponseEntity();
+    }
+
+    /**
+     * 处理JPA实体未找到异常（懒加载引用的实体已被删除时触发）
+     * @param exception 实体未找到异常
+     * @return HTTP 404未找到响应
+     */
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEntityNotFoundException(EntityNotFoundException exception) {
+        return new ApiResponse<Void>(HttpStatus.NOT_FOUND, "请求的资源不存在或已被删除", null).toResponseEntity();
     }
 
     /**
