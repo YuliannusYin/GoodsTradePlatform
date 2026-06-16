@@ -302,18 +302,16 @@ async function executePlaceOrder() {
       address.value.region,
       address.value.detailAddress,
       deliveryMethod.value
-    ) as { id?: string; orderId?: string }
+    ) as string | undefined
 
-    if (response) {
-      // 下单成功，推进步骤到"完成"并更新成功状态
-      currentStep.value = 3
-      orderPlaced.value = true
-      placedOrderId.value = response.id || response.orderId || ''
-      placedTotalPrice.value = totalPrice.value
-      // 刷新账户余额并计算剩余余额
-      await accountStore.fetchUserDetails()
-      placedRemainingBalance.value = accountStore.balance ?? 0
-    }
+    // 下单成功（无异常即成功），推进步骤到"完成"并更新成功状态
+    currentStep.value = 3
+    orderPlaced.value = true
+    placedOrderId.value = response || ''
+    placedTotalPrice.value = totalPrice.value
+    // 刷新账户余额并计算剩余余额
+    await accountStore.fetchUserDetails()
+    placedRemainingBalance.value = accountStore.balance ?? 0
   } catch (e: unknown) {
     // 下单失败提示
     const message = e instanceof Error ? e.message : '下单失败，请重试'

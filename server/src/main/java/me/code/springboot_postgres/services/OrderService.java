@@ -70,7 +70,7 @@ public class OrderService {
      */
     @Transactional
     @SuppressWarnings("null")
-    public ApiResponse<Void> placeOrder(User user, String[] productIds, String receiverName,
+    public ApiResponse<String> placeOrder(User user, String[] productIds, String receiverName,
                                         String receiverPhone, String region, String detailAddress,
                                         Order.DeliveryMethod deliveryMethod) {
         // 重新从数据库加载用户，获取当前事务中的托管实体（避免脱管实体导致持久化异常和余额变更丢失）
@@ -112,7 +112,7 @@ public class OrderService {
         // 清空用户购物车（后端侧同步清空，防止重复下单）
         cartService.clearCart(managedUser.getId());
 
-        return ApiResponse.ok("The order was placed successfully");
+        return ApiResponse.ok("The order was placed successfully", order.getId());
     }
 
     /**

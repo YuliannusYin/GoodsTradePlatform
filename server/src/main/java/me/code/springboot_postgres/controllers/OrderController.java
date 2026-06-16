@@ -50,7 +50,7 @@ public class OrderController {
      * @return 操作结果
      */
     @PostMapping("/place")
-    public ResponseEntity<ApiResponse<Void>> placeOrder(@AuthenticationPrincipal User user, @Valid @RequestBody PlaceOrderDTO dto) {
+    public ResponseEntity<ApiResponse<String>> placeOrder(@AuthenticationPrincipal User user, @Valid @RequestBody PlaceOrderDTO dto) {
         return orderService.placeOrder(user, dto.productIds(),
                 dto.receiverName(), dto.receiverPhone(), dto.region(), dto.detailAddress(),
                 dto.deliveryMethod()).toResponseEntity();

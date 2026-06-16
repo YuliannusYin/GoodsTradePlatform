@@ -60,6 +60,7 @@ const password = ref('')
 /**
  * 确认操作处理函数
  * 需要密码验证时先校验密码，验证通过后执行确认回调；无需验证时直接执行确认回调
+ * 当传入loading prop时（异步模式），不自动关闭弹窗，由调用方在操作完成后关闭
  */
 async function handleConfirm() {
   // 加载中不允许重复操作
@@ -81,8 +82,10 @@ async function handleConfirm() {
     // 无需密码验证，直接确认
     props.onConfirm(password.value)
   }
-  // 仅在非加载状态下关闭弹窗（加载中由调用方控制关闭时机）
-  if (!props.loading) {
+  // 仅在非异步模式下自动关闭弹窗（异步模式下由调用方控制关闭时机）
+  // 判断依据：loading prop 是否被传入（非 undefined），而非其当前值
+  // 因为 Vue 响应式更新是异步批处理的，onConfirm 中设置 loading=true 后 props.loading 可能尚未更新
+  if (props.loading === undefined) {
     props.onCancel()
   }
 }
