@@ -43,6 +43,7 @@ public class SecurityConfig {
             ACCOUNT_PATH + "/login",
             PRODUCTS_PATH + "/all",
             PRODUCTS_PATH + "/featured",
+            PRODUCTS_PATH + "/random",
             PRODUCTS_PATH + "/{productId}",
             PRODUCTS_PATH + "/search/**",
             PRODUCTS_PATH + "/category/**",

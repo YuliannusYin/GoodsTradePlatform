@@ -37,4 +37,14 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%')) " +
            "ORDER BY CASE WHEN LOWER(p.name) LIKE LOWER(CONCAT(:query, '%')) THEN 0 ELSE 1 END")
     List<Product> searchByName(@Param("query") String query);
+
+    /**
+     * 随机获取指定数量的已审核通过商品
+     * 使用PostgreSQL的RANDOM()函数实现随机排序，取前count条
+     * @param status 商品审核状态（APPROVED）
+     * @param count 需要获取的商品数量
+     * @return 随机排序后的商品列表
+     */
+    @Query(value = "SELECT * FROM products WHERE status = :status ORDER BY RANDOM() LIMIT :count", nativeQuery = true)
+    List<Product> findRandomByStatus(@Param("status") String status, @Param("count") int count);
 }

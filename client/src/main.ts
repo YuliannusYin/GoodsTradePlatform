@@ -17,6 +17,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { useAccountStore } from './stores/network/accountStore'
+import { useShoppingCartStore } from './stores/shoppingCartStore'
 
 // 创建 Vue 应用实例
 const app = createApp(App)
@@ -33,5 +34,14 @@ accountStore.restoreSession().then(() => {
   app.use(router)
 
   // 将应用挂载到 HTML 中 id 为 app 的 DOM 元素
+  app.mount('#app')
+}).catch(() => {
+  // 会话恢复失败（令牌无效或过期），清空购物车
+  // 防止未登录用户刷新页面后仍能看到上次购物车数据
+  const shoppingCartStore = useShoppingCartStore()
+  shoppingCartStore.clearCart()
+
+  // 即使会话恢复失败，仍需挂载应用
+  app.use(router)
   app.mount('#app')
 })

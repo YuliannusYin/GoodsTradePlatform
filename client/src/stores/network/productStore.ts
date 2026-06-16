@@ -49,6 +49,15 @@ export const useProductStore = defineStore('productStore', () => {
   }
 
   /**
+   * 随机获取推荐商品列表
+   * @param {number} count - 获取数量，默认8个
+   * @returns {Promise<Product[]>} 随机排序的商品列表
+   */
+  async function getRandomProducts(count: number = 8): Promise<Product[]> {
+    return callGet(`/api/products/random?count=${count}`)
+  }
+
+  /**
    * 商户添加自有商品
    * @param {CreateProductDto} dto - 商品创建数据
    * @returns {Promise<Product>} 新创建的商品
@@ -82,7 +91,7 @@ export const useProductStore = defineStore('productStore', () => {
   }
 
   return {
-    getAllProducts, getProduct, getSearchedProducts, getFeaturedProducts,
+    getAllProducts, getProduct, getSearchedProducts, getFeaturedProducts, getRandomProducts,
     addMyProduct, getMyProducts, editMyProduct, deleteMyProduct
   }
 })

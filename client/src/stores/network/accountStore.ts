@@ -7,6 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { callGet, callPost, callPut, callDelete } from './requests'
+import { useShoppingCartStore } from '../shoppingCartStore'
 
 /** 登录响应数据结构，包含用户角色列表和JWT令牌 */
 export interface LoginResponse {
@@ -63,7 +64,7 @@ export const useAccountStore = defineStore('accountStore', () => {
   }
 
   /**
-   * 用户登出，清除所有认证状态和用户信息
+   * 用户登出，清除所有认证状态和用户信息，并清空购物车
    */
   function logout() {
     // 重置所有状态为初始值
@@ -75,6 +76,9 @@ export const useAccountStore = defineStore('accountStore', () => {
     // 清除sessionStorage中的认证信息
     sessionStorage.removeItem('jwtToken')
     sessionStorage.removeItem('userRole')
+    // 退出登录时清空购物车，防止未登录用户看到残留数据
+    const shoppingCartStore = useShoppingCartStore()
+    shoppingCartStore.clearCart()
   }
 
   /**

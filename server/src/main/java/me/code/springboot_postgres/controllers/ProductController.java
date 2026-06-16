@@ -49,6 +49,17 @@ public class ProductController {
     }
 
     /**
+     * 随机获取推荐商品列表
+     * @param count 获取数量，默认8个（2行×4列）
+     * @return 随机排序的商品列表
+     */
+    @GetMapping("/random")
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> getRandomProducts(
+            @RequestParam(defaultValue = "8") int count) {
+        return ApiResponse.ok("随机推荐商品获取成功", productService.getRandomProducts(count)).toResponseEntity();
+    }
+
+    /**
      * 根据商品ID获取单个商品详情
      * @param productId 商品ID
      * @return 商品详情

@@ -77,6 +77,18 @@ public class ProductService {
     }
 
     /**
+     * 随机获取指定数量的已审核通过商品
+     * 使用PostgreSQL的RANDOM()函数实现随机排序
+     * @param count 需要获取的商品数量
+     * @return 随机排序后的商品DTO列表
+     */
+    @Transactional(readOnly = true)
+    public List<ProductDTO> getRandomProducts(int count) {
+        return productRepository.findRandomByStatus(Product.Status.APPROVED.name(), count)
+                .stream().map(ProductDTO::from).toList();
+    }
+
+    /**
      * 搜索商品（不含分类过滤）
      * @param query 搜索关键词
      * @param filter 排序条件
