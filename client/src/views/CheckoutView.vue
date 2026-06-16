@@ -6,6 +6,13 @@
  */
 <template>
   <div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- 步骤指示器（结算流程和成功页都显示） -->
+    <CheckoutStepper
+      :steps="stepLabels"
+      :current-step="currentStep"
+      @update:current-step="handleStepChange"
+    />
+
     <!-- 下单成功页面 -->
     <OrderSuccess
       v-if="orderPlaced"
@@ -16,13 +23,6 @@
 
     <!-- 结算流程 -->
     <template v-else>
-      <!-- 步骤指示器 -->
-      <CheckoutStepper
-        :steps="stepLabels"
-        :current-step="currentStep"
-        @update:current-step="handleStepChange"
-      />
-
       <!-- 加载中状态 -->
       <div v-if="isLoading" class="flex items-center justify-center py-20">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
@@ -151,8 +151,8 @@ const shoppingCartStore = useShoppingCartStore()
 
 // === 步骤管理 ===
 
-/** 步骤名称数组 */
-const stepLabels = ['商品清单', '地址与配送', '确认订单']
+/** 步骤名称数组（含完成步骤） */
+const stepLabels = ['商品清单', '地址与配送', '确认订单', '完成']
 /** 当前步骤索引 */
 const currentStep = ref(0)
 
@@ -305,7 +305,8 @@ async function executePlaceOrder() {
     ) as { id?: string; orderId?: string }
 
     if (response) {
-      // 下单成功，更新成功状态
+      // 下单成功，推进步骤到"完成"并更新成功状态
+      currentStep.value = 3
       orderPlaced.value = true
       placedOrderId.value = response.id || response.orderId || ''
       placedTotalPrice.value = totalPrice.value
