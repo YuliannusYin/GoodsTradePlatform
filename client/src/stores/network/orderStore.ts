@@ -70,9 +70,8 @@ export const useOrderStore = defineStore('orderStore', () => {
   async function getOngoingOrder() {
     // 使用共享函数构建商品ID数组
     const productIds = buildProductIdsFromCart()
-    return callPost('/api/orders/ongoing', {
-      productIds
-    })
+    // 后端 @RequestBody String[] 期望纯数组，不能包装为对象
+    return callPost('/api/orders/ongoing', productIds)
   }
 
   /**
