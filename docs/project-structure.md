@@ -13,8 +13,7 @@ eCommerce-Project/
 ├── docs/                            # 项目文档
 │   ├── project-structure.md         # 项目结构（本文件）
 │   ├── database-design.md           # 数据库设计
-│   ├── api-reference.md             # API 接口文档
-│   └── code-review-report.md        # 代码审查报告
+│   └── api-reference.md             # API 接口文档
 ├── docker-compose.yml               # Docker Compose 编排
 ├── .gitignore
 └── README.md
@@ -37,14 +36,21 @@ client/
 │   │   ├── admintools/              # 管理员工具
 │   │   │   ├── AdminToolsItem.vue   # 管理工具导航项
 │   │   │   ├── AdminToolsPopup.vue  # 管理工具弹窗
-│   │   │   ├── ProductForm.vue      # 商品表单（新增/编辑）
+│   │   │   ├── ProductForm.vue      # 商品表单（新增/编辑/删除三种模式）
 │   │   │   ├── UserOrderAside.vue   # 用户订单侧边栏
 │   │   │   └── UsersOrdersTable.vue # 用户订单表格
 │   │   ├── cart/                    # 购物车相关
-│   │   │   └── CartItemRow.vue      # 购物车商品行
+│   │   │   ├── CartItemList.vue     # 购物车商品列表
+│   │   │   ├── CartItemRow.vue      # 购物车商品行
+│   │   │   └── CartSummary.vue      # 购物车汇总
 │   │   ├── checkout/                # 结算相关
+│   │   │   ├── CheckoutAddress.vue  # 结算地址
+│   │   │   ├── CheckoutBalance.vue  # 结算余额
 │   │   │   ├── CheckoutConfirm.vue  # 结算确认
-│   │   │   └── CheckoutItems.vue    # 结算商品列表
+│   │   │   ├── CheckoutDelivery.vue # 结算配送方式
+│   │   │   ├── CheckoutItems.vue    # 结算商品列表
+│   │   │   ├── CheckoutStepper.vue  # 结算步骤条
+│   │   │   └── OrderSuccess.vue     # 下单成功
 │   │   ├── footer/                  # 页脚
 │   │   │   ├── FooterInfo.vue       # 页脚信息
 │   │   │   ├── FooterNavItems.vue   # 页脚导航链接
@@ -58,8 +64,10 @@ client/
 │   │   ├── products/                # 商品相关
 │   │   │   ├── ProductCard.vue      # 商品卡片（列表/详情双模式）
 │   │   │   ├── ProductCards.vue     # 商品卡片网格
+│   │   │   ├── ProductDetailCard.vue # 商品详情卡片
+│   │   │   ├── ProductPublishForm.vue # 商品发布表单
 │   │   │   ├── FeaturedProducts.vue # 精选商品
-│   │   │   ├── OngoingOrder.vue     # 进行中订单
+│   │   │   ├── MyProductsList.vue   # 我的商品列表（商户）
 │   │   │   └── PlaceholderCards.vue # 占位骨架屏
 │   │   ├── ConfirmDialogue.vue      # 确认对话框
 │   │   ├── HeroSection.vue          # 首页横幅
@@ -77,8 +85,10 @@ client/
 │   │   │   ├── productStore.ts      # 商品状态（含商户商品管理）
 │   │   │   ├── reviewStore.ts       # 评价状态
 │   │   │   └── requests.ts          # Axios 请求封装（拦截器）
-│   │   └── shoppingCartStore.ts     # 购物车状态
+│   │   └── shoppingCartStore.ts     # 购物车状态（本地）
 │   ├── types/                       # TypeScript 类型定义
+│   │   ├── api.ts                   # API 通用类型
+│   │   ├── cart.ts                  # 购物车类型
 │   │   ├── favorite.ts              # 收藏类型
 │   │   ├── order.ts                 # 订单类型
 │   │   ├── product.ts               # 商品类型
@@ -92,6 +102,7 @@ client/
 │   │   │   ├── ProductReviewView.vue # 商品审核
 │   │   │   └── UserManagementView.vue # 用户管理
 │   │   ├── AccountView.vue          # 账户中心
+│   │   ├── CartView.vue             # 购物车
 │   │   ├── CheckoutView.vue         # 结算页
 │   │   ├── EditAccountView.vue      # 编辑账户
 │   │   ├── FavoritesView.vue        # 我的收藏
@@ -122,7 +133,7 @@ client/
 server/
 ├── src/main/java/me/code/springboot_postgres/
 │   ├── config/                      # 配置类
-│   │   └── DataInitializer.java     # 数据初始化（启动时确保内置用户存在）
+│   │   └── DataInitializer.java     # 数据初始化（启动时确保内置用户和测试商品存在）
 │   ├── controllers/                 # REST 控制器
 │   │   ├── AdminToolsController.java      # 管理员工具（商品/订单管理）
 │   │   ├── CartController.java            # 购物车管理

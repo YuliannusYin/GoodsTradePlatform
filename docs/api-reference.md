@@ -58,17 +58,20 @@ Authorization: Bearer <token>
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | GET | /api/products/all | 获取所有已审核商品 | 否 |
-| GET | /api/products/featured | 获取热门商品 | 否 |
-| GET | /api/products/{id} | 获取商品详情 | 否 |
+| GET | /api/products/featured | 获取精选商品（库存降序前 4） | 否 |
+| GET | /api/products/{productId} | 获取商品详情 | 否 |
 | GET | /api/products/search | 搜索商品（支持分类、排序） | 否 |
+| GET | /api/products/category/{category} | 按分类获取商品 | 否 |
+| GET | /api/products/categories | 获取所有分类枚举 | 否 |
+| GET | /api/products/conditions | 获取所有成色枚举 | 否 |
 
 ### 搜索参数
 
 | 参数 | 类型 | 说明 |
 |------|------|------|
 | `query` | String | 搜索关键词 |
+| `filter` | String | 排序方式：`lowest_price`、`highest_price` |
 | `category` | String | 分类筛选 |
-| `sort` | String | 排序方式：`lowest_price`、`highest_price` |
 
 ---
 
@@ -77,10 +80,10 @@ Authorization: Bearer <token>
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | GET | /api/cart | 获取购物车 | 是 |
-| POST | /api/cart/add | 添加商品到购物车 | 是 |
-| PATCH | /api/cart/update | 更新购物车商品数量 | 是 |
-| DELETE | /api/cart/remove/{productId} | 移除购物车商品 | 是 |
-| DELETE | /api/cart/clear | 清空购物车 | 是 |
+| POST | /api/cart/items | 添加商品到购物车 | 是 |
+| PUT | /api/cart/items/{productId}?quantity= | 更新购物车商品数量 | 是 |
+| DELETE | /api/cart/items/{productId} | 移除购物车商品 | 是 |
+| DELETE | /api/cart | 清空购物车 | 是 |
 | POST | /api/cart/merge | 合并购物车（登录后） | 是 |
 
 ---
@@ -90,10 +93,10 @@ Authorization: Bearer <token>
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | POST | /api/orders/ongoing | 获取进行中订单预览 | 否 |
-| POST | /api/orders/place | 下单 | 是 |
+| POST | /api/orders/place | 下单（余额支付） | 是 |
 | GET | /api/orders/all | 获取用户订单 | 是 |
-| GET | /api/orders/delivery/methods | 获取配送方式 | 否 |
-| GET | /api/orders/payment/methods | 获取支付方式 | 否 |
+| GET | /api/orders/delivery/methods | 获取配送方式枚举 | 否 |
+| GET | /api/orders/payment/methods | 获取支付方式枚举 | 否 |
 
 ---
 
@@ -102,9 +105,10 @@ Authorization: Bearer <token>
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | POST | /api/reviews/add | 添加评价 | 是 |
-| GET | /api/reviews/product/{id} | 获取商品评价 | 否 |
-| GET | /api/reviews/product/{id}/rating | 获取商品评分 | 否 |
-| GET | /api/reviews/user/{id} | 获取用户评价 | 是 |
+| GET | /api/reviews/product/{productId} | 获取商品评价列表 | 否 |
+| GET | /api/reviews/product/{productId}/rating | 获取商品评分统计 | 否 |
+| GET | /api/reviews/user/{userId} | 获取用户评价 | 是 |
+| DELETE | /api/reviews/{reviewId} | 删除评价（所有者或管理员） | 是 |
 
 ---
 
@@ -113,9 +117,9 @@ Authorization: Bearer <token>
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | POST | /api/favorites/add?productId= | 添加收藏 | 是 |
-| DELETE | /api/favorites/remove/{id} | 取消收藏 | 是 |
+| DELETE | /api/favorites/remove/{productId} | 取消收藏 | 是 |
 | GET | /api/favorites/list | 获取收藏列表 | 是 |
-| GET | /api/favorites/check/{id} | 检查是否已收藏 | 是 |
+| GET | /api/favorites/check/{productId} | 检查是否已收藏 | 是 |
 
 ---
 
@@ -125,8 +129,8 @@ Authorization: Bearer <token>
 |------|------|------|------|
 | POST | /api/user_products/add | 商户发布商品 | MERCHANT+ |
 | GET | /api/user_products/my | 获取我的商品 | MERCHANT+ |
-| PUT | /api/user_products/edit/{id} | 编辑我的商品 | MERCHANT+ |
-| DELETE | /api/user_products/delete/{id} | 删除我的商品 | MERCHANT+ |
+| PUT | /api/user_products/edit/{productId} | 编辑我的商品 | MERCHANT+ |
+| DELETE | /api/user_products/delete/{productId} | 删除我的商品 | MERCHANT+ |
 
 ---
 
@@ -134,14 +138,15 @@ Authorization: Bearer <token>
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
-| POST | /api/admin_tools/product/add | 添加商品 | ADMIN+ |
-| PUT | /api/admin_tools/product/edit/{id} | 编辑商品 | ADMIN+ |
-| DELETE | /api/admin_tools/product/delete/{id} | 删除商品 | ADMIN+ |
-| PATCH | /api/admin_tools/product/approve/{id} | 审核通过 | ADMIN+ |
-| PATCH | /api/admin_tools/product/reject/{id}?rejectReason= | 审核驳回 | ADMIN+ |
-| PATCH | /api/admin_tools/product/disable/{id} | 禁用商品 | ADMIN+ |
-| PATCH | /api/admin_tools/product/enable/{id} | 启用商品 | ADMIN+ |
+| POST | /api/admin_tools/product/add | 添加商品（直接已审核） | ADMIN+ |
+| PUT | /api/admin_tools/product/edit/{productId} | 编辑商品 | ADMIN+ |
+| DELETE | /api/admin_tools/product/delete/{productId} | 删除商品 | ADMIN+ |
+| GET | /api/admin_tools/product/pending | 获取待审核商品 | ADMIN+ |
 | GET | /api/admin_tools/product/status/{status} | 按状态查商品 | ADMIN+ |
+| PATCH | /api/admin_tools/product/approve/{productId} | 审核通过 | ADMIN+ |
+| PATCH | /api/admin_tools/product/reject/{productId}?rejectReason= | 审核驳回 | ADMIN+ |
+| PATCH | /api/admin_tools/product/disable/{productId} | 禁用商品 | ADMIN+ |
+| PATCH | /api/admin_tools/product/enable/{productId} | 启用商品 | ADMIN+ |
 
 ---
 
@@ -151,7 +156,7 @@ Authorization: Bearer <token>
 |------|------|------|------|
 | GET | /api/admin_tools/order/all | 获取所有订单 | ADMIN+ |
 | GET | /api/admin_tools/order/all/{status} | 按状态查订单 | ADMIN+ |
-| PATCH | /api/admin_tools/order/send | 发货 | ADMIN+ |
+| PATCH | /api/admin_tools/order/send | 发货并设置预计送达时间 | ADMIN+ |
 | PATCH | /api/admin_tools/order/expected_delivery | 修改预计送达时间 | ADMIN+ |
 
 ---
@@ -161,10 +166,11 @@ Authorization: Bearer <token>
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | GET | /api/admin/users/all | 获取用户列表 | SUPER_ADMIN |
-| GET | /api/admin/users/{id} | 获取用户详情 | SUPER_ADMIN |
-| PUT | /api/admin/users/{id}/role | 分配用户角色 | SUPER_ADMIN |
-| PATCH | /api/admin/users/{id}/toggle-enabled | 禁用/启用用户 | SUPER_ADMIN |
-| DELETE | /api/admin/users/{id} | 删除用户 | SUPER_ADMIN |
+| GET | /api/admin/users/{userId} | 获取用户详情 | SUPER_ADMIN |
+| PUT | /api/admin/users/{userId}/role | 分配用户角色 | SUPER_ADMIN |
+| PATCH | /api/admin/users/{userId}/toggle-enabled | 禁用/启用用户 | SUPER_ADMIN |
+| DELETE | /api/admin/users/{userId} | 删除用户 | SUPER_ADMIN |
+| PUT | /api/admin/users/balance | 调整用户余额 | SUPER_ADMIN |
 
 ---
 
@@ -181,10 +187,18 @@ Authorization: Bearer <token>
 | `/account/edit` | 编辑账户 | 是 |
 | `/account/orders` | 我的订单 | 是 |
 | `/account/my-products` | 我的商品 | 商户 |
+| `/cart` | 购物车 | 否 |
 | `/checkout` | 结算页 | 否（需购物车有商品） |
 | `/publish` | 发布商品 | 商户 |
 | `/favorites` | 我的收藏 | 是 |
+| `/admin_tools` | 管理工具主页 | 管理员 |
 | `/admin_tools/products` | 管理商品 | 管理员 |
+| `/admin_tools/products/add` | 添加商品 | 管理员 |
+| `/admin_tools/products/edit` | 编辑商品 | 管理员 |
+| `/admin_tools/products/delete` | 删除商品 | 管理员 |
 | `/admin_tools/orders` | 管理订单 | 管理员 |
+| `/admin_tools/orders/pending` | 待发货订单 | 管理员 |
+| `/admin_tools/orders/sent` | 已发货订单 | 管理员 |
+| `/admin_tools/orders/all` | 所有订单 | 管理员 |
 | `/admin_tools/reviews` | 商品审核 | 管理员 |
 | `/admin_tools/users` | 用户管理 | 超级管理员 |
