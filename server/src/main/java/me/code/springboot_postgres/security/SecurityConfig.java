@@ -20,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.http.HttpMethod;
+
 /**
  * Spring Security安全配置类
  * 职责：配置URL访问权限规则、JWT过滤器、认证入口和异常处理器
@@ -97,6 +99,8 @@ public class SecurityConfig {
                 // 配置URL访问权限
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(PUBLIC_URLS).permitAll()
+                        // 佣金配置修改接口仅超级管理员可访问
+                        .requestMatchers(HttpMethod.PUT, API_PATH + "/admin_tools/commission").hasRole("SUPER_ADMIN")
                         .requestMatchers(SUPER_ADMIN_URLS).hasRole("SUPER_ADMIN")
                         .requestMatchers(ADMIN_URLS).hasAnyRole("SUPER_ADMIN", "ADMIN")
                         .requestMatchers(MERCHANT_URLS).hasAnyRole("MERCHANT", "SUPER_ADMIN", "ADMIN")

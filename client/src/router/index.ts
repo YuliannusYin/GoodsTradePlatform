@@ -25,6 +25,7 @@ import PublishProductView from '@/views/PublishProductView.vue'
 import FavoritesView from '@/views/FavoritesView.vue'
 import UserManagementView from '@/views/admin/UserManagementView.vue'
 import ProductReviewView from '@/views/admin/ProductReviewView.vue'
+import CommissionConfigView from '@/views/admin/CommissionConfigView.vue'
 import MyProductsView from '@/views/MyProductsView.vue'
 
 // 创建路由实例，使用 HTML5 History 模式
@@ -257,6 +258,21 @@ const router = createRouter({
               next()
             } else {
               // 非管理员，重定向到管理工具首页
+              next('/admin_tools')
+            }
+          }
+        },
+        {
+          // 佣金配置子路由，仅超级管理员可访问
+          path: 'commission',
+          name: 'CommissionConfigView',
+          component: CommissionConfigView,
+          beforeEnter: (_to, _from, next) => {
+            if (sessionStorage.getItem('userRole') === 'SUPER_ADMIN') {
+              // 是超级管理员，允许进入
+              next()
+            } else {
+              // 非超级管理员，重定向到管理工具首页
               next('/admin_tools')
             }
           }

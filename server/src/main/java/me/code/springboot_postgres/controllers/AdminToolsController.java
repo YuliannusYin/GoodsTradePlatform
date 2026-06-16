@@ -7,9 +7,11 @@
 package me.code.springboot_postgres.controllers;
 
 import jakarta.validation.Valid;
+import me.code.springboot_postgres.dtos.requests.CommissionConfigDTO;
 import me.code.springboot_postgres.dtos.requests.OrderDeliveryDTO;
 import me.code.springboot_postgres.dtos.requests.ProductDTO;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
+import me.code.springboot_postgres.dtos.responses.CommissionConfigResponseDTO;
 import me.code.springboot_postgres.dtos.responses.UserOrderDTO;
 import me.code.springboot_postgres.services.AdminToolsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,5 +162,24 @@ public class AdminToolsController {
     @PatchMapping("/order/expected_delivery")
     public ResponseEntity<ApiResponse<Void>> changeExpectedDelivery(@RequestBody OrderDeliveryDTO dto) {
         return adminToolsService.changeExpectedDelivery(dto.orderId(), dto.expectedDelivery()).toResponseEntity();
+    }
+
+    /**
+     * 获取当前佣金配置
+     * @return 佣金配置信息
+     */
+    @GetMapping("/commission")
+    public ResponseEntity<ApiResponse<CommissionConfigResponseDTO>> getCommissionConfig() {
+        return ApiResponse.ok("佣金配置获取成功", adminToolsService.getCommissionConfig()).toResponseEntity();
+    }
+
+    /**
+     * 更新佣金配置（仅超级管理员可操作）
+     * @param dto 佣金配置请求数据
+     * @return 更新后的佣金配置
+     */
+    @PutMapping("/commission")
+    public ResponseEntity<ApiResponse<CommissionConfigResponseDTO>> updateCommissionConfig(@Valid @RequestBody CommissionConfigDTO dto) {
+        return ApiResponse.ok("佣金配置更新成功", adminToolsService.updateCommissionConfig(dto)).toResponseEntity();
     }
 }

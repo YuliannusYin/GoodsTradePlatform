@@ -113,6 +113,7 @@
         v-if="showConfirmDialog"
         header="确认下单"
         :text="`确认使用账户余额支付 ¥${totalPrice.toFixed(2)} 下单吗？`"
+        :loading="isSubmitting"
         :on-confirm="executePlaceOrder"
         :on-cancel="closeConfirmDialog"
       />

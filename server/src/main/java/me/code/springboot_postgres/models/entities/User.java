@@ -127,6 +127,20 @@ public class User implements UserDetails {
     }
 
     /**
+     * 增加用户余额（用于商户收款、退款等场景）
+     * @param amount 增加金额（必须为非负数）
+     * @throws CustomRuntimeException 金额为负数时抛出异常
+     */
+    public void addBalance(BigDecimal amount) {
+        // 校验增加金额不能为负
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST,
+                    "增加金额不能为负数：" + amount);
+        }
+        this.balance = this.balance.add(amount);
+    }
+
+    /**
      * 获取用户权限列表
      * @return 角色对应的权限集合
      */

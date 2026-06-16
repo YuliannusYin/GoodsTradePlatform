@@ -1,17 +1,34 @@
 /**
  * @file adminToolsStore.ts
- * @description 管理员工具状态管理，提供商品管理（增删改、审核、启用禁用）和订单管理（查询、发货、修改预计送达时间）等管理端操作
- * @input 商品DTO、商品ID、订单ID、状态、拒绝原因等管理操作参数
- * @output 操作结果、商品列表、订单列表等
+ * @description 管理员工具状态管理，提供商品管理（增删改、审核、启用禁用）、订单管理（查询、发货、修改预计送达时间）和佣金配置管理等管理端操作
+ * @input 商品DTO、商品ID、订单ID、状态、拒绝原因、佣金配置等管理操作参数
+ * @output 操作结果、商品列表、订单列表、佣金配置等
  */
 import { defineStore } from 'pinia'
 import type { CreateProductDto, Product } from '@/types/product'
 import { callGet, callPost, callPut, callPatch, callDelete } from './requests'
 import type { UserOrder } from '@/types/order'
 
+/** 佣金配置类型 */
+export interface CommissionConfig {
+  /** 佣金类型：PERCENTAGE（百分比）或 FIXED（固定金额） */
+  commissionType: string
+  /** 佣金率（百分比模式时使用，如 0.05 表示 5%） */
+  commissionRate: number
+  /** 固定佣金金额（固定金额模式时使用） */
+  fixedAmount: number
+}
+
+/** 佣金配置更新请求参数 */
+export interface CommissionConfigUpdateDTO {
+  commissionType: string
+  commissionRate?: number
+  fixedAmount?: number
+}
+
 /**
  * 管理员工具状态管理Store
- * 职责：封装管理员专属的API调用，包括商品管理和订单管理操作
+ * 职责：封装管理员专属的API调用，包括商品管理、订单管理和佣金配置操作
  */
 export const useAdminToolsStore = defineStore('adminToolsStore', () => {
   /**
@@ -127,11 +144,29 @@ export const useAdminToolsStore = defineStore('adminToolsStore', () => {
     return callPatch(`/api/admin_tools/product/enable/${productId}`, {})
   }
 
+  /**
+   * 获取当前佣金配置
+   * @returns {Promise<CommissionConfig>} 佣金配置信息
+   */
+  async function getCommissionConfig(): Promise<CommissionConfig> {
+    return callGet('/api/admin_tools/commission')
+  }
+
+  /**
+   * 更新佣金配置（仅超级管理员可操作）
+   * @param {CommissionConfigUpdateDTO} dto - 佣金配置更新数据
+   * @returns {Promise<CommissionConfig>} 更新后的佣金配置
+   */
+  async function updateCommissionConfig(dto: CommissionConfigUpdateDTO): Promise<CommissionConfig> {
+    return callPut('/api/admin_tools/commission', dto)
+  }
+
   return {
     addProduct, editProduct, deleteProduct,
     getAllOrders, getAllOrdersWithStatus,
     sendOrder, changeExpectedDelivery,
     getProductsByStatus,
-    approveProduct, rejectProduct, disableProduct, enableProduct
+    approveProduct, rejectProduct, disableProduct, enableProduct,
+    getCommissionConfig, updateCommissionConfig
   }
 })

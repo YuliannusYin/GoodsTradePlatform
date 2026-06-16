@@ -30,6 +30,13 @@
             商品审核
           </router-link>
         </button>
+        <button v-if="isSuperAdmin" class="border p-2 w-full min-w-max sm:p-4 hover:bg-blue-50 hover:text-blue-600"
+          :class="{ 'bg-blue-50 text-blue-600': isOnCommissionRoute, 'bg-white': !isOnCommissionRoute }">
+          <i class="fas fa-percent"></i>
+          <router-link :to="{ name: 'CommissionConfigView' }" class="text-black font-semibold">
+            佣金配置
+          </router-link>
+        </button>
       </div>
       <RouterView class="w-full border" />
     </div>
@@ -39,18 +46,24 @@
 <script setup lang="ts">
 /**
  * @file AdminToolsView.vue
- * @description 管理员工具主视图，提供商品管理、订单管理、用户管理、商品审核的侧边栏导航及子路由展示
+ * @description 管理员工具主视图，提供商品管理、订单管理、用户管理、商品审核、佣金配置的侧边栏导航及子路由展示
  */
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAccountStore } from '@/stores/network/accountStore'
 
 const route = useRoute()
+const accountStore = useAccountStore()
+
+// 是否为超级管理员
+const isSuperAdmin = ref(sessionStorage.getItem('userRole') === 'SUPER_ADMIN')
 
 // 各导航按钮的高亮状态
 const isOnProductsRoute = ref(false) // 是否处于商品管理路由
 const isOnOrdersRoute = ref(false)   // 是否处于订单管理路由
 const isOnUsersRoute = ref(false)    // 是否处于用户管理路由
 const isOnReviewsRoute = ref(false)  // 是否处于商品审核路由
+const isOnCommissionRoute = ref(false) // 是否处于佣金配置路由
 
 /**
  * 根据当前路由名称更新侧边栏按钮的高亮状态
@@ -64,6 +77,8 @@ function assignHighlightedButton() {
   isOnUsersRoute.value = ['UserManagementView'].includes(route.name as string)
   // 商品审核路由高亮
   isOnReviewsRoute.value = ['ProductReviewView'].includes(route.name as string)
+  // 佣金配置路由高亮
+  isOnCommissionRoute.value = ['CommissionConfigView'].includes(route.name as string)
 }
 
 // 组件挂载时初始化高亮状态

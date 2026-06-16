@@ -7,13 +7,17 @@
 package me.code.springboot_postgres.services;
 
 import org.springframework.transaction.annotation.Transactional;
+import me.code.springboot_postgres.dtos.requests.CommissionConfigDTO;
 import me.code.springboot_postgres.dtos.requests.ProductDTO;
 import me.code.springboot_postgres.dtos.responses.ApiResponse;
+import me.code.springboot_postgres.dtos.responses.CommissionConfigResponseDTO;
 import me.code.springboot_postgres.dtos.responses.UserOrderDTO;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
+import me.code.springboot_postgres.models.entities.CommissionConfig;
 import me.code.springboot_postgres.models.entities.Order;
 import me.code.springboot_postgres.models.entities.Product;
 import me.code.springboot_postgres.repositories.CartItemRepository;
+import me.code.springboot_postgres.repositories.CommissionConfigRepository;
 import me.code.springboot_postgres.repositories.FavoriteRepository;
 import me.code.springboot_postgres.repositories.OrderRepository;
 import me.code.springboot_postgres.repositories.ProductRepository;
@@ -43,17 +47,20 @@ public class AdminToolsService {
     private final CartItemRepository cartItemRepository;
     private final FavoriteRepository favoriteRepository;
     private final ReviewRepository reviewRepository;
+    private final CommissionConfigRepository commissionConfigRepository;
 
     @Autowired
     public AdminToolsService(OrderRepository orderRepository, ProductRepository productRepository,
                              ProductService productService, CartItemRepository cartItemRepository,
-                             FavoriteRepository favoriteRepository, ReviewRepository reviewRepository) {
+                             FavoriteRepository favoriteRepository, ReviewRepository reviewRepository,
+                             CommissionConfigRepository commissionConfigRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.productService = productService;
         this.cartItemRepository = cartItemRepository;
         this.favoriteRepository = favoriteRepository;
         this.reviewRepository = reviewRepository;
+        this.commissionConfigRepository = commissionConfigRepository;
     }
 
     /**
@@ -303,6 +310,63 @@ public class AdminToolsService {
             return ApiResponse.ok("Product re-enabled successfully");
         }
         throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "Only disabled products can be re-enabled");
+    }
+
+    /**
+     * 获取当前佣金配置
+     * 若数据库中无配置记录，则返回默认配置（5%百分比佣金）
+     * @return 佣金配置响应DTO
+     */
+    @Transactional(readOnly = true)
+    public CommissionConfigResponseDTO getCommissionConfig() {
+        CommissionConfig config = commissionConfigRepository.findById("1")
+                .orElseGet(CommissionConfig::new);
+        return CommissionConfigResponseDTO.from(config);
+    }
+
+    /**
+     * 更新佣金配置（全局仅一条记录）
+     * @param dto 佣金配置请求数据
+     * @return 更新后的佣金配置响应DTO
+     */
+    @Transactional
+    public CommissionConfigResponseDTO updateCommissionConfig(CommissionConfigDTO dto) {
+        // 验证佣金类型是否合法
+        CommissionConfig.CommissionType type;
+        try {
+            type = CommissionConfig.CommissionType.valueOf(dto.commissionType());
+        } catch (IllegalArgumentException e) {
+            throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "无效的佣金类型: " + dto.commissionType());
+        }
+
+        // 加载或创建配置记录（单例模式，固定ID为"1"）
+        CommissionConfig config = commissionConfigRepository.findById("1")
+                .orElseGet(CommissionConfig::new);
+
+        // 更新佣金类型
+        config.setCommissionType(type);
+
+        if (type == CommissionConfig.CommissionType.PERCENTAGE) {
+            // 百分比模式：校验佣金率
+            if (dto.commissionRate() == null) {
+                throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "百分比佣金模式必须设置佣金率");
+            }
+            config.setCommissionRate(dto.commissionRate());
+            // 百分比模式下固定金额清零
+            config.setFixedAmount(java.math.BigDecimal.ZERO);
+        } else {
+            // 固定金额模式：校验固定金额
+            if (dto.fixedAmount() == null) {
+                throw new CustomRuntimeException(HttpStatus.BAD_REQUEST, "固定佣金模式必须设置固定金额");
+            }
+            config.setFixedAmount(dto.fixedAmount());
+            // 固定金额模式下佣金率清零
+            config.setCommissionRate(java.math.BigDecimal.ZERO);
+        }
+
+        // 保存配置
+        commissionConfigRepository.save(config);
+        return CommissionConfigResponseDTO.from(config);
     }
 
 }

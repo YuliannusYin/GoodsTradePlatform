@@ -11,10 +11,12 @@ import me.code.springboot_postgres.dtos.responses.OngoingOrderDTO;
 import me.code.springboot_postgres.dtos.responses.OrderDTO;
 import me.code.springboot_postgres.dtos.responses.UnavailableProductDTO;
 import me.code.springboot_postgres.exceptions.types.CustomRuntimeException;
+import me.code.springboot_postgres.models.entities.CommissionConfig;
 import me.code.springboot_postgres.models.entities.Order;
 import me.code.springboot_postgres.models.entities.OrderItem;
 import me.code.springboot_postgres.models.entities.Product;
 import me.code.springboot_postgres.models.entities.User;
+import me.code.springboot_postgres.repositories.CommissionConfigRepository;
 import me.code.springboot_postgres.repositories.OrderRepository;
 import me.code.springboot_postgres.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -38,18 +41,23 @@ public class OrderService {
     private final ProductService productService;
     private final OrderItemService orderItemService;
     private final UserRepository userRepository;
+    private final CartService cartService;
+    private final CommissionConfigRepository commissionConfigRepository;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, ProductService productService,
-                        OrderItemService orderItemService, UserRepository userRepository) {
+                        OrderItemService orderItemService, UserRepository userRepository,
+                        CartService cartService, CommissionConfigRepository commissionConfigRepository) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.orderItemService = orderItemService;
         this.userRepository = userRepository;
+        this.cartService = cartService;
+        this.commissionConfigRepository = commissionConfigRepository;
     }
 
     /**
-     * 提交订单：验证库存、校验余额、扣减余额、扣减库存、创建订单
+     * 提交订单：验证库存、校验余额、扣减余额、商户结算、扣减库存、创建订单、清空购物车
      * 支付方式固定为余额支付
      * @param user 下单用户
      * @param productIds 商品ID数组
@@ -90,6 +98,9 @@ public class OrderService {
         managedUser.deductBalance(orderPrice);
         userRepository.save(managedUser);
 
+        // 商户结算：按卖家分组，将货款（扣除佣金后）入账到各卖家余额
+        settleSellers(items);
+
         // 扣减商品库存
         productService.updateProductQuantities(items);
 
@@ -98,7 +109,59 @@ public class OrderService {
         items.forEach(item -> item.setOrder(order));
         orderRepository.save(order);
 
+        // 清空用户购物车（后端侧同步清空，防止重复下单）
+        cartService.clearCart(managedUser.getId());
+
         return ApiResponse.ok("The order was placed successfully");
+    }
+
+    /**
+     * 商户结算：按卖家分组计算各卖家应收金额，扣除平台佣金后入账
+     * 佣金配置从数据库读取，若无配置则默认5%百分比佣金
+     * @param items 订单项列表
+     */
+    @SuppressWarnings("null")
+    private void settleSellers(List<OrderItem> items) {
+        // 加载佣金配置，若无则使用默认5%百分比佣金
+        CommissionConfig config = commissionConfigRepository.findById("1")
+                .orElseGet(() -> {
+                    // 首次使用时创建默认配置（5%百分比佣金）
+                    CommissionConfig defaultConfig = new CommissionConfig();
+                    return commissionConfigRepository.save(defaultConfig);
+                });
+
+        // 按卖家分组统计各卖家的应收货款
+        Map<User, BigDecimal> sellerAmounts = new java.util.HashMap<>();
+        for (OrderItem item : items) {
+            User seller = item.getProduct().getSeller();
+            if (seller != null) {
+                // 累加该卖家的订单项金额
+                sellerAmounts.merge(seller, item.getPrice(), BigDecimal::add);
+            }
+        }
+
+        // 逐个卖家结算：扣除佣金后入账
+        for (Map.Entry<User, BigDecimal> entry : sellerAmounts.entrySet()) {
+            User seller = entry.getKey();
+            BigDecimal sellerRevenue = entry.getValue();
+
+            // 计算平台佣金
+            BigDecimal commission = config.calculateCommission(sellerRevenue)
+                    .setScale(2, RoundingMode.HALF_UP);
+            // 卖家实收金额 = 货款 - 佣金
+            BigDecimal sellerIncome = sellerRevenue.subtract(commission)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            // 确保卖家实收金额不为负
+            if (sellerIncome.compareTo(BigDecimal.ZERO) > 0) {
+                // 重新加载卖家实体获取托管对象，避免脱管实体问题
+                User managedSeller = userRepository.findById(seller.getId()).orElse(null);
+                if (managedSeller != null) {
+                    managedSeller.addBalance(sellerIncome);
+                    userRepository.save(managedSeller);
+                }
+            }
+        }
     }
 
     /**
