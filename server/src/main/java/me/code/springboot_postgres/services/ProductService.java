@@ -20,9 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -211,12 +210,23 @@ public class ProductService {
     }
 
     /**
-     * 根据ID数组批量加载商品（使用批量查询避免N+1问题）
-     * @param productIds 商品ID数组
-     * @return 商品实体列表
+     * 根据ID数组批量加载商品（保留重复ID以支持数量信息）
+     * findAllById内部执行SELECT WHERE id IN(...)会自动去重，
+     * 因此需要手动按原始ID顺序构建结果列表，保留重复ID对应的商品实例
+     * @param productIds 商品ID数组（可包含重复ID，重复次数代表购买数量）
+     * @return 商品实体列表（保留重复ID的顺序和数量）
      */
     @Transactional(readOnly = true)
     public List<Product> loadProductsById(String[] productIds) {
-        return productRepository.findAllById(Arrays.asList(productIds));
+        // 先批量查询去重后的商品
+        List<Product> uniqueProducts = productRepository.findAllById(Arrays.asList(productIds));
+        // 构建ID到商品的映射，用于快速查找
+        Map<String, Product> productMap = uniqueProducts.stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+        // 按原始ID数组顺序返回商品列表（保留重复ID，以支持数量信息）
+        return Arrays.stream(productIds)
+                .map(productMap::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
 }
