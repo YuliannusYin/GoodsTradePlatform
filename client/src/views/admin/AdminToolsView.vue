@@ -48,15 +48,13 @@
  * @file AdminToolsView.vue
  * @description 管理员工具主视图，提供商品管理、订单管理、用户管理、商品审核、佣金配置的侧边栏导航及子路由展示
  */
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAccountStore } from '@/stores/network/accountStore'
 
 const route = useRoute()
-const accountStore = useAccountStore()
 
 // 是否为超级管理员
-const isSuperAdmin = ref(sessionStorage.getItem('userRole') === 'SUPER_ADMIN')
+const isSuperAdmin = computed(() => sessionStorage.getItem('userRole') === 'SUPER_ADMIN')
 
 // 各导航按钮的高亮状态
 const isOnProductsRoute = ref(false) // 是否处于商品管理路由
@@ -69,8 +67,8 @@ const isOnCommissionRoute = ref(false) // 是否处于佣金配置路由
  * 根据当前路由名称更新侧边栏按钮的高亮状态
  */
 function assignHighlightedButton() {
-  // 商品管理相关路由高亮
-  isOnProductsRoute.value = ['AddProduct', 'EditProduct', 'DeleteProduct', 'HandleProductsView'].includes(route.name as string)
+  // 商品管理路由高亮（已简化为单一路由，不再有 add/edit/delete 子路由）
+  isOnProductsRoute.value = ['HandleProductsView'].includes(route.name as string)
   // 订单管理相关路由高亮
   isOnOrdersRoute.value = ['PendingOrders', 'SentOrders', 'AllOrders', 'HandleOrdersView'].includes(route.name as string)
   // 用户管理路由高亮

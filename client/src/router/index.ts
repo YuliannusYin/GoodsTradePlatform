@@ -17,7 +17,6 @@ import { useAccountStore } from '@/stores/network/accountStore'
 import { useShoppingCartStore } from '@/stores/shoppingCartStore'
 import AdminToolsView from '@/views/admin/AdminToolsView.vue'
 import HandleProductsView from '@/views/admin/HandleProductsView.vue'
-import ProductForm from '@/components/admintools/ProductForm.vue'
 import HandleOrdersView from '@/views/admin/HandleOrdersView.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
 import UsersOrdersTable from '@/components/admintools/UsersOrdersTable.vue'
@@ -176,34 +175,10 @@ const router = createRouter({
       },
       children: [
         {
-          // 商品管理子路由，默认重定向到添加商品
+          // 商品管理子路由，包含搜索、筛选、增删改功能
           path: 'products',
           name: 'HandleProductsView',
-          component: HandleProductsView,
-          redirect: '/admin_tools/products/add',
-          children: [
-            {
-              // 添加商品
-              path: 'add',
-              name: 'AddProduct',
-              component: ProductForm,
-              props: { formMode: 'add' }
-            },
-            {
-              // 编辑商品
-              path: 'edit',
-              name: 'EditProduct',
-              component: ProductForm,
-              props: { formMode: 'edit' }
-            },
-            {
-              // 删除商品
-              path: 'delete',
-              name: 'DeleteProduct',
-              component: ProductForm,
-              props: { formMode: 'delete' }
-            }
-          ]
+          component: HandleProductsView
         },
         {
           // 订单管理子路由，默认重定向到待处理订单

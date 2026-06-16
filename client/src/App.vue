@@ -11,12 +11,15 @@
   <RouterView class="min-h-max p-0 sm:p-2.5 bg-primary-50" />
   <!-- 底部信息栏 -->
   <FooterInfo />
+  <!-- 全局 Toast 通知容器 -->
+  <ToastContainer />
 </template>
 
 <script setup lang="ts">
-import NavBar from './components/header/NavBar.vue';
+import NavBar from './components/header/NavBar.vue'
 import { RouterView } from 'vue-router'
 import FooterInfo from './components/footer/FooterInfo.vue'
+import ToastContainer from './components/ToastContainer.vue'
 </script>
 
 
