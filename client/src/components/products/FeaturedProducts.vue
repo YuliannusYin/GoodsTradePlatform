@@ -1,6 +1,6 @@
 /**
  * @file FeaturedProducts.vue
- * @description 随机推荐商品展示组件，2行×4列网格布局，支持点击刷新按钮或刷新浏览器时重新获取随机商品
+ * @description 随机推荐商品展示组件，大屏4列网格布局，默认获取8个随机商品，支持点击刷新按钮重新获取
  * @input 无
  * @output 无
  */
@@ -48,7 +48,7 @@
 <script setup lang="ts">
 /**
  * 随机推荐商品展示组件
- * 职责：加载并展示2行×4列随机推荐商品，支持刷新按钮重新获取
+ * 职责：加载并展示大屏4列网格随机推荐商品，支持刷新按钮重新获取
  */
 import { onMounted, ref } from 'vue'
 import { useProductStore } from '@/stores/network/productStore'

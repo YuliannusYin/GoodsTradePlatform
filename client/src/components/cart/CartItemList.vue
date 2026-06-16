@@ -67,7 +67,7 @@ const hasError = ref(false)
 
 /**
  * 从后端批量加载购物车中所有商品的详情
- * 遍历购物车Map，逐个调用 productStore.getProduct 获取商品信息
+ * 遍历购物车Map，并行调用 productStore.getProduct 获取商品信息
  */
 async function loadProducts() {
   const items = shoppingCartStore.getAllItems()
@@ -84,6 +84,7 @@ async function loadProducts() {
   const results = await Promise.allSettled(
     items.map(async (item) => {
       const product = await productStore.getProduct(item.productId)
+      if (!product) throw new Error(`商品 ${item.productId} 不存在`)
       return { productId: item.productId, product, quantity: item.quantity }
     })
   )

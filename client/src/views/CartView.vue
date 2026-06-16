@@ -125,6 +125,7 @@ async function loadProductDetails() {
   const results = await Promise.allSettled(
     items.map(async (item) => {
       const product = await productStore.getProduct(item.productId)
+      if (!product) throw new Error(`商品 ${item.productId} 不存在`)
       return { productId: item.productId, product }
     })
   )
@@ -186,9 +187,9 @@ onMounted(() => {
   loadFeaturedProducts()
 })
 
-// 监听购物车商品种类数变化，当外部增删商品时重新加载商品详情以更新总价
+// 监听购物车商品总数量变化，当增删商品或修改数量时重新加载商品详情以更新总价
 watch(
-  () => shoppingCartStore.totalKinds,
+  () => shoppingCartStore.totalQuantity,
   () => {
     loadProductDetails()
   }

@@ -36,8 +36,8 @@
           <textarea v-model="product.description" class="border w-full p-2 rounded"></textarea>
         </div>
         <div class="mb-4">
-          <label class="block text-gray-700 font-bold mb-2">图片链接</label>
-          <input v-model="imageUrlInput" type="text" class="border w-full p-2 rounded" />
+          <label class="block text-gray-700 font-bold mb-2">图片链接（每行一个）</label>
+          <textarea v-model="imageUrlInput" class="border w-full p-2 rounded" rows="3" placeholder="每行输入一个图片链接"></textarea>
         </div>
         <div class="mb-4">
           <label class="block text-gray-700 font-bold mb-2">价格</label>
@@ -47,8 +47,7 @@
           <label class="block text-gray-700 font-bold mb-2">数量</label>
           <input v-model="product.quantity" type="number" class="border w-full p-2 rounded" />
         </div>
-        <button type="submit" :class="formMode === 'add' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-500 hover:bg-blue-600'"
-          class="text-white py-2 px-4 rounded">{{ formMode === 'add' ? '添加商品' : '保存修改' }}</button>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">{{ formMode === 'add' ? '添加商品' : '保存修改' }}</button>
       </form>
 
       <!-- Delete button -->
@@ -143,17 +142,21 @@ onMounted(async () => {
 
 /**
  * 加载选中商品的详情数据并填充到表单
+ * 包括名称、描述、图片、价格、数量、分类和成色
  */
 async function loadProduct() {
   if (!selectedProductId.value) return
   const response = await productStore.getProduct(selectedProductId.value)
+  if (!response) return
   selectedProduct.value = response
   product.value.name = response.name
   product.value.description = response.description
   product.value.imageUrls = response.imageUrls || []
-  imageUrlInput.value = response.imageUrls?.[0] || ''
+  imageUrlInput.value = (response.imageUrls || []).join('\n')
   product.value.price = response.price
   product.value.quantity = response.quantity
+  product.value.category = response.category || ''
+  product.value.condition = response.condition || 'NEW'
 }
 
 // 显示确认对话框
@@ -171,17 +174,22 @@ function closeConfirmation() {
  * 根据表单模式执行添加、编辑或删除商品操作
  */
 async function handleConfirm() {
+  // 将换行分隔的图片文本转为数组
+  product.value.imageUrls = imageUrlInput.value
+    .split('\n')
+    .map(url => url.trim())
+    .filter(url => url.length > 0)
+
   switch (props.formMode) {
     case 'add':
-      // 添加商品：将图片链接转为数组格式
-      product.value.imageUrls = imageUrlInput.value ? [imageUrlInput.value] : []
+      // 添加商品
       await adminToolsStore.addProduct({ ...product.value })
       resetProduct()
       break
     case 'edit':
-      // 编辑商品：更新商品信息
-      product.value.imageUrls = imageUrlInput.value ? [imageUrlInput.value] : []
+      // 编辑商品：更新商品信息并刷新列表
       await adminToolsStore.editProduct(selectedProductId.value, { ...product.value })
+      products.value = await productStore.getAllProducts()
       break
     case 'delete':
       // 删除商品：删除后刷新商品列表

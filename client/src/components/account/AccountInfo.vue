@@ -4,7 +4,7 @@
     <div>
       <p><strong>用户名：</strong> {{ accountStore.username }}</p>
       <p><strong>邮箱：</strong> {{ accountStore.email }}</p>
-      <p><strong>余额：</strong> ${{ formattedBalance }}</p>
+      <p><strong>余额：</strong> ¥{{ formattedBalance }}</p>
       <p v-if="accountStore.isProtected" class="mt-2 text-sm text-amber-600 font-medium">
         这是系统账户，用户名、邮箱、密码和删除操作受到限制。
       </p>

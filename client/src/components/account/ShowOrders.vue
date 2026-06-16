@@ -2,7 +2,7 @@
   <div class="p-4 bg-white rounded shadow">
     <h2 class="text-xl font-semibold mb-4">我的订单</h2>
     <ul>
-      <li v-for="order in orders" :key="order.received" class="mb-4 p-4 border rounded">
+      <li v-for="order in orders" :key="order.id" class="mb-4 p-4 border rounded">
         <div class="text-sm text-gray-500 border-b pb-3">
           状态：{{ order.status }} | 下单时间：{{ order.received }}
         </div>
@@ -15,12 +15,12 @@
                   @error="(e: Event) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22><rect fill=%22%23f3f4f6%22 width=%2232%22 height=%2232%22/></svg>') }" />
                 <div v-else class="w-8 h-8 bg-gray-100 inline-block mr-2 rounded"></div>
                 <span class="font-bold">{{ item.product.name }}</span>
-                - {{ item.product.price }}
+                - ¥{{ item.product.price.toFixed(2) }}
                 <span v-if="item.amount > 1" class="font-semibold text-blue-700"> x {{ item.amount }}</span>
               </div>
             </div>
           </div>
-          <div class="font-bold">{{ order.price }}</div>
+          <div class="font-bold">¥{{ order.price.toFixed(2) }}</div>
         </div>
       </li>
     </ul>

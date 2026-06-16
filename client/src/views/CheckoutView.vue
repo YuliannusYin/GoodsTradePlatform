@@ -199,7 +199,7 @@ const addressRef = ref<InstanceType<typeof CheckoutAddress> | null>(null)
 
 // === 计算属性 ===
 
-/** 订单总价 */
+/** 订单总价（OrderItem.price 为订单项小计，直接求和即可） */
 const totalPrice = computed(() => {
   return orderItems.value.reduce((sum, item) => sum + item.price, 0)
 })
@@ -275,8 +275,14 @@ function goToConfirm() {
 
 /**
  * 处理确认下单按钮点击，弹出确认弹窗
+ * 余额不足时提前提示用户
  */
 function handleConfirmOrder() {
+  // 前端校验余额是否充足
+  if (currentBalance.value < totalPrice.value) {
+    alert(`账户余额不足（当前余额：¥${currentBalance.value.toFixed(2)}，需支付：¥${totalPrice.value.toFixed(2)}），请先充值`)
+    return
+  }
   showConfirmDialog.value = true
 }
 

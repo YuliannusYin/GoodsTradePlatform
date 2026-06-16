@@ -64,7 +64,7 @@
 <script setup lang="ts">
 /**
  * @file NavBar.vue
- * @description 顶部导航栏组件，包含 Logo、搜索栏、桌面端导航项和移动端汉堡菜单
+ * @description 顶部导航栏组件，包含 Logo、搜索栏、桌面端导航项（含管理工具入口）和移动端汉堡菜单
  */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'

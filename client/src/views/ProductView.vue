@@ -74,9 +74,9 @@
 <script setup lang="ts">
 /**
  * @file ProductView.vue
- * @description 商品详情视图，展示商品信息、评价列表，支持发表评价和加入购物车
+ * @description 商品详情视图，展示商品信息和评价列表，支持发表评价
  */
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import type { Product } from '@/types/product'
 import type { Review, ProductRating } from '@/types/review'
 
@@ -140,4 +140,14 @@ async function submitReview() {
 
 // 组件挂载时加载商品数据
 onMounted(loadProductData)
+
+// 监听路由参数变化，当商品ID改变时重新加载商品数据
+watch(
+  () => route.params.productId,
+  (newId) => {
+    if (newId) {
+      loadProductData()
+    }
+  }
+)
 </script>

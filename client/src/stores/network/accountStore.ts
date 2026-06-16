@@ -42,6 +42,7 @@ export const useAccountStore = defineStore('accountStore', () => {
 
   /**
    * 用户登录，验证凭证并保存令牌和角色信息
+   * 登录成功后合并本地购物车到后端
    * @param {string} loginEmail - 登录邮箱
    * @param {string} password - 登录密码
    * @returns {Promise<LoginResponse>} 登录响应，包含令牌和角色
@@ -59,14 +60,17 @@ export const useAccountStore = defineStore('accountStore', () => {
       isAuthenticated.value = true
       // 登录后立即拉取用户详细信息
       await fetchUserDetails()
+      // 登录后合并本地购物车到后端
+      const shoppingCartStore = useShoppingCartStore()
+      await shoppingCartStore.mergeCartAfterLogin()
     }
     return response
   }
 
   /**
-   * 用户登出，清除所有认证状态和用户信息，并清空购物车
+   * 用户登出，清除所有认证状态和用户信息，并清空购物车（含后端同步）
    */
-  function logout() {
+  async function logout() {
     // 重置所有状态为初始值
     isAuthenticated.value = false
     email.value = null
@@ -76,9 +80,9 @@ export const useAccountStore = defineStore('accountStore', () => {
     // 清除sessionStorage中的认证信息
     sessionStorage.removeItem('jwtToken')
     sessionStorage.removeItem('userRole')
-    // 退出登录时清空购物车，防止未登录用户看到残留数据
+    // 退出登录时清空购物车（含后端同步），防止未登录用户看到残留数据
     const shoppingCartStore = useShoppingCartStore()
-    shoppingCartStore.clearCart()
+    await shoppingCartStore.clearCart()
   }
 
   /**

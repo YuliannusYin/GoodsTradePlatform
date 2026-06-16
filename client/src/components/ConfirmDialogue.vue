@@ -66,6 +66,9 @@ async function handleConfirm() {
   // 加载中不允许重复操作
   if (props.loading) return
 
+  // 每次确认前重置密码错误状态
+  isConfirmationErrorResponse.value = false
+
   if (props.isPasswordRequired) {
     try {
       // 验证用户输入的密码是否正确

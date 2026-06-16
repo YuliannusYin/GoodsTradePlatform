@@ -20,10 +20,11 @@ export const useProductStore = defineStore('productStore', () => {
 
   /**
    * 根据商品ID获取单个商品详情
-   * @param {string | null} productId - 商品ID
-   * @returns {Promise<Product>} 商品详情
+   * @param {string | null} productId - 商品ID，为null时返回空结果
+   * @returns {Promise<Product | null>} 商品详情，ID无效时返回null
    */
-  async function getProduct(productId: string | null): Promise<Product> {
+  async function getProduct(productId: string | null): Promise<Product | null> {
+    if (!productId) return null
     return callGet(`/api/products/${productId}`)
   }
 

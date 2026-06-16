@@ -246,7 +246,7 @@ async function handleEditSubmit() {
 }
 
 /**
- * 重新提交被拒绝的商品，使其重新进入审核流程
+ * 重新提交被拒绝的商品，通过编辑接口更新商品信息使其重新进入审核流程
  * @param {Product} product - 待重新提交的商品
  */
 async function handleResubmit(product: Product) {

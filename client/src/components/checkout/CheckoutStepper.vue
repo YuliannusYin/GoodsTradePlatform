@@ -1,6 +1,6 @@
 /**
  * @file CheckoutStepper.vue
- * @description 结算步骤指示器组件，横向展示步骤进度，支持点击已完成步骤回退，完成步骤显示绿色勾号
+ * @description 结算步骤指示器组件，横向展示步骤进度，支持点击已完成步骤回退；已完成步骤显示蓝色勾号，最后一步（完成步骤）显示绿色勾号
  * @input steps: 步骤名称数组, currentStep: 当前步骤索引（从0开始）
  * @output emit update:currentStep: 点击已完成步骤时触发，携带目标步骤索引
  */

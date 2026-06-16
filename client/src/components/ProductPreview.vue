@@ -24,9 +24,9 @@
  * @description 商品预览组件，在管理后台表单旁展示商品的图片、名称、描述和价格
  */
 import SmallViewTitle from './SmallViewTitle.vue'
-import type { Product } from '@/types/product'
+import type { CreateProductDto } from '@/types/product'
 
 defineProps<{
-  product: Product
+  product: CreateProductDto
 }>()
 </script>

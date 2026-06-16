@@ -88,7 +88,7 @@ async function handleSearch(query: string, filter: string | null, category?: str
     getAllProducts()
   } else {
     // 有搜索条件时按条件搜索
-    getSearchedProducts(query, filter, category)
+    getSearchedProducts(query, filter || '', category)
   }
 }
 
